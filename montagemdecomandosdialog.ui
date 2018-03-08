@@ -1,0 +1,859 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MontagemDeComandosDialog</class>
+ <widget class="QDialog" name="MontagemDeComandosDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>467</width>
+    <height>466</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QLineEdit" name="edtComando">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>20</y>
+     <width>341</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+  </widget>
+  <widget class="QToolBox" name="toolBoxComandos">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>70</y>
+     <width>341</width>
+     <height>373</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="lineWidth">
+    <number>1</number>
+   </property>
+   <property name="currentIndex">
+    <number>6</number>
+   </property>
+   <widget class="QWidget" name="pgComandosSemParametros">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>341</width>
+      <height>184</height>
+     </rect>
+    </property>
+    <attribute name="label">
+     <string>Abrir Garra, Fechar Garra, Repouso</string>
+    </attribute>
+    <widget class="QSplitter" name="splitter">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>13</y>
+       <width>161</width>
+       <height>141</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="QPushButton" name="btAbrirGarra">
+      <property name="text">
+       <string>Abrir Garra ([GA])</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btFecharGarra">
+      <property name="text">
+       <string>Fechar Garra ([GF])</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btRepouso">
+      <property name="text">
+       <string>Repouso ([RPS])</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="pgCTZ">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>341</width>
+      <height>184</height>
+     </rect>
+    </property>
+    <attribute name="label">
+     <string>Centraliza (CTZ)</string>
+    </attribute>
+    <widget class="QPushButton" name="btCTZ">
+     <property name="geometry">
+      <rect>
+       <x>38</x>
+       <y>20</y>
+       <width>71</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CTZ</string>
+     </property>
+    </widget>
+    <widget class="QSplitter" name="splitter_2">
+     <property name="geometry">
+      <rect>
+       <x>119</x>
+       <y>6</y>
+       <width>140</width>
+       <height>141</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="QRadioButton" name="rdbJunta0">
+      <property name="text">
+       <string>Junta 0 (base)</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta1">
+      <property name="text">
+       <string>Junta 1</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta2">
+      <property name="text">
+       <string>Junta 2</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta3">
+      <property name="text">
+       <string>Junta 3</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta4">
+      <property name="text">
+       <string>Junta 4 (Pulso da Garra)</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbGarra">
+      <property name="text">
+       <string>Garra</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="pgJST">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>341</width>
+      <height>184</height>
+     </rect>
+    </property>
+    <attribute name="label">
+     <string>Junta Setar Target (JST)</string>
+    </attribute>
+    <widget class="QPushButton" name="btJST">
+     <property name="geometry">
+      <rect>
+       <x>6</x>
+       <y>20</y>
+       <width>51</width>
+       <height>163</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>JST</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>61</x>
+       <y>20</y>
+       <width>261</width>
+       <height>164</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QCheckBox" name="chkJunta0">
+          <property name="text">
+           <string>Junta 0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spnJ0Alvo">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <number>9999</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spnJ0AlvoGraus">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <double>9999.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="chkJunta1">
+          <property name="text">
+           <string>Junta 1</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spnJ1Alvo">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <number>9999</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spnJ1AlvoGraus">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <double>9999.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QCheckBox" name="chkJunta2">
+          <property name="text">
+           <string>Junta 2</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spnJ2Alvo">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <number>9999</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spnJ2AlvoGraus">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <double>9999.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QCheckBox" name="chkJunta3">
+          <property name="text">
+           <string>Junta 3</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spnJ3Alvo">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <number>9999</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spnJ3AlvoGraus">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <double>9999.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QCheckBox" name="chkJunta4">
+          <property name="text">
+           <string>Junta 4</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spnJ4Alvo">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <number>9999</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spnJ4AlvoGraus">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <double>9999.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QCheckBox" name="chkGarra">
+          <property name="text">
+           <string>Garra</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spnGRAlvo">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <number>9999</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spnGRAlvoGraus">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <double>9999.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>0</y>
+       <width>171</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Microsseg.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Graus</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="pgVel">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>341</width>
+      <height>184</height>
+     </rect>
+    </property>
+    <attribute name="label">
+     <string>Velocidade (VEL)</string>
+    </attribute>
+    <widget class="QPushButton" name="btVel">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>18</y>
+       <width>75</width>
+       <height>121</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>VEL</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spnVel">
+     <property name="geometry">
+      <rect>
+       <x>151</x>
+       <y>72</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>9999</number>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="spnVelGrausPorSeg">
+     <property name="geometry">
+      <rect>
+       <x>246</x>
+       <y>72</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <double>9999.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>248</x>
+       <y>48</y>
+       <width>81</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>graus/s</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>152</x>
+       <y>48</y>
+       <width>91</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>0,25us/10ms</string>
+     </property>
+    </widget>
+    <widget class="QSplitter" name="splitter_4">
+     <property name="geometry">
+      <rect>
+       <x>88</x>
+       <y>12</y>
+       <width>59</width>
+       <height>141</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="QRadioButton" name="rdbJunta0Vel">
+      <property name="text">
+       <string>Junta 0</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta1Vel">
+      <property name="text">
+       <string>Junta 1</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta2Vel">
+      <property name="text">
+       <string>Junta 2</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta3Vel">
+      <property name="text">
+       <string>Junta 3</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta4Vel">
+      <property name="text">
+       <string>Junta 4</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbGarraVel">
+      <property name="text">
+       <string>Garra</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="pgAcl">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>341</width>
+      <height>184</height>
+     </rect>
+    </property>
+    <attribute name="label">
+     <string>Aceleração (ACL)</string>
+    </attribute>
+    <widget class="QPushButton" name="btAcl">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>18</y>
+       <width>75</width>
+       <height>121</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>ACL</string>
+     </property>
+    </widget>
+    <widget class="QSplitter" name="splitter_5">
+     <property name="geometry">
+      <rect>
+       <x>88</x>
+       <y>12</y>
+       <width>59</width>
+       <height>141</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="QRadioButton" name="rdbJunta0Acl">
+      <property name="text">
+       <string>Junta 0</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta1Acl">
+      <property name="text">
+       <string>Junta 1</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta2Acl">
+      <property name="text">
+       <string>Junta 2</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta3Acl">
+      <property name="text">
+       <string>Junta 3</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbJunta4Acl">
+      <property name="text">
+       <string>Junta 4</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rdbGarraAcl">
+      <property name="text">
+       <string>Garra</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>152</x>
+       <y>48</y>
+       <width>91</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>0,25us/10ms/80ms</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="spnAclGrausPorSegQuad">
+     <property name="geometry">
+      <rect>
+       <x>246</x>
+       <y>72</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <double>9999.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spnAcl">
+     <property name="geometry">
+      <rect>
+       <x>151</x>
+       <y>72</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>9999</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6">
+     <property name="geometry">
+      <rect>
+       <x>248</x>
+       <y>48</y>
+       <width>81</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>graus/s^2</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="pgLED">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>341</width>
+      <height>184</height>
+     </rect>
+    </property>
+    <attribute name="label">
+     <string>Comando de LEDs (LED)</string>
+    </attribute>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>126</x>
+       <y>16</y>
+       <width>160</width>
+       <height>42</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="layoutLeds">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="chkLEDP0">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>P0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="chkLEDP1">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>P1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="chkLEDP2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>P2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QCheckBox" name="chkLEDP3">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>P3</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="chkLEDP4">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>P4</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="chkLEDP5">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>P5</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QCheckBox" name="chkLEDP6">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>P6</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QCheckBox" name="chkLEDP7">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>P7</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QPushButton" name="btLED">
+     <property name="geometry">
+      <rect>
+       <x>36</x>
+       <y>16</y>
+       <width>75</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>LED</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="pgDLY">
+    <attribute name="label">
+     <string>Atraso/Delay (DLY)</string>
+    </attribute>
+    <widget class="QPushButton" name="btDLY">
+     <property name="geometry">
+      <rect>
+       <x>36</x>
+       <y>16</y>
+       <width>75</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>DLY</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>125</x>
+       <y>18</y>
+       <width>91</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>atraso (ms)</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spnTempoMs">
+     <property name="geometry">
+      <rect>
+       <x>124</x>
+       <y>42</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>9999</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblAvisoDLY">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>70</y>
+       <width>291</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Valor zero faz o comando DLY interromper a execução da sequência até que seja pressionada a tecla ENTER, o botão &quot;continuar&quot; ou &quot;continuar loop&quot;. O mesmo acontece com o comando DLY sem parâmetro ([DLY]).</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QSplitter" name="splitter_3">
+   <property name="geometry">
+    <rect>
+     <x>378</x>
+     <y>20</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+   <widget class="QPushButton" name="btAdicionarOuModificar">
+    <property name="text">
+     <string>Adicionar</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btSair">
+    <property name="text">
+     <string>Sair</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
