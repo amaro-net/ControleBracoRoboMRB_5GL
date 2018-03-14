@@ -2,6 +2,8 @@
 #define MONTAGEMDECOMANDOSDIALOG_H
 
 #include "mainwindow.h"
+#include "constantes.h"
+
 
 #include <QDialog>
 #include <QtWidgets/QSpinBox>

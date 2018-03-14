@@ -1,10 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define QTD_SERVOS 6
-
 #include "montagemdecomandosdialog.h"
 #include "console.h"
+#include "constantes.h"
 
 #include <QMainWindow>
 
@@ -15,6 +14,7 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QSlider>
+#include <QtWidgets/QTableWidget>
 #include <QListWidgetItem>
 #include <qqueue.h>
 #include <QTimer>
@@ -37,12 +37,28 @@ public:
     void adicionarComandoAASequencia(QString comando);
     void editarComandoNaSequencia(QString comando);
 
+    /* Funções de conversão de valores de posição, velocidade e aceleração */
+    double converteMicrossegundosParaGraus(int idxJunta, int posicaoMicrossegundos);
+    int converteGrausParaMicrossegundos(int idxJunta, double posicaoGraus);
+    double converteVelTmpPulsoParaGrausPorSeg(int idxJunta, int velTmpPulso);
+    int converteVelGrausPorSegParaTmpPulso(int idxJunta, double velGrausPorSeg);
+    double converteAclTmpPulsoParaGrausPorSegQuad(int idxJunta, int aclTmpPulso);
+    int converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad);
+
+    void converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo);
+    void converteSpnVelParaGrausPorSeg(int idxJunta, int velocidade);
+    void converteSpnAclParaGrausPorSegQuad(int idxJunta, int aceleracao);
+
+    void converteSpnAlvoGrausParaTmpPulso(int idxJunta, double posicaoGraus);
+    void converteSpnVelGrausPorSegParaTmpPulso(int idxJunta, double velGrausPorSeg);
+    void converteSpnAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad);
+
 private slots:    
 
     void abrirPortaSerial();
     void fecharPortaSerial();
     void writeData(const QByteArray &data);
-    void readData();    
+    void readData();
     void handleError(QSerialPort::SerialPortError error);
     void timeoutDLY();
     void timeoutConfig();
@@ -139,6 +155,78 @@ private slots:
 
     void on_chkEcoLocal_clicked(bool checked);
 
+    void on_spnJ0Alvo_valueChanged(int posicaoMicrossegundos);
+
+    void on_spnJ1Alvo_valueChanged(int posicaoMicrossegundos);
+
+    void on_spnJ2Alvo_valueChanged(int posicaoMicrossegundos);
+
+    void on_spnJ3Alvo_valueChanged(int posicaoMicrossegundos);
+
+    void on_spnJ4Alvo_valueChanged(int posicaoMicrossegundos);
+
+    void on_spnGRAlvo_valueChanged(int posicaoMicrossegundos);
+
+    void on_spnJ0Vel_valueChanged(int velTmpPulso);
+
+    void on_spnJ1Vel_valueChanged(int velTmpPulso);
+
+    void on_spnJ2Vel_valueChanged(int velTmpPulso);
+
+    void on_spnJ3Vel_valueChanged(int velTmpPulso);
+
+    void on_spnJ4Vel_valueChanged(int velTmpPulso);
+
+    void on_spnGRVel_valueChanged(int velTmpPulso);
+
+    void on_spnJ0Acl_valueChanged(int aclTmpPulso);
+
+    void on_spnJ1Acl_valueChanged(int aclTmpPulso);
+
+    void on_spnJ2Acl_valueChanged(int aclTmpPulso);
+
+    void on_spnJ3Acl_valueChanged(int aclTmpPulso);
+
+    void on_spnJ4Acl_valueChanged(int aclTmpPulso);
+
+    void on_spnGRAcl_valueChanged(int aclTmpPulso);
+
+    void on_spnJ0AlvoGraus_valueChanged(double posicaoGraus);
+
+    void on_spnJ1AlvoGraus_valueChanged(double posicaoGraus);
+
+    void on_spnJ2AlvoGraus_valueChanged(double posicaoGraus);
+
+    void on_spnJ3AlvoGraus_valueChanged(double posicaoGraus);
+
+    void on_spnJ4AlvoGraus_valueChanged(double posicaoGraus);
+
+    void on_spnGRAlvoGraus_valueChanged(double posicaoGraus);
+
+    void on_spnJ0VelGrausPorSeg_valueChanged(double velGrausPorSeg);
+
+    void on_spnJ1VelGrausPorSeg_valueChanged(double velGrausPorSeg);
+
+    void on_spnJ2VelGrausPorSeg_valueChanged(double velGrausPorSeg);
+
+    void on_spnJ3VelGrausPorSeg_valueChanged(double velGrausPorSeg);
+
+    void on_spnJ4VelGrausPorSeg_valueChanged(double velGrausPorSeg);
+
+    void on_spnGRVelGrausPorSeg_valueChanged(double velGrausPorSeg);
+
+    void on_spnJ0AclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad);
+
+    void on_spnJ1AclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad);
+
+    void on_spnJ2AclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad);
+
+    void on_spnJ3AclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad);
+
+    void on_spnJ4AclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad);
+
+    void on_spnGRAclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad);
+
 private:
     void preencheCombosPortaSerial();
     void showStatusMessage(const QString &message);
@@ -147,6 +235,9 @@ private:
     void alimentarFilaDeComandosDeInicializacao();
 
     void configuracoesIniciais();
+
+    void configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefault = false);
+
     void habilitarComponentesConn(bool estadoHab);
     void habilitarComponentes(bool estadoHab);
     void habilitarComponentesReadyForPIC(bool estadoHab);
@@ -159,6 +250,7 @@ private:
     void decodificaResposta();
 
     void setarValorPosLimiteResposta(QString resposta);
+    void setaValorItemTabela(QTableWidget *tableWidget, int idxLinha, int idxColuna, QString strValor);
     void setarVelOuAclResposta(QString resposta, QList<QSpinBox *> listaSpinBox);
 
 
@@ -232,9 +324,21 @@ private:
     bool emDLYSemParam = false;
     int posUltimoDLYSemParam = -1;
     QString ultimoStatusSeqComandos = "";
-};
 
-//QString junta[QTD_SERVOS] = {"J0", "J1", "J2", "J3", "J4", "GR"};
-//QString idJST[QTD_SERVOS] = {"A", "B", "C", "D", "E", "G"};
+
+    /**** Variáveis para conversão entre ângulos em graus e posições em microssegundos ****/
+    double coeffAng[QTD_SERVOS];
+    double offsetAng[QTD_SERVOS];
+    int tempoPulsoMax[QTD_SERVOS];
+    int tempoPulsoMin[QTD_SERVOS];
+    double angMax[QTD_SERVOS];
+    double angMin[QTD_SERVOS];
+    int qtdPosicoesTmpPulso[QTD_SERVOS];
+    double incrementosAng[QTD_SERVOS];
+    double velGrausPorSeg[QTD_SERVOS];
+    double aclGrausPorSegQuad[QTD_SERVOS];
+    double incVelGrausPorSeg[QTD_SERVOS];
+    double incAclGrausPorSegQuad[QTD_SERVOS];
+};
 
 #endif // MAINWINDOW_H

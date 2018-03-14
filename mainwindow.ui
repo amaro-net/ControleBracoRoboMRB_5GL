@@ -30,7 +30,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>1</number>
     </property>
     <property name="elideMode">
      <enum>Qt::ElideNone</enum>
@@ -518,7 +518,7 @@ comandos</string>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabLarguraDePulso">
        <attribute name="title">
@@ -1252,8 +1252,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>4</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1274,8 +1283,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>4</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1296,8 +1314,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>4</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1318,8 +1345,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>4</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1340,8 +1376,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>4</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1362,8 +1407,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>4</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1374,7 +1428,7 @@ comandos</string>
          <rect>
           <x>230</x>
           <y>0</y>
-          <width>61</width>
+          <width>67</width>
           <height>171</height>
          </rect>
         </property>
@@ -1393,18 +1447,30 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="minimum">
+            <double>-9999.000000000000000</double>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1415,18 +1481,30 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="minimum">
+            <double>-9999.000000000000000</double>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1437,18 +1515,33 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="minimum">
+            <double>-9999.000000000000000</double>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1459,18 +1552,30 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="minimum">
+            <double>-9999.000000000000000</double>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1481,18 +1586,30 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="minimum">
+            <double>-9999.000000000000000</double>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1503,18 +1620,30 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>59</width>
+             <width>65</width>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="minimum">
+            <double>-9999.000000000000000</double>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1747,8 +1876,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1769,8 +1907,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1791,8 +1938,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1813,8 +1969,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1835,8 +2000,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1857,8 +2031,17 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
            <property name="maximum">
             <double>9999.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1867,9 +2050,9 @@ comandos</string>
        <widget class="QWidget" name="layoutWidget_6">
         <property name="geometry">
          <rect>
-          <x>293</x>
+          <x>298</x>
           <y>0</y>
-          <width>59</width>
+          <width>52</width>
           <height>171</height>
          </rect>
         </property>
@@ -1894,13 +2077,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>16777215</height>
             </size>
            </property>
@@ -1922,13 +2105,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>16777215</height>
             </size>
            </property>
@@ -1950,13 +2133,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>16777215</height>
             </size>
            </property>
@@ -1978,13 +2161,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>16777215</height>
             </size>
            </property>
@@ -2006,13 +2189,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>16777215</height>
             </size>
            </property>
@@ -2034,13 +2217,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>57</width>
+             <width>50</width>
              <height>16777215</height>
             </size>
            </property>
@@ -2157,6 +2340,12 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="maximum">
+            <double>9999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="1" column="2">
@@ -2232,6 +2421,12 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="maximum">
+            <double>9999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="2" column="2">
@@ -2300,6 +2495,12 @@ comandos</string>
              <width>81</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="maximum">
+            <double>9999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -2370,6 +2571,12 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="maximum">
+            <double>9999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="4" column="2">
@@ -2439,6 +2646,12 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="maximum">
+            <double>9999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="5" column="2">
@@ -2507,6 +2720,12 @@ comandos</string>
              <width>81</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="maximum">
+            <double>9999.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -2627,9 +2846,9 @@ comandos</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>300</x>
-        <y>45</y>
-        <width>111</width>
+        <x>280</x>
+        <y>47</y>
+        <width>88</width>
         <height>23</height>
        </rect>
       </property>
@@ -2644,8 +2863,8 @@ comandos</string>
       <property name="geometry">
        <rect>
         <x>300</x>
-        <y>75</y>
-        <width>111</width>
+        <y>114</y>
+        <width>99</width>
         <height>23</height>
        </rect>
       </property>
@@ -2660,8 +2879,8 @@ comandos</string>
       <property name="geometry">
        <rect>
         <x>300</x>
-        <y>105</y>
-        <width>126</width>
+        <y>144</y>
+        <width>120</width>
         <height>23</height>
        </rect>
       </property>
@@ -2676,7 +2895,7 @@ comandos</string>
       <property name="geometry">
        <rect>
         <x>310</x>
-        <y>130</y>
+        <y>169</y>
         <width>101</width>
         <height>17</height>
        </rect>
@@ -2692,7 +2911,7 @@ comandos</string>
       <property name="geometry">
        <rect>
         <x>310</x>
-        <y>150</y>
+        <y>189</y>
         <width>111</width>
         <height>17</height>
        </rect>
@@ -2734,7 +2953,7 @@ comandos</string>
       <property name="geometry">
        <rect>
         <x>270</x>
-        <y>175</y>
+        <y>214</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -2750,7 +2969,7 @@ comandos</string>
       <property name="geometry">
        <rect>
         <x>360</x>
-        <y>175</y>
+        <y>214</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -2765,8 +2984,8 @@ comandos</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>270</x>
-        <y>205</y>
+        <x>280</x>
+        <y>77</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -2782,7 +3001,7 @@ comandos</string>
       <property name="geometry">
        <rect>
         <x>360</x>
-        <y>205</y>
+        <y>77</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -2797,7 +3016,7 @@ comandos</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>11</x>
         <y>245</y>
         <width>75</width>
         <height>23</height>
@@ -2813,7 +3032,7 @@ comandos</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>100</x>
+        <x>91</x>
         <y>245</y>
         <width>75</width>
         <height>23</height>
@@ -2829,7 +3048,7 @@ comandos</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>181</x>
+        <x>172</x>
         <y>245</y>
         <width>81</width>
         <height>23</height>
@@ -2845,7 +3064,7 @@ comandos</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>270</x>
+        <x>259</x>
         <y>245</y>
         <width>91</width>
         <height>23</height>
@@ -2861,7 +3080,7 @@ comandos</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>369</x>
+        <x>356</x>
         <y>245</y>
         <width>75</width>
         <height>23</height>
@@ -3000,9 +3219,6 @@ comandos</string>
        <property name="autoScroll">
         <bool>true</bool>
        </property>
-       <attribute name="horizontalHeaderVisible">
-        <bool>true</bool>
-       </attribute>
        <attribute name="horizontalHeaderCascadingSectionResizes">
         <bool>true</bool>
        </attribute>

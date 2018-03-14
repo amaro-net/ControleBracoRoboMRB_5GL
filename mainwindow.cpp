@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QFileDialog>
+#include <math.h>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "constantes.h"
@@ -53,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(timerDLY, &QTimer::timeout, this, &MainWindow::timeoutDLY);
     connect(timer, &QTimer::timeout, this, &MainWindow::timeoutConfig);
+
+    //configurarConversaoEntreMicrossegundosEAngulos(true);
 }
 
 void MainWindow::conectarComponentes()
@@ -139,22 +142,7 @@ void MainWindow::alimentarFilaDeComandosDeInicializacao()
     filaComandosInicializacao.clear();
 
     filaComandosInicializacao.enqueue("[FRS1]");
-    filaComandosInicializacao.enqueue("[CSB0]");
-    filaComandosInicializacao.enqueue("[JST]");
-
-    filaComandosInicializacao.enqueue("[VELJ00016]");
-    filaComandosInicializacao.enqueue("[VELJ10008]");
-    filaComandosInicializacao.enqueue("[VELJ20008]");
-    filaComandosInicializacao.enqueue("[VELJ30008]");
-    filaComandosInicializacao.enqueue("[VELJ4]");
-    filaComandosInicializacao.enqueue("[VELGR]");
-
-    filaComandosInicializacao.enqueue("[ACLJ0]");
-    filaComandosInicializacao.enqueue("[ACLJ1]");
-    filaComandosInicializacao.enqueue("[ACLJ2]");
-    filaComandosInicializacao.enqueue("[ACLJ3]");
-    filaComandosInicializacao.enqueue("[ACLJ4]");
-    filaComandosInicializacao.enqueue("[ACLGR]");
+    filaComandosInicializacao.enqueue("[CSB0]");    
 
     filaComandosInicializacao.enqueue("[TMXJ0]");
     filaComandosInicializacao.enqueue("[TMXJ1]");
@@ -183,6 +171,22 @@ void MainWindow::alimentarFilaDeComandosDeInicializacao()
     filaComandosInicializacao.enqueue("[TRPJ3]");
     filaComandosInicializacao.enqueue("[TRPJ4]");
     filaComandosInicializacao.enqueue("[TRPGR]");
+
+    filaComandosInicializacao.enqueue("[JST]");
+
+    filaComandosInicializacao.enqueue("[VELJ00016]");
+    filaComandosInicializacao.enqueue("[VELJ10008]");
+    filaComandosInicializacao.enqueue("[VELJ20008]");
+    filaComandosInicializacao.enqueue("[VELJ30008]");
+    filaComandosInicializacao.enqueue("[VELJ4]");
+    filaComandosInicializacao.enqueue("[VELGR]");
+
+    filaComandosInicializacao.enqueue("[ACLJ0]");
+    filaComandosInicializacao.enqueue("[ACLJ1]");
+    filaComandosInicializacao.enqueue("[ACLJ2]");
+    filaComandosInicializacao.enqueue("[ACLJ3]");
+    filaComandosInicializacao.enqueue("[ACLJ4]");
+    filaComandosInicializacao.enqueue("[ACLGR]");
 }
 
 
@@ -194,6 +198,157 @@ void MainWindow::configuracoesIniciais()
     tentativaConfig = 0;
     enviaComando("[ECH0]");
     timer->start(2000);
+}
+
+void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefault)
+{    
+    if(valoresDefault)
+    {
+        for(int i = 0; i < QTD_SERVOS; i++)
+        {
+            for(int j = 0; j < 4; j++)
+            {
+                setaValorItemTabela(ui->tabelaPosLimites, i, j, QString("%1").arg(tabelaPosLimitesDefault[i][j]));
+                setaValorItemTabela(ui->tabelaPosLimitesGraus, i, j, QString("%1").arg(tabelaPosLimitesGrausDefault[i][j]));
+            }
+
+            if(tabelaPosLimitesGrausDefault[i][4] == 1)
+                ui->tabelaPosLimitesGraus->item(i,4)->setCheckState(Qt::CheckState::Checked);
+            else
+                ui->tabelaPosLimitesGraus->item(i,4)->setCheckState(Qt::CheckState::Unchecked);
+
+            lstSpnVel[i]->setValue(velTmpPulsoDefault[i]);
+            lstSpnAcl[i]->setValue(aclTmpPulsoDefault[i]);
+        }
+    }
+
+    int tempoPulsoNeutro[QTD_SERVOS];
+    int tempoPulsoRepouso[QTD_SERVOS];
+    bool propInv[QTD_SERVOS];
+
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        tempoPulsoMax[i] = ui->tabelaPosLimites->item(i,0)->text().toInt();
+        tempoPulsoMin[i] = ui->tabelaPosLimites->item(i,1)->text().toInt();
+        tempoPulsoNeutro[i] = ui->tabelaPosLimites->item(i,2)->text().toInt();
+        tempoPulsoRepouso[i] = ui->tabelaPosLimites->item(i,3)->text().toInt();
+
+        angMax[i] = ui->tabelaPosLimitesGraus->item(i,0)->text().toInt();
+        angMin[i] = ui->tabelaPosLimitesGraus->item(i,1)->text().toInt();
+        propInv[i] = (ui->tabelaPosLimitesGraus->item(i,4)->checkState() == Qt::CheckState::Checked);
+    }
+
+    for (int i = 0; i < QTD_SERVOS; i++)
+    {
+        if(propInv[i])
+        {
+            coeffAng[i] = (angMin[i] - angMax[i])/(tempoPulsoMax[i] - tempoPulsoMin[i]);
+            offsetAng[i] = angMin[i] - tempoPulsoMax[i] * coeffAng[i];
+        }
+        else
+        {
+            coeffAng[i] = (angMax[i] - angMin[i]) / (tempoPulsoMax[i] - tempoPulsoMin[i]);
+            offsetAng[i] = angMax[i] - tempoPulsoMax[i] * coeffAng[i];
+        }
+
+        double anguloNeutro = coeffAng[i] * tempoPulsoNeutro[i] + offsetAng[i];
+        anguloNeutro = round(anguloNeutro * DIV_CD_POSICAO) / DIV_CD_POSICAO;
+        setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 2, QString("%1").arg(anguloNeutro));
+        double anguloRepouso = coeffAng[i] * tempoPulsoRepouso[i] + offsetAng[i];        
+        anguloRepouso = round(anguloRepouso * DIV_CD_POSICAO) / DIV_CD_POSICAO;
+        setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 3, QString("%1").arg(anguloRepouso));
+
+        if(ui->rdbReadyForPIC->isChecked())
+        {
+            qtdPosicoesTmpPulso[i] = (tempoPulsoMax[i] - tempoPulsoMin[i]);  // us
+            incrementosAng[i] = (angMax[i] - angMin[i])/qtdPosicoesTmpPulso[i]; // Graus / us
+            if(round(incrementosAng[i] * DIV_CD_POSICAO) / DIV_CD_POSICAO > 0)
+                incrementosAng[i] = round(incrementosAng[i] * DIV_CD_POSICAO) / DIV_CD_POSICAO;
+            else
+                incrementosAng[i] = 0.001;
+            incVelGrausPorSeg[i] = incrementosAng[i] / 0.25 * (10e-3);
+            if(round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE > 0)
+                incVelGrausPorSeg[i]  = round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+            else
+                incVelGrausPorSeg[i] = 0.001;
+            incAclGrausPorSegQuad[i] = incrementosAng[i] / 0.25 * (10e-3) * (80e-3);
+            if(round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO > 0)
+                incAclGrausPorSegQuad[i] = round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+            else
+                incAclGrausPorSegQuad[i] = 0.001;
+
+            lstSpnAlvoGraus[i]->setDecimals(CASAS_DECIMAIS_POSICAO);
+            lstSpnAlvoGraus[i]->setSingleStep(incrementosAng[i]);
+            lstSpnVelGrausPorSeg[i]->setDecimals(CASAS_DECIMAIS_VELOCIDADE);
+            lstSpnVelGrausPorSeg[i]->setSingleStep(incVelGrausPorSeg[i]);
+            lstSpnAclGrausPorSegQuad[i]->setDecimals(CASAS_DECIMAIS_ACELERACAO);
+            lstSpnAclGrausPorSegQuad[i]->setSingleStep(incAclGrausPorSegQuad[i]);
+
+            // TODO: Verificar se estes vetores serão usados nas velocidades e acelerações
+            int velTmpPulso = lstSpnVel[i]->value();
+            velGrausPorSeg[i] = velTmpPulso * incrementosAng[i] / 0.25 * (10e-3);  // (0.25us)/(10ms)
+                            // (0.25us)/(10ms) * Graus/(us) / 0.25
+                            // (0.25us)/(10ms) * Graus/(0.25us)
+                            //        1/(10ms) * Graus
+                            //     Graus /(10ms)
+                            // Graus / (10e-3 s) * 10e-3
+                            // Graus / s
+            velGrausPorSeg[i] = round(velGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+            lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg[i]);
+
+            int aclTmpPulso = lstSpnAcl[i]->value();
+            aclGrausPorSegQuad[i] = aclTmpPulso * incrementosAng[i] / 0.25 * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
+            aclGrausPorSegQuad[i] = round(aclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+            lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad[i]);
+
+
+        }
+        else if(ui->rdbMiniMaestro24->isChecked())
+        {
+            qtdPosicoesTmpPulso[i] = (tempoPulsoMax[i] - tempoPulsoMin[i]) * 4; // 0.25us
+            incrementosAng[i] = (angMax[i] - angMin[i])/qtdPosicoesTmpPulso[i]; // Graus / 0.25us
+            if(round(incrementosAng[i] * DIV_CD_POSICAO) / DIV_CD_POSICAO > 0)
+                incrementosAng[i] = round(incrementosAng[i] * DIV_CD_POSICAO) / DIV_CD_POSICAO;
+            else
+                incrementosAng[i] = 0.001;
+            incVelGrausPorSeg[i] = incrementosAng[i] * (10e-3);
+            if(round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE > 0)
+                incVelGrausPorSeg[i]  = round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+            else
+                incVelGrausPorSeg[i] = 0.001;
+            incAclGrausPorSegQuad[i] = incrementosAng[i] * (10e-3) * (80e-3);
+            if(round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO > 0)
+                incAclGrausPorSegQuad[i] = round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+            else
+                incAclGrausPorSegQuad[i] = 0.001;
+
+            lstSpnAlvoGraus[i]->setSingleStep(incrementosAng[i]);
+            lstSpnVelGrausPorSeg[i]->setSingleStep(incVelGrausPorSeg[i]);
+            lstSpnAclGrausPorSegQuad[i]->setSingleStep(incAclGrausPorSegQuad[i]);
+
+            // TODO: Verificar se estes vetores serão usados nas velocidades e acelerações
+            int velTmpPulso = lstSpnVel[i]->value();
+            velGrausPorSeg[i] = velTmpPulso * incrementosAng[i] * (10e-3);  // (0.25us)/(10ms)
+                            // (0.25us)/(10ms) * Graus/(0.25us) * 10 * 10e-3
+                            //      1 / (10ms) * Graus          * 10 * 10e-3
+                            //       Graus / ((10e-3) * s) * (10e-3)
+                            //       Graus / s
+            velGrausPorSeg[i] = round(velGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+            lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg[i]);
+
+
+            int aclTmpPulso = lstSpnAcl[i]->value();
+            aclGrausPorSegQuad[i] = aclTmpPulso * incrementosAng[i] * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
+                            // (0.25us)/(10ms)/(80ms) * Graus/(0.25us)
+                            // 1/(10ms)/(80ms) * Graus/1
+                            // Graus/(10ms)/(80ms)
+                            // Graus/((10ms)*(80ms))
+                            // Graus / (10e-3 * s  * 80e-3 * s) * 10e-3 * 80e-3
+                            // Graus / s^2
+            aclGrausPorSegQuad[i] = round(aclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+            lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad[i]);
+        }
+    }
 }
 
 void MainWindow::timeoutConfig()
@@ -397,7 +552,6 @@ void MainWindow::abrirPortaSerial()
         inicializando = true;
         configuracoesIniciais();
 
-        // TODO: Conexão porta serial: tentar enviar o comando ECH
         //habilitarComponentesConn(true);        
     }
     else
@@ -610,25 +764,32 @@ void MainWindow::decodificaResposta()
     }
     else if(resposta.length() == 35 && (resposta.contains("MOV") || resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN1")) )
     {
-        QString valor;
+        QString strValor;
+        double graus;
+
         for(int i = 0; i < QTD_SERVOS; i++)
         {
-            valor = resposta.mid(5*(i+1), 4);
-            lstEdtAtual[i]->setText(valor.setNum(valor.toInt()));
-            // TODO: Aba Posição das Juntas: Conversão de/para ângulos (pos. atual várias juntas)
+            strValor = resposta.mid(5*(i+1), 4);
+            lstEdtAtual[i]->setText(strValor.setNum(strValor.toInt()));
+
+            graus = converteMicrossegundosParaGraus(i, strValor.toInt());
+            lstEdtAtualGraus[i]->setText(QString("%1").arg(graus));
         }
 
         if(resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN1"))
         {
             for(int i = 0; i < QTD_SERVOS; i++)
             {
-                valor = resposta.mid(5*(i+1), 4);
-                lstSpnAlvo[i]->setValue(valor.toInt());
-                // TODO: Aba Posição das Juntas: Conversão de/para ângulos (pos. alvo várias juntas)
+                strValor = resposta.mid(5*(i+1), 4);
+                lstSpnAlvo[i]->setValue(strValor.toInt());
+
+                graus = converteMicrossegundosParaGraus(i, strValor.toInt());
+                lstSpnAlvoGraus[i]->setValue(graus);
                 // TODO: Aba Posição das Juntas: Slider para posição alvo (microssegundos)
                 // TODO: Aba Posição das Juntas: Slider para posição alvo (graus)
                 // TODO: Cinemática direta
-                lstChkHab[i]->setChecked(valor.toInt() > 0);
+                lstChkHab[i]->setChecked(strValor.toInt() > 0);
+                lstChkHabGraus[i]->setChecked(strValor.toInt() > 0);
             }
             HabilitarComponentesComServosLigados();
 
@@ -714,11 +875,18 @@ void MainWindow::decodificaResposta()
 
 
     if(filaComandosInicializacao.count() > 0)
+    {
+        if(resposta.contains("TRPGR"))
+            configurarConversaoEntreMicrossegundosEAngulos();
+
         enviaComando(filaComandosInicializacao.dequeue());
+    }
     else if(!(resposta.contains("ECH") || resposta.contains("PRONTO")))
     {
         if (inicializando && serial->isOpen())
-            habilitarComponentesConn(true);
+        {
+            habilitarComponentesConn(true);            
+        }
         inicializando = false;
 
         if(filaComandosPosicaoNeutraCTZ.count() > 0 && ehRespostaCTZ)
@@ -729,9 +897,12 @@ void MainWindow::decodificaResposta()
         {
             parser(filaComandosMoverComVelAcl.dequeue());
         }
-        else if(filaConfigPosLimites.count() > 0 && ehRespostaConfigPosLimite)
+        else if(ehRespostaConfigPosLimite)
         {
-            enviaComando(filaConfigPosLimites.dequeue());
+            if(filaConfigPosLimites.count() > 0)
+                enviaComando(filaConfigPosLimites.dequeue());
+            else
+                configurarConversaoEntreMicrossegundosEAngulos();
         }
         else if(seqEmExecucao && ehRespostaFinal)
         {            
@@ -772,8 +943,8 @@ void MainWindow::setarValorPosLimiteResposta(QString resposta)
     {
         int valor = strValor.toInt();
         strValor.setNum(valor);
-
-        if(ui->tabelaPosLimites->item(idxJunta, 0) == 0)
+        /*
+        if(ui->tabelaPosLimites->item(idxJunta, idxComando) == 0)
         {
             QTableWidgetItem *item = new QTableWidgetItem();
             item->setText(strValor);
@@ -783,6 +954,22 @@ void MainWindow::setarValorPosLimiteResposta(QString resposta)
         {
             ui->tabelaPosLimites->item(idxJunta, idxComando)->setText(strValor);
         }
+        */
+        setaValorItemTabela(ui->tabelaPosLimites, idxJunta, idxComando, strValor);
+    }
+}
+
+void MainWindow::setaValorItemTabela(QTableWidget *tableWidget, int idxLinha, int idxColuna, QString strValor)
+{
+    if(tableWidget->item(idxLinha, idxColuna) == 0)
+    {
+        QTableWidgetItem *item = new QTableWidgetItem();
+        item->setText(strValor);
+        tableWidget->setItem(idxLinha, idxColuna, item);
+    }
+    else
+    {
+        tableWidget->item(idxLinha, idxColuna)->setText(strValor);
     }
 }
 
@@ -1265,12 +1452,195 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
     // TODO: Aba Posições das Juntas: Botão de cinemática inversa
 }
 
+void MainWindow::on_spnJ0Alvo_valueChanged(int posicaoMicrossegundos)
+{
+    converteSpnAlvoParaGraus(0, posicaoMicrossegundos);
+}
+
+void MainWindow::on_spnJ1Alvo_valueChanged(int posicaoMicrossegundos)
+{
+    converteSpnAlvoParaGraus(1, posicaoMicrossegundos);
+}
+
+void MainWindow::on_spnJ2Alvo_valueChanged(int posicaoMicrossegundos)
+{
+    converteSpnAlvoParaGraus(2, posicaoMicrossegundos);
+}
+
+void MainWindow::on_spnJ3Alvo_valueChanged(int posicaoMicrossegundos)
+{
+    converteSpnAlvoParaGraus(3, posicaoMicrossegundos);
+}
+
+void MainWindow::on_spnJ4Alvo_valueChanged(int posicaoMicrossegundos)
+{
+    converteSpnAlvoParaGraus(4, posicaoMicrossegundos);
+}
+
+void MainWindow::on_spnGRAlvo_valueChanged(int posicaoMicrossegundos)
+{
+    converteSpnAlvoParaGraus(5, posicaoMicrossegundos);
+}
+
+void MainWindow::on_spnJ0Vel_valueChanged(int velTmpPulso)
+{
+    converteSpnVelParaGrausPorSeg(0, velTmpPulso);
+}
+
+void MainWindow::on_spnJ1Vel_valueChanged(int velTmpPulso)
+{
+    converteSpnVelParaGrausPorSeg(1, velTmpPulso);
+}
+
+void MainWindow::on_spnJ2Vel_valueChanged(int velTmpPulso)
+{
+    converteSpnVelParaGrausPorSeg(2, velTmpPulso);
+}
+
+void MainWindow::on_spnJ3Vel_valueChanged(int velTmpPulso)
+{
+    converteSpnVelParaGrausPorSeg(3, velTmpPulso);
+}
+
+void MainWindow::on_spnJ4Vel_valueChanged(int velTmpPulso)
+{
+    converteSpnVelParaGrausPorSeg(4, velTmpPulso);
+}
+
+void MainWindow::on_spnGRVel_valueChanged(int velTmpPulso)
+{
+    converteSpnVelParaGrausPorSeg(5, velTmpPulso);
+}
+
+void MainWindow::on_spnJ0Acl_valueChanged(int aclTmpPulso)
+{
+    converteSpnAclParaGrausPorSegQuad(0, aclTmpPulso);
+}
+
+void MainWindow::on_spnJ1Acl_valueChanged(int aclTmpPulso)
+{
+    converteSpnAclParaGrausPorSegQuad(1, aclTmpPulso);
+}
+
+void MainWindow::on_spnJ2Acl_valueChanged(int aclTmpPulso)
+{
+    converteSpnAclParaGrausPorSegQuad(2, aclTmpPulso);
+}
+
+void MainWindow::on_spnJ3Acl_valueChanged(int aclTmpPulso)
+{
+    converteSpnAclParaGrausPorSegQuad(3, aclTmpPulso);
+}
+
+void MainWindow::on_spnJ4Acl_valueChanged(int aclTmpPulso)
+{
+    converteSpnAclParaGrausPorSegQuad(4, aclTmpPulso);
+}
+
+void MainWindow::on_spnGRAcl_valueChanged(int aclTmpPulso)
+{
+    converteSpnAclParaGrausPorSegQuad(5, aclTmpPulso);
+}
+
+void MainWindow::on_spnJ0AlvoGraus_valueChanged(double posicaoGraus)
+{
+    // TODO: Aba posições das juntas: verificar se as conversões estão sendo calculadas corretamente.    
+    converteSpnAlvoGrausParaTmpPulso(0, posicaoGraus);
+}
+
+void MainWindow::on_spnJ1AlvoGraus_valueChanged(double posicaoGraus)
+{
+    converteSpnAlvoGrausParaTmpPulso(1, posicaoGraus);
+}
+
+void MainWindow::on_spnJ2AlvoGraus_valueChanged(double posicaoGraus)
+{
+    converteSpnAlvoGrausParaTmpPulso(2, posicaoGraus);
+}
+
+void MainWindow::on_spnJ3AlvoGraus_valueChanged(double posicaoGraus)
+{
+    converteSpnAlvoGrausParaTmpPulso(3, posicaoGraus);
+}
+
+void MainWindow::on_spnJ4AlvoGraus_valueChanged(double posicaoGraus)
+{
+    converteSpnAlvoGrausParaTmpPulso(4, posicaoGraus);
+}
+
+void MainWindow::on_spnGRAlvoGraus_valueChanged(double posicaoGraus)
+{
+    converteSpnAlvoGrausParaTmpPulso(5, posicaoGraus);
+}
+
+void MainWindow::on_spnJ0VelGrausPorSeg_valueChanged(double velGrausPorSeg)
+{
+    converteSpnVelGrausPorSegParaTmpPulso(0, velGrausPorSeg);
+}
+
+void MainWindow::on_spnJ1VelGrausPorSeg_valueChanged(double velGrausPorSeg)
+{
+    converteSpnVelGrausPorSegParaTmpPulso(1, velGrausPorSeg);
+}
+
+void MainWindow::on_spnJ2VelGrausPorSeg_valueChanged(double velGrausPorSeg)
+{
+    converteSpnVelGrausPorSegParaTmpPulso(2, velGrausPorSeg);
+}
+
+void MainWindow::on_spnJ3VelGrausPorSeg_valueChanged(double velGrausPorSeg)
+{
+    converteSpnVelGrausPorSegParaTmpPulso(3, velGrausPorSeg);
+}
+
+void MainWindow::on_spnJ4VelGrausPorSeg_valueChanged(double velGrausPorSeg)
+{
+    converteSpnVelGrausPorSegParaTmpPulso(4, velGrausPorSeg);
+}
+
+void MainWindow::on_spnGRVelGrausPorSeg_valueChanged(double velGrausPorSeg)
+{
+    converteSpnVelGrausPorSegParaTmpPulso(5, velGrausPorSeg);
+}
+
+void MainWindow::on_spnJ0AclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad)
+{
+    converteSpnAclGrausPorSegQuadParaTmpPulso(0, aclGrausPorSegQuad);
+}
+
+void MainWindow::on_spnJ1AclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad)
+{
+    converteSpnAclGrausPorSegQuadParaTmpPulso(1, aclGrausPorSegQuad);
+}
+
+void MainWindow::on_spnJ2AclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad)
+{
+    converteSpnAclGrausPorSegQuadParaTmpPulso(2, aclGrausPorSegQuad);
+}
+
+void MainWindow::on_spnJ3AclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad)
+{
+    converteSpnAclGrausPorSegQuadParaTmpPulso(3, aclGrausPorSegQuad);
+}
+
+void MainWindow::on_spnJ4AclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad)
+{
+    converteSpnAclGrausPorSegQuadParaTmpPulso(4, aclGrausPorSegQuad);
+}
+
+void MainWindow::on_spnGRAclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad)
+{
+    converteSpnAclGrausPorSegQuadParaTmpPulso(5, aclGrausPorSegQuad);
+}
+
+
 
 /* NOTE: ***** Aba Sequência de Comandos ***** */
 
 void MainWindow::on_btNovaSequencia_clicked()
 {
     on_btPararSeqComandos_clicked();
+    // TODO: Adicionar messagebox de confirmação para nova sequência de comandos
     ui->lblNomeArquivoSequencia->setText("Nova sequência");
     ui->listSequenciaComandos->clear();
 
@@ -1303,6 +1673,163 @@ void MainWindow::editarComandoNaSequencia(QString comando)
     ui->listSequenciaComandos->currentItem()->setText(comando);
     on_btPararSeqComandos_clicked();
 }
+
+/* NOTE: ***** Funções de conversão de posição, velocidade e aceleração ***** */
+double MainWindow::converteMicrossegundosParaGraus(int idxJunta, int posicaoMicrossegundos)
+{
+    double a, b, x, y;
+
+    a = coeffAng[idxJunta];
+    b = offsetAng[idxJunta];
+    x = posicaoMicrossegundos;
+
+    y = a * x + b;
+
+    return round(y*DIV_CD_POSICAO)/DIV_CD_POSICAO;
+}
+
+int MainWindow::converteGrausParaMicrossegundos(int idxJunta, double posicaoGraus)
+{
+    double a, b, x, y;
+
+    y = posicaoGraus;
+    a = coeffAng[idxJunta];
+    b = offsetAng[idxJunta];
+
+    x = (y - b)/a;
+
+    return qRound(x);
+}
+
+double MainWindow::converteVelTmpPulsoParaGrausPorSeg(int idxJunta, int velTmpPulso)
+{
+    double velGrausPorSeg;
+
+    if(ui->rdbReadyForPIC->isChecked())
+        velGrausPorSeg = velTmpPulso * incrementosAng[idxJunta] / 0.25 * 10e-3;
+    else
+        velGrausPorSeg = velGrausPorSeg = velTmpPulso * incrementosAng[idxJunta] * 10e-3;
+
+    return round(velGrausPorSeg * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+
+}
+
+int MainWindow::converteVelGrausPorSegParaTmpPulso(int idxJunta, double velGrausPorSeg)
+{
+    double velTmpPulso;
+
+    if(ui->rdbReadyForPIC->isChecked())
+        velTmpPulso = velGrausPorSeg / (incrementosAng[idxJunta] / 0.25 * 10e-3);
+    else
+        velTmpPulso = velGrausPorSeg / (incrementosAng[idxJunta] * 10e-3);
+
+    return qRound(velTmpPulso);
+}
+
+double MainWindow::converteAclTmpPulsoParaGrausPorSegQuad(int idxJunta, int aclTmpPulso)
+{
+    double aclGrausPorSegQuad;
+
+    if(ui->rdbReadyForPIC->isChecked())
+        aclGrausPorSegQuad = aclTmpPulso * incrementosAng[idxJunta] / 0.25 * 10e-3 * 80e-3;
+    else
+        aclGrausPorSegQuad = aclTmpPulso * incrementosAng[idxJunta] * 10e-3 * 80e-3;
+
+    return round(aclGrausPorSegQuad * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+}
+
+int MainWindow::converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad)
+{
+    double aclTmpPulso;
+    if(ui->rdbReadyForPIC->isChecked())
+        aclTmpPulso = aclGrausPorSegQuad / (incrementosAng[idxJunta] / 0.25 * 10e-3 * 80e-3);
+    else
+        aclTmpPulso = aclGrausPorSegQuad / (incrementosAng[idxJunta] * 10e-3 * 80e-3);
+
+    return qRound(aclTmpPulso);
+}
+
+void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
+{
+    // TODO: Avaliar o que fazer com a conversão de/para ângulos quando a posição em us for zero.
+    double angulo = converteMicrossegundosParaGraus(idxJunta, posicaoAlvo);
+    double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();
+
+    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+    if(angulo != anguloAtual)
+        lstSpnAlvoGraus[idxJunta]->setValue(angulo);
+}
+
+void MainWindow::converteSpnVelParaGrausPorSeg(int idxJunta, int velocidade)
+{
+    double velocidadeAngular = converteVelTmpPulsoParaGrausPorSeg(idxJunta, velocidade);
+    double velocidadeAngularAtual = lstSpnVelGrausPorSeg[idxJunta]->value();
+
+    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+    if(velocidadeAngular != velocidadeAngularAtual)
+        lstSpnVelGrausPorSeg[idxJunta]->setValue(velocidadeAngular);
+}
+
+void MainWindow::converteSpnAclParaGrausPorSegQuad(int idxJunta, int aceleracao)
+{
+    double aceleracaoAngular = converteAclTmpPulsoParaGrausPorSegQuad(idxJunta, aceleracao);
+    double aceleracaoAngularAtual = lstSpnAclGrausPorSegQuad[idxJunta]->value();
+
+    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+    if(aceleracaoAngular != aceleracaoAngularAtual)
+        lstSpnAclGrausPorSegQuad[idxJunta]->setValue(aceleracaoAngular);
+}
+
+void MainWindow::converteSpnAlvoGrausParaTmpPulso(int idxJunta, double posicaoGraus)
+{
+    int posicaoMicrossegundos = converteGrausParaMicrossegundos(idxJunta, posicaoGraus);
+    int posicaoMicrossegundosAtual = lstSpnAlvo[idxJunta]->value();
+
+    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+    if(posicaoMicrossegundos != posicaoMicrossegundosAtual)
+        lstSpnAlvo[idxJunta]->setValue(posicaoMicrossegundos);
+
+    /*
+    double posicaoGrausRecalculada = converteMicrossegundosParaGraus(idxJunta, posicaoMicrossegundos);
+
+    if(posicaoGraus != posicaoGrausRecalculada)
+        lstSpnAlvoGraus[idxJunta]->setValue(posicaoGrausRecalculada);
+    */
+}
+
+void MainWindow::converteSpnVelGrausPorSegParaTmpPulso(int idxJunta, double velGrausPorSeg)
+{
+    int velocidadeTmpPulso = converteVelGrausPorSegParaTmpPulso(idxJunta, velGrausPorSeg);
+    int velocidadeTmpPulsoAtual = lstSpnVel[idxJunta]->value();
+
+    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+    if(velocidadeTmpPulso != velocidadeTmpPulsoAtual)
+        lstSpnVel[idxJunta]->setValue(velocidadeTmpPulso);
+
+    /*
+    double velGrausPorSegRecalculada = converteVelTmpPulsoParaGrausPorSeg(idxJunta, velocidadeTmpPulso);
+    if(velGrausPorSeg != velGrausPorSegRecalculada)
+        lstSpnVelGrausPorSeg[idxJunta]->setValue(velGrausPorSegRecalculada);
+    */
+}
+
+void MainWindow::converteSpnAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad)
+{
+    int aceleracaoTmpPulso = converteAclGrausPorSegQuadParaTmpPulso(idxJunta, aclGrausPorSegQuad);
+    int aceleracaoTmpPulsoAtual = lstSpnAcl[idxJunta]->value();
+
+    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+    if(aceleracaoTmpPulso != aceleracaoTmpPulsoAtual)
+        lstSpnAcl[idxJunta]->setValue(aceleracaoTmpPulso);
+
+    /*
+    double aclGrausPorSegQuadRecalculada = converteAclTmpPulsoParaGrausPorSegQuad(idxJunta, aceleracaoTmpPulso);
+    if(aclGrausPorSegQuad != aclGrausPorSegQuadRecalculada)
+        lstSpnAclGrausPorSegQuad[idxJunta]->setValue(aclGrausPorSegQuadRecalculada);
+    */
+}
+
+
 
 void MainWindow::on_btAdicionarPosCorrente_clicked()
 {
@@ -1805,8 +2332,8 @@ void MainWindow::on_btConfigurarPosLimites_clicked()
 }
 
 void MainWindow::on_btConfigurarPosLimitesGraus_clicked()
-{
-    // TODO: Aba Configurações: botão configurar (posições limites em graus)
+{    
+    configurarConversaoEntreMicrossegundosEAngulos();
 }
 
 void MainWindow::on_rdbSemFeedback_clicked(bool checked)
@@ -1858,7 +2385,11 @@ void MainWindow::on_btResetarPlacaServos_clicked()
 }
 
 
+/* NOTE: ***** Aba Terminal ***** */
+
 void MainWindow::on_chkEcoLocal_clicked(bool checked)
 {
     console->setLocalEchoEnabled(checked);
 }
+
+
