@@ -14,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QLocale::setDefault(QLocale::system());
+
     console = new Console(ui->tabTerminal);
     console->setEnabled(false);
     console->setVisible(true);
@@ -406,15 +408,22 @@ void MainWindow::habilitarComponentes(bool estadoHab)
     {
         lstChkHab[i]->setEnabled(estadoHab);
         lstSlider[i]->setEnabled(estadoHab);
-        lstSpnAlvo[i]->setEnabled(estadoHab);
-        //lstEdtAtual[i]->setEnabled(estadoHab);
+        bool ehNumeroEZero = false;
+
+        lstEdtAtual[i]->text().toInt(&ehNumeroEZero);
+
+        if(ehNumeroEZero)
+        {
+            ehNumeroEZero = (lstEdtAtual[i]->text().toInt() > 0);
+        }
+
+        lstSpnAlvo[i]->setEnabled(estadoHab && ehNumeroEZero);
         lstSpnVel[i]->setEnabled(estadoHab);
         lstSpnAcl[i]->setEnabled(estadoHab);
 
         lstChkHabGraus[i]->setEnabled(estadoHab);
         lstSliderGraus[i]->setEnabled(estadoHab);
-        lstSpnAlvoGraus[i]->setEnabled(estadoHab);
-        //lstEdtAtualGraus[i]->setEnabled(estadoHab);
+        lstSpnAlvoGraus[i]->setEnabled(estadoHab && ehNumeroEZero);
         lstSpnVelGrausPorSeg[i]->setEnabled(estadoHab);
         lstSpnAclGrausPorSegQuad[i]->setEnabled(estadoHab);
     }
@@ -762,18 +771,24 @@ void MainWindow::decodificaResposta()
     {
         ui->chkComandosBloqueantesDeMovimento->setChecked(resposta.at(4) == '1');
     }
+    // TODO: Colocar este trecho de código como o primeiro if
     else if(resposta.length() == 35 && (resposta.contains("MOV") || resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN1")) )
-    {
+    {        
         QString strValor;
         double graus;
 
         for(int i = 0; i < QTD_SERVOS; i++)
         {
             strValor = resposta.mid(5*(i+1), 4);
+
             lstEdtAtual[i]->setText(strValor.setNum(strValor.toInt()));
 
-            graus = converteMicrossegundosParaGraus(i, strValor.toInt());
-            lstEdtAtualGraus[i]->setText(QString("%1").arg(graus));
+            if(strValor.toInt() > 0)
+            {
+                graus = converteMicrossegundosParaGraus(i, strValor.toInt());
+                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
+                //lstEdtAtualGraus[i]->setText(QString().number(graus,'f',CASAS_DECIMAIS_POSICAO));
+            }
         }
 
         if(resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN1"))
@@ -781,15 +796,34 @@ void MainWindow::decodificaResposta()
             for(int i = 0; i < QTD_SERVOS; i++)
             {
                 strValor = resposta.mid(5*(i+1), 4);
-                lstSpnAlvo[i]->setValue(strValor.toInt());
 
-                graus = converteMicrossegundosParaGraus(i, strValor.toInt());
-                lstSpnAlvoGraus[i]->setValue(graus);
+                if(strValor.toInt() > 0)
+                {
+                    lstSpnAlvo[i]->setValue(strValor.toInt());
+
+                    if(!this->lstSpnAlvo[i]->isEnabled())
+                    {
+                        this->lstSpnAlvo[i]->setEnabled(true);
+                        this->lstChkHab[i]->setChecked(true);
+                        this->lstSpnAlvoGraus[i]->setEnabled(true);
+                        this->lstChkHabGraus[i]->setChecked(true);
+                    }
+                }
+                else
+                {
+                    lstChkHab[i]->setChecked(false);
+                    lstSpnAlvo[i]->setEnabled(false);
+                    lstChkHabGraus[i]->setChecked(false);
+                    lstSpnAlvoGraus[i]->setEnabled(false);
+                }
+
+                //graus = converteMicrossegundosParaGraus(i, strValor.toInt());
+                //lstSpnAlvoGraus[i]->setValue(graus);
                 // TODO: Aba Posição das Juntas: Slider para posição alvo (microssegundos)
                 // TODO: Aba Posição das Juntas: Slider para posição alvo (graus)
                 // TODO: Cinemática direta
-                lstChkHab[i]->setChecked(strValor.toInt() > 0);
-                lstChkHabGraus[i]->setChecked(strValor.toInt() > 0);
+                //lstChkHab[i]->setChecked(strValor.toInt() > 0);
+                //lstChkHabGraus[i]->setChecked(strValor.toInt() > 0);
             }
             HabilitarComponentesComServosLigados();
 
@@ -797,8 +831,9 @@ void MainWindow::decodificaResposta()
             ehRespostaMoverComVelAcl = resposta.contains("JST");
         }
     }
+    // TODO: Colocar este trecho de código como o segundo if
     else if(resposta.length() == 11)
-    {
+    {        
         if(resposta.contains("MOV") || resposta.contains("CTZ") || resposta.contains("IN1"))
         {
             QString junta = resposta.mid(4,2);
@@ -813,11 +848,37 @@ void MainWindow::decodificaResposta()
                 i = 5;
 
             valorFloat = valor.toFloat();
+
             lstEdtAtual[i]->setText(valor.setNum(valorFloat));
+
+            if(valorFloat > 0)
+            {
+                double graus = converteMicrossegundosParaGraus(i, valor.toInt());
+                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
+            }
 
             if(resposta.contains("CTZ") || resposta.contains("IN1"))
             {
-                lstSpnAlvo[i]->setValue(valorFloat);
+                if(valorFloat > 0)
+                {
+                    lstSpnAlvo[i]->setValue(valorFloat);
+
+                    if(!this->lstSpnAlvo[i]->isEnabled())
+                    {
+                        this->lstSpnAlvo[i]->setEnabled(true);
+                        this->lstChkHab[i]->setChecked(true);
+                        this->lstSpnAlvoGraus[i]->setEnabled(true);
+                        this->lstChkHabGraus[i]->setChecked(true);
+                    }
+                }
+                else
+                {
+                    lstChkHab[i]->setChecked(false);
+                    lstSpnAlvo[i]->setEnabled(false);
+                    lstChkHabGraus[i]->setChecked(false);
+                    lstSpnAlvoGraus[i]->setEnabled(false);
+                }
+
                 HabilitarComponentesComServosLigados();
                 ehRespostaFinal = true;
                 ehRespostaCTZ = resposta.contains("CTZ");
@@ -846,8 +907,21 @@ void MainWindow::decodificaResposta()
     {
         QString valor = resposta.mid(3,4);
         valor.setNum(valor.toInt());
+
         ui->edtGRAtual->setText(valor);
+        double graus = converteMicrossegundosParaGraus(5, valor.toInt());
+        ui->edtGRAtualGraus->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
+
         ui->spnGRAlvo->setValue(valor.toInt());
+
+        if(!ui->spnGRAlvo->isEnabled())
+        {
+            ui->spnGRAlvo->setEnabled(true);
+            ui->chkGR->setChecked(true);
+            ui->spnGRAlvoGraus->setEnabled(true);
+            ui->chkGRAng->setChecked(true);
+        }
+
         ehRespostaFinal = true;
     }
     else if(resposta.contains("RST"))
@@ -910,8 +984,6 @@ void MainWindow::decodificaResposta()
         }
 
     }
-
-
 }
 
 void MainWindow::setarValorPosLimiteResposta(QString resposta)
@@ -943,18 +1015,7 @@ void MainWindow::setarValorPosLimiteResposta(QString resposta)
     {
         int valor = strValor.toInt();
         strValor.setNum(valor);
-        /*
-        if(ui->tabelaPosLimites->item(idxJunta, idxComando) == 0)
-        {
-            QTableWidgetItem *item = new QTableWidgetItem();
-            item->setText(strValor);
-            ui->tabelaPosLimites->setItem(idxJunta, idxComando, item);
-        }
-        else
-        {
-            ui->tabelaPosLimites->item(idxJunta, idxComando)->setText(strValor);
-        }
-        */
+
         setaValorItemTabela(ui->tabelaPosLimites, idxJunta, idxComando, strValor);
     }
 }
@@ -1674,6 +1735,8 @@ void MainWindow::editarComandoNaSequencia(QString comando)
     on_btPararSeqComandos_clicked();
 }
 
+
+
 /* NOTE: ***** Funções de conversão de posição, velocidade e aceleração ***** */
 double MainWindow::converteMicrossegundosParaGraus(int idxJunta, int posicaoMicrossegundos)
 {
@@ -1708,7 +1771,7 @@ double MainWindow::converteVelTmpPulsoParaGrausPorSeg(int idxJunta, int velTmpPu
     if(ui->rdbReadyForPIC->isChecked())
         velGrausPorSeg = velTmpPulso * incrementosAng[idxJunta] / 0.25 * 10e-3;
     else
-        velGrausPorSeg = velGrausPorSeg = velTmpPulso * incrementosAng[idxJunta] * 10e-3;
+        velGrausPorSeg = velTmpPulso * incrementosAng[idxJunta] * 10e-3;
 
     return round(velGrausPorSeg * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
 
@@ -1751,13 +1814,27 @@ int MainWindow::converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclG
 
 void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
 {
-    // TODO: Avaliar o que fazer com a conversão de/para ângulos quando a posição em us for zero.
-    double angulo = converteMicrossegundosParaGraus(idxJunta, posicaoAlvo);
-    double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();
+    if(posicaoAlvo > 0)
+    {
+        lstChkHab[idxJunta]->setChecked(true);
+        lstSpnAlvo[idxJunta]->setEnabled(true);
+        lstSpnAlvoGraus[idxJunta]->setEnabled(true);
+        lstChkHabGraus[idxJunta]->setChecked(true);
+        double angulo = converteMicrossegundosParaGraus(idxJunta, posicaoAlvo);
+        double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();
 
-    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-    if(angulo != anguloAtual)
-        lstSpnAlvoGraus[idxJunta]->setValue(angulo);
+        // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+        if(angulo != anguloAtual)
+            lstSpnAlvoGraus[idxJunta]->setValue(angulo);
+    }
+    else
+    {
+        lstChkHab[idxJunta]->setChecked(false);
+        lstSpnAlvo[idxJunta]->setEnabled(false);
+        //lstSpnAlvo[idxJunta]->setValue(lstEdtAtual[idxJunta]->text().toInt());
+        lstSpnAlvoGraus[idxJunta]->setEnabled(false);
+        lstChkHabGraus[idxJunta]->setChecked(false);
+    }
 }
 
 void MainWindow::converteSpnVelParaGrausPorSeg(int idxJunta, int velocidade)
@@ -2146,10 +2223,15 @@ bool MainWindow::parser(QString comando)
                 if(idxJunta != -1)
                 {
                     int valor = comando.mid(5*(i+1), 4).toInt();
+                    //lstChkHab[idxJunta]->setChecked(valor > 0);
 
-                    lstChkHab[idxJunta]->setChecked(valor > 0);
+                    if(valor > 0)
+                    {
+                        lstSpnAlvo[idxJunta]->setValue(valor);
+                    }
+                    else
+                        lstChkHab[idxJunta]->setChecked(false);
 
-                    lstSpnAlvo[idxJunta]->setValue(valor);
                     //lstSpnPosAlvo[idxJunta]->setEnabled(true);
                 }
             }
@@ -2162,7 +2244,7 @@ bool MainWindow::parser(QString comando)
         for (int i = 0; i < QTD_SERVOS; i++)
         {
             int valor = ui->tabelaPosLimites->item(i, 3)->text().toInt();
-            this->lstSpnAlvo[i]->setValue(valor);
+            this->lstSpnAlvo[i]->setValue(valor);            
         }
 
         enviaComando(comando);
@@ -2180,27 +2262,26 @@ bool MainWindow::parser(QString comando)
             idxJunta = 5;
 
         if(idxJunta != -1)
-        {
-            lstChkHab[idxJunta]->setChecked(true);
+        {            
             int valor = ui->tabelaPosLimites->item(idxJunta, 2)->text().toInt();
-            lstSpnAlvo[idxJunta]->setValue(valor);
+            lstSpnAlvo[idxJunta]->setValue(valor);            
         }
         enviaComando(comando);
         return true;
     }
     else if(comando.contains("GA"))
-    {
-        ui->chkJ0->setChecked(true);
+    {        
         int valor = ui->tabelaPosLimites->item(5, 0)->text().toInt();
         ui->spnGRAlvo->setValue(valor);
+
         enviaComando(comando);
         return true;
     }
     else if(comando.contains("GF"))
-    {
-        ui->chkJ0->setChecked(true);
+    {        
         int valor = ui->tabelaPosLimites->item(5, 1)->text().toInt();
         ui->spnGRAlvo->setValue(valor);
+
         enviaComando(comando);
         return true;
     }
