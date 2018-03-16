@@ -707,12 +707,142 @@ void MainWindow::recebeCaracteresDeResposta(QByteArray data)
 void MainWindow::decodificaResposta()
 {
     QString resposta = filaBufferEntrada.dequeue();
+    int tamanhoResposta = resposta.length();
     bool ehRespostaFinal = false;
     bool ehRespostaConfigPosLimite = false;
     bool ehRespostaCTZ = false;
     bool ehRespostaMoverComVelAcl = false;
 
-    if(resposta.contains("[PRONTO]"))
+    if(tamanhoResposta == 35 && (resposta.contains("MOV") || resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN1")) )
+    {
+        QString strValor;
+        int valor;
+        double graus;
+
+        for(int i = 0; i < QTD_SERVOS; i++)
+        {
+            strValor = resposta.mid(5*(i+1), 4);
+            valor = strValor.toInt();
+
+            lstEdtAtual[i]->setText(strValor.setNum(valor));
+
+            if(valor > 0)
+            {
+                graus = converteMicrossegundosParaGraus(i, valor);
+                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
+            }
+        }
+
+        //if(resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN1"))
+        if(!resposta.contains("MOV"))
+        {
+            for(int i = 0; i < QTD_SERVOS; i++)
+            {
+                valor = resposta.mid(5*(i+1), 4).toInt();
+
+                if(valor > 0)
+                {
+                    lstSpnAlvo[i]->setValue(valor);
+
+                    if(!this->lstSpnAlvo[i]->isEnabled())
+                    {
+                        this->lstSpnAlvo[i]->setEnabled(true);
+                        this->lstChkHab[i]->setChecked(true);
+                        this->lstSpnAlvoGraus[i]->setEnabled(true);
+                        this->lstChkHabGraus[i]->setChecked(true);
+                    }
+                }
+                else
+                {
+                    lstChkHab[i]->setChecked(false);
+                    lstSpnAlvo[i]->setEnabled(false);
+                    lstChkHabGraus[i]->setChecked(false);
+                    lstSpnAlvoGraus[i]->setEnabled(false);
+                }
+
+                // TODO: Aba Posição das Juntas: Slider para posição alvo (microssegundos)
+                // TODO: Aba Posição das Juntas: Slider para posição alvo (graus)
+                // TODO: Cinemática direta
+            }
+            HabilitarComponentesComServosLigados();
+
+            ehRespostaFinal = true;
+            ehRespostaMoverComVelAcl = resposta.contains("JST");
+        }
+    }
+    else if(tamanhoResposta == 11)
+    {
+        if(resposta.contains("MOV") || resposta.contains("CTZ") || resposta.contains("IN1"))
+        {
+            QString junta = resposta.mid(4,2);
+            QString strValor = resposta.mid(6,4);
+
+            int i;
+            int valor;
+
+            if(junta.contains("J"))
+                i = junta.at(1).toLatin1() - '0';
+            else
+                i = 5;
+
+            valor = strValor.toInt();
+
+            lstEdtAtual[i]->setText(strValor.setNum(valor));
+
+            if(valor > 0)
+            {
+                double graus = converteMicrossegundosParaGraus(i, valor);
+                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
+            }
+
+            //if(resposta.contains("CTZ") || resposta.contains("IN1"))
+            if(!resposta.contains("MOV"))
+            {
+                if(valor > 0)
+                {
+                    lstSpnAlvo[i]->setValue(valor);
+
+                    if(!this->lstSpnAlvo[i]->isEnabled())
+                    {
+                        this->lstSpnAlvo[i]->setEnabled(true);
+                        this->lstChkHab[i]->setChecked(true);
+                        this->lstSpnAlvoGraus[i]->setEnabled(true);
+                        this->lstChkHabGraus[i]->setChecked(true);
+                    }
+                }
+                else
+                {
+                    lstChkHab[i]->setChecked(false);
+                    lstSpnAlvo[i]->setEnabled(false);
+                    lstChkHabGraus[i]->setChecked(false);
+                    lstSpnAlvoGraus[i]->setEnabled(false);
+                }
+
+                HabilitarComponentesComServosLigados();
+                ehRespostaFinal = true;
+                ehRespostaCTZ = resposta.contains("CTZ");
+            }
+
+        }
+        else if(resposta.contains("VEL"))
+        {
+            setarVelOuAclResposta(resposta, lstSpnVel);
+            ehRespostaFinal = true;
+            ehRespostaMoverComVelAcl = true;
+        }
+        else if(resposta.contains("ACL"))
+        {
+            setarVelOuAclResposta(resposta, lstSpnAcl);
+            ehRespostaFinal = true;
+            ehRespostaMoverComVelAcl = true;
+        }
+        else if(resposta.contains("TMX") || resposta.contains("TMN") || resposta.contains("T90") || resposta.contains("TRP"))
+        {
+            setarValorPosLimiteResposta(resposta);
+            ehRespostaConfigPosLimite = true;
+        }
+    }
+    else if(resposta.contains("[PRONTO]"))
     {
         inicializando = true;
         enviaComando("[ECH]");
@@ -721,12 +851,12 @@ void MainWindow::decodificaResposta()
     {
         timer->stop();
 
-        if(resposta.length() == 5)
+        if(tamanhoResposta == 5)
         {
             // Podemos deduzir que, se o [ECH] está sendo ecoado, o eco de caracteres está ativo no braço robô
             ecoCaracteresAtivado = true;
         }
-        else if(resposta.length() == 6)
+        else if(tamanhoResposta == 6)
         {
             if (resposta.at(4) == '1')
             {
@@ -770,138 +900,6 @@ void MainWindow::decodificaResposta()
     else if(resposta.contains("CSB"))
     {
         ui->chkComandosBloqueantesDeMovimento->setChecked(resposta.at(4) == '1');
-    }
-    // TODO: Colocar este trecho de código como o primeiro if
-    else if(resposta.length() == 35 && (resposta.contains("MOV") || resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN1")) )
-    {        
-        QString strValor;
-        double graus;
-
-        for(int i = 0; i < QTD_SERVOS; i++)
-        {
-            strValor = resposta.mid(5*(i+1), 4);
-
-            lstEdtAtual[i]->setText(strValor.setNum(strValor.toInt()));
-
-            if(strValor.toInt() > 0)
-            {
-                graus = converteMicrossegundosParaGraus(i, strValor.toInt());
-                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
-                //lstEdtAtualGraus[i]->setText(QString().number(graus,'f',CASAS_DECIMAIS_POSICAO));
-            }
-        }
-
-        if(resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN1"))
-        {
-            for(int i = 0; i < QTD_SERVOS; i++)
-            {
-                strValor = resposta.mid(5*(i+1), 4);
-
-                if(strValor.toInt() > 0)
-                {
-                    lstSpnAlvo[i]->setValue(strValor.toInt());
-
-                    if(!this->lstSpnAlvo[i]->isEnabled())
-                    {
-                        this->lstSpnAlvo[i]->setEnabled(true);
-                        this->lstChkHab[i]->setChecked(true);
-                        this->lstSpnAlvoGraus[i]->setEnabled(true);
-                        this->lstChkHabGraus[i]->setChecked(true);
-                    }
-                }
-                else
-                {
-                    lstChkHab[i]->setChecked(false);
-                    lstSpnAlvo[i]->setEnabled(false);
-                    lstChkHabGraus[i]->setChecked(false);
-                    lstSpnAlvoGraus[i]->setEnabled(false);
-                }
-
-                //graus = converteMicrossegundosParaGraus(i, strValor.toInt());
-                //lstSpnAlvoGraus[i]->setValue(graus);
-                // TODO: Aba Posição das Juntas: Slider para posição alvo (microssegundos)
-                // TODO: Aba Posição das Juntas: Slider para posição alvo (graus)
-                // TODO: Cinemática direta
-                //lstChkHab[i]->setChecked(strValor.toInt() > 0);
-                //lstChkHabGraus[i]->setChecked(strValor.toInt() > 0);
-            }
-            HabilitarComponentesComServosLigados();
-
-            ehRespostaFinal = true;
-            ehRespostaMoverComVelAcl = resposta.contains("JST");
-        }
-    }
-    // TODO: Colocar este trecho de código como o segundo if
-    else if(resposta.length() == 11)
-    {        
-        if(resposta.contains("MOV") || resposta.contains("CTZ") || resposta.contains("IN1"))
-        {
-            QString junta = resposta.mid(4,2);
-            QString valor = resposta.mid(6,4);
-
-            int i;
-            float valorFloat;
-
-            if(junta.contains("J"))
-                i = junta.at(1).toLatin1() - '0';
-            else
-                i = 5;
-
-            valorFloat = valor.toFloat();
-
-            lstEdtAtual[i]->setText(valor.setNum(valorFloat));
-
-            if(valorFloat > 0)
-            {
-                double graus = converteMicrossegundosParaGraus(i, valor.toInt());
-                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
-            }
-
-            if(resposta.contains("CTZ") || resposta.contains("IN1"))
-            {
-                if(valorFloat > 0)
-                {
-                    lstSpnAlvo[i]->setValue(valorFloat);
-
-                    if(!this->lstSpnAlvo[i]->isEnabled())
-                    {
-                        this->lstSpnAlvo[i]->setEnabled(true);
-                        this->lstChkHab[i]->setChecked(true);
-                        this->lstSpnAlvoGraus[i]->setEnabled(true);
-                        this->lstChkHabGraus[i]->setChecked(true);
-                    }
-                }
-                else
-                {
-                    lstChkHab[i]->setChecked(false);
-                    lstSpnAlvo[i]->setEnabled(false);
-                    lstChkHabGraus[i]->setChecked(false);
-                    lstSpnAlvoGraus[i]->setEnabled(false);
-                }
-
-                HabilitarComponentesComServosLigados();
-                ehRespostaFinal = true;
-                ehRespostaCTZ = resposta.contains("CTZ");
-            }
-
-        }
-        else if(resposta.contains("VEL"))
-        {
-            setarVelOuAclResposta(resposta, lstSpnVel);
-            ehRespostaFinal = true;
-            ehRespostaMoverComVelAcl = true;
-        }
-        else if(resposta.contains("ACL"))
-        {
-            setarVelOuAclResposta(resposta, lstSpnAcl);
-            ehRespostaFinal = true;
-            ehRespostaMoverComVelAcl = true;
-        }
-        else if(resposta.contains("TMX") || resposta.contains("TMN") || resposta.contains("T90") || resposta.contains("TRP"))
-        {
-            setarValorPosLimiteResposta(resposta);
-            ehRespostaConfigPosLimite = true;
-        }
     }
     else if(resposta.length() == 8 && (resposta.contains("GA") || resposta.contains("GF")))
     {
