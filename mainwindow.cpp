@@ -74,7 +74,6 @@ void MainWindow::conectarComponentes()
     connect(ui->chkLEDP6, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
     connect(ui->chkLEDP7, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
 
-    // TODO: Aba Posições das Juntas: Conectar checkboxes de habilitar junta
     // TODO: Aba Posições das Juntas: Conectar checkboxes de mover assim que mudar posição    
 }
 
@@ -302,8 +301,6 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             aclGrausPorSegQuad[i] = aclTmpPulso * incrementosAng[i] / 0.25 * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
             aclGrausPorSegQuad[i] = round(aclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
             lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad[i]);
-
-
         }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
@@ -1692,6 +1689,122 @@ void MainWindow::on_spnGRAclGrausPorSegQuad_valueChanged(double aclGrausPorSegQu
     converteSpnAclGrausPorSegQuadParaTmpPulso(5, aclGrausPorSegQuad);
 }
 
+// TODO: Aba Posições das Juntas: Conectar checkboxes de habilitar junta
+void MainWindow::habilitaJunta(int idxJunta, bool checked)
+{
+    if(checked)
+    {
+        int valor = lstSpnAlvo[idxJunta]->value();
+
+        if(valor <= 0)
+        {
+            valor = ui->tabelaPosLimites->item(idxJunta, 3)->text().toInt();
+            lstSpnAlvo[idxJunta]->setValue(valor);
+        }
+
+        if(!lstSpnAlvo[idxJunta]->isEnabled())
+        {
+            converteSpnAlvoParaGraus(idxJunta, valor);
+        }
+
+        if(ui->chkMoverAssimQueMudarPosAlvo->isChecked())
+        {
+            if(ui->chkComVelocidadesEAceleracoes->isChecked())
+            {
+                int valorVel_Acl = lstSpnVel[idxJunta]->value();
+                QString comandoVEL_ACL = QString("[VEL%1%2]").arg(junta[idxJunta]).arg(valorVel_Acl, 4, 10, QChar('0'));
+
+                filaComandosMoverComVelAcl.enqueue(comandoVEL_ACL);
+
+                valorVel_Acl = lstSpnAcl[idxJunta]->value();
+                comandoVEL_ACL = QString("[ACL%1%2]").arg(junta[idxJunta]).arg(valorVel_Acl, 4, 10, QChar('0'));
+
+                filaComandosMoverComVelAcl.enqueue(comandoVEL_ACL);
+            }
+
+            QString comandoJST = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(valor, 4, 10, QChar('0'));
+            filaComandosMoverComVelAcl.enqueue(comandoJST);
+
+            parser(filaComandosMoverComVelAcl.dequeue());
+        }
+    }
+    else
+    {
+        lstSpnAlvo[idxJunta]->setEnabled(false);
+        lstSpnAlvoGraus[idxJunta]->setEnabled(false);
+        lstChkHab[idxJunta]->setChecked(false);
+        lstChkHabGraus[idxJunta]->setChecked(false);
+        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (microssegundos)
+        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (graus)
+
+        if(ui->chkMoverAssimQueMudarPosAlvo->isChecked())
+        {
+            QString comandoJST = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(0, 4, 10, QChar('0'));
+            parser(comandoJST);
+        }
+    }
+}
+
+void MainWindow::on_chkJ0_clicked(bool checked)
+{
+    habilitaJunta(0, checked);
+}
+
+void MainWindow::on_chkJ1_clicked(bool checked)
+{
+    habilitaJunta(1, checked);
+}
+
+void MainWindow::on_chkJ2_clicked(bool checked)
+{
+    habilitaJunta(2, checked);
+}
+
+void MainWindow::on_chkJ3_clicked(bool checked)
+{
+    habilitaJunta(3, checked);
+}
+
+void MainWindow::on_chkJ4_clicked(bool checked)
+{
+    habilitaJunta(4, checked);
+}
+
+void MainWindow::on_chkGR_clicked(bool checked)
+{
+    habilitaJunta(5, checked);
+}
+
+void MainWindow::on_chkJ0Ang_clicked(bool checked)
+{
+    habilitaJunta(0, checked);
+}
+
+void MainWindow::on_chkJ1Ang_clicked(bool checked)
+{
+    habilitaJunta(1, checked);
+}
+
+void MainWindow::on_chkJ2Ang_clicked(bool checked)
+{
+    habilitaJunta(2, checked);
+}
+
+void MainWindow::on_chkJ3Ang_clicked(bool checked)
+{
+    habilitaJunta(3, checked);
+}
+
+void MainWindow::on_chkJ4Ang_clicked(bool checked)
+{
+    habilitaJunta(4, checked);
+}
+
+void MainWindow::on_chkGRAng_clicked(bool checked)
+{
+    habilitaJunta(5, checked);
+}
+
 
 
 /* NOTE: ***** Aba Sequência de Comandos ***** */
@@ -1820,6 +1933,8 @@ void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
         lstChkHabGraus[idxJunta]->setChecked(true);
         double angulo = converteMicrossegundosParaGraus(idxJunta, posicaoAlvo);
         double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();
+        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (microssegundos)
+        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (graus)
 
         // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
         if(angulo != anguloAtual)
@@ -2470,5 +2585,8 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
 {
     console->setLocalEchoEnabled(checked);
 }
+
+
+
 
 

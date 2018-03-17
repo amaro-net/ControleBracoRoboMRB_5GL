@@ -227,6 +227,32 @@ private slots:
 
     void on_spnGRAclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad);
 
+    void on_chkJ0_clicked(bool checked);
+
+    void on_chkJ1_clicked(bool checked);
+
+    void on_chkJ2_clicked(bool checked);
+
+    void on_chkJ3_clicked(bool checked);
+
+    void on_chkJ4_clicked(bool checked);
+
+    void on_chkGR_clicked(bool checked);
+
+    void on_chkJ0Ang_clicked(bool checked);
+
+    void on_chkJ1Ang_clicked(bool checked);
+
+    void on_chkJ2Ang_clicked(bool checked);
+
+    void on_chkJ3Ang_clicked(bool checked);
+
+    void on_chkJ4Ang_clicked(bool checked);
+
+    void on_chkGRAng_clicked(bool checked);
+
+
+
 private:
     void preencheCombosPortaSerial();
     void showStatusMessage(const QString &message);
@@ -273,6 +299,8 @@ private:
     bool parser(QString comando);
 
     void iniciaDLYSemParametro();
+
+    void habilitaJunta(int idxJunta, bool checked);
 
 
     Ui::MainWindow *ui;
