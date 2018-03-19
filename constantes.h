@@ -13,6 +13,15 @@
 #define DIV_CD_VELOCIDADE          1000
 #define DIV_CD_ACELERACAO          10000
 
+#define STATUS_SEQCOM_PARADA_VAZIA      "Sequência parada"
+#define STATUS_SEQCOM_PARADA_NAO_VAZIA  "Sequência parada. ENTER ou duplo clique para executar um comando."
+#define STATUS_SEQCOM_EM_EXECUCAO       "Em execução"
+#define STATUS_SEQCOM_CONTINUANDO_EXEC  "Continuando execução"
+#define STATUS_SEQCOM_EM_LOOP           "Em loop"
+#define STATUS_SEQCOM_CONTINUANDO_LOOP  "Continuando loop"
+#define STATUS_SEQCOM_EM_DLY_SEM_PAR    "Em espera. Pressione ENTER ou duplo clique na sequência."
+
+
 static QString junta[QTD_SERVOS] = {"J0", "J1", "J2", "J3", "J4", "GR"};
 static QString idJST[QTD_SERVOS] = {"A", "B", "C", "D", "E", "G"};
 

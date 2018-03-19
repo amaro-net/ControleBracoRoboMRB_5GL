@@ -228,11 +228,15 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
     bool propInv[QTD_SERVOS];
 
     for(int i = 0; i < QTD_SERVOS; i++)
-    {
+    {                
         tempoPulsoMax[i] = ui->tabelaPosLimites->item(i,0)->text().toInt();
         tempoPulsoMin[i] = ui->tabelaPosLimites->item(i,1)->text().toInt();
         tempoPulsoNeutro[i] = ui->tabelaPosLimites->item(i,2)->text().toInt();
         tempoPulsoRepouso[i] = ui->tabelaPosLimites->item(i,3)->text().toInt();
+
+        lstSlider[i]->setMaximum(tempoPulsoMax[i]);
+        lstSlider[i]->setMinimum(tempoPulsoMin[i]);
+        lstSlider[i]->setTickInterval(1);
 
         angMax[i] = ui->tabelaPosLimitesGraus->item(i,0)->text().toInt();
         angMin[i] = ui->tabelaPosLimitesGraus->item(i,1)->text().toInt();
@@ -262,6 +266,7 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         if(ui->rdbReadyForPIC->isChecked())
         {
             qtdPosicoesTmpPulso[i] = (tempoPulsoMax[i] - tempoPulsoMin[i]);  // us
+
             incrementosAng[i] = (angMax[i] - angMin[i])/qtdPosicoesTmpPulso[i]; // Graus / us
             if(round(incrementosAng[i] * DIV_CD_POSICAO) / DIV_CD_POSICAO > 0)
                 incrementosAng[i] = round(incrementosAng[i] * DIV_CD_POSICAO) / DIV_CD_POSICAO;
@@ -436,8 +441,7 @@ void MainWindow::habilitarComponentes(bool estadoHab)
 
     ui->btMover->setEnabled(estadoHab);
     ui->btMoverComVelEAcl->setEnabled(estadoHab);
-    ui->chkMoverAssimQueMudarPosAlvo->setEnabled(estadoHab);
-    ui->chkComVelocidadesEAceleracoes->setEnabled(estadoHab);
+    ui->chkEnviaComandoImediato->setEnabled(estadoHab);
 
     ui->tabelaPosLimites->setEnabled(estadoHab);
     ui->tabelaPosLimitesGraus->setEnabled(estadoHab);
@@ -642,6 +646,158 @@ void MainWindow::preencheCombosPortaSerial()
     ui->cmbBitDeParada->addItem(tr("1.5"), QSerialPort::OneAndHalfStop);
 #endif
     ui->cmbBitDeParada->addItem(QStringLiteral("2"), QSerialPort::TwoStop);
+}
+
+
+/* NOTE: ***** Funções de conversão de posição, velocidade e aceleração ***** */
+double MainWindow::converteMicrossegundosParaGraus(int idxJunta, int posicaoMicrossegundos)
+{
+    double a, b, x, y;
+
+    a = coeffAng[idxJunta];
+    b = offsetAng[idxJunta];
+    x = posicaoMicrossegundos;
+
+    y = a * x + b;
+
+    return round(y*DIV_CD_POSICAO)/DIV_CD_POSICAO;
+}
+
+int MainWindow::converteGrausParaMicrossegundos(int idxJunta, double posicaoGraus)
+{
+    double a, b, x, y;
+
+    y = posicaoGraus;
+    a = coeffAng[idxJunta];
+    b = offsetAng[idxJunta];
+
+    x = (y - b)/a;
+
+    return qRound(x);
+}
+
+double MainWindow::converteVelTmpPulsoParaGrausPorSeg(int idxJunta, int velTmpPulso)
+{
+    double velGrausPorSeg;
+
+    if(ui->rdbReadyForPIC->isChecked())
+        velGrausPorSeg = velTmpPulso * incrementosAng[idxJunta] / 0.25 * 10e-3;
+    else
+        velGrausPorSeg = velTmpPulso * incrementosAng[idxJunta] * 10e-3;
+
+    return round(velGrausPorSeg * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+
+}
+
+int MainWindow::converteVelGrausPorSegParaTmpPulso(int idxJunta, double velGrausPorSeg)
+{
+    double velTmpPulso;
+
+    if(ui->rdbReadyForPIC->isChecked())
+        velTmpPulso = velGrausPorSeg / (incrementosAng[idxJunta] / 0.25 * 10e-3);
+    else
+        velTmpPulso = velGrausPorSeg / (incrementosAng[idxJunta] * 10e-3);
+
+    return qRound(velTmpPulso);
+}
+
+double MainWindow::converteAclTmpPulsoParaGrausPorSegQuad(int idxJunta, int aclTmpPulso)
+{
+    double aclGrausPorSegQuad;
+
+    if(ui->rdbReadyForPIC->isChecked())
+        aclGrausPorSegQuad = aclTmpPulso * incrementosAng[idxJunta] / 0.25 * 10e-3 * 80e-3;
+    else
+        aclGrausPorSegQuad = aclTmpPulso * incrementosAng[idxJunta] * 10e-3 * 80e-3;
+
+    return round(aclGrausPorSegQuad * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+}
+
+int MainWindow::converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad)
+{
+    double aclTmpPulso;
+    if(ui->rdbReadyForPIC->isChecked())
+        aclTmpPulso = aclGrausPorSegQuad / (incrementosAng[idxJunta] / 0.25 * 10e-3 * 80e-3);
+    else
+        aclTmpPulso = aclGrausPorSegQuad / (incrementosAng[idxJunta] * 10e-3 * 80e-3);
+
+    return qRound(aclTmpPulso);
+}
+
+void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
+{
+    if(posicaoAlvo > 0)
+    {
+        lstChkHab[idxJunta]->setChecked(true);
+        lstSpnAlvo[idxJunta]->setEnabled(true);
+        lstSpnAlvoGraus[idxJunta]->setEnabled(true);
+        lstChkHabGraus[idxJunta]->setChecked(true);
+        double angulo = converteMicrossegundosParaGraus(idxJunta, posicaoAlvo);
+        double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();
+        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (microssegundos)
+        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (graus)
+
+        // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+        if(angulo != anguloAtual)
+            lstSpnAlvoGraus[idxJunta]->setValue(angulo);
+    }
+    else
+    {
+        lstChkHab[idxJunta]->setChecked(false);
+        lstSpnAlvo[idxJunta]->setEnabled(false);
+        lstSpnAlvoGraus[idxJunta]->setEnabled(false);
+        lstChkHabGraus[idxJunta]->setChecked(false);
+    }
+}
+
+void MainWindow::converteSpnVelParaGrausPorSeg(int idxJunta, int velocidade)
+{
+    double velocidadeAngular = converteVelTmpPulsoParaGrausPorSeg(idxJunta, velocidade);
+    double velocidadeAngularAtual = lstSpnVelGrausPorSeg[idxJunta]->value();
+
+    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+    if(velocidadeAngular != velocidadeAngularAtual)
+        lstSpnVelGrausPorSeg[idxJunta]->setValue(velocidadeAngular);
+}
+
+void MainWindow::converteSpnAclParaGrausPorSegQuad(int idxJunta, int aceleracao)
+{
+    double aceleracaoAngular = converteAclTmpPulsoParaGrausPorSegQuad(idxJunta, aceleracao);
+    double aceleracaoAngularAtual = lstSpnAclGrausPorSegQuad[idxJunta]->value();
+
+    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+    if(aceleracaoAngular != aceleracaoAngularAtual)
+        lstSpnAclGrausPorSegQuad[idxJunta]->setValue(aceleracaoAngular);
+}
+
+void MainWindow::converteSpnAlvoGrausParaTmpPulso(int idxJunta, double posicaoGraus)
+{
+    int posicaoMicrossegundos = converteGrausParaMicrossegundos(idxJunta, posicaoGraus);
+    int posicaoMicrossegundosAtual = lstSpnAlvo[idxJunta]->value();
+
+    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+    if(posicaoMicrossegundos != posicaoMicrossegundosAtual)
+        lstSpnAlvo[idxJunta]->setValue(posicaoMicrossegundos);
+}
+
+void MainWindow::converteSpnVelGrausPorSegParaTmpPulso(int idxJunta, double velGrausPorSeg)
+{
+    int velocidadeTmpPulso = converteVelGrausPorSegParaTmpPulso(idxJunta, velGrausPorSeg);
+    int velocidadeTmpPulsoAtual = lstSpnVel[idxJunta]->value();
+
+    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+    if(velocidadeTmpPulso != velocidadeTmpPulsoAtual)
+        lstSpnVel[idxJunta]->setValue(velocidadeTmpPulso);
+}
+
+void MainWindow::converteSpnAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad)
+{
+    int aceleracaoTmpPulso = converteAclGrausPorSegQuadParaTmpPulso(idxJunta, aclGrausPorSegQuad);
+    int aceleracaoTmpPulsoAtual = lstSpnAcl[idxJunta]->value();
+
+    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
+    if(aceleracaoTmpPulso != aceleracaoTmpPulsoAtual)
+        lstSpnAcl[idxJunta]->setValue(aceleracaoTmpPulso);
 }
 
 
@@ -1068,18 +1224,14 @@ void MainWindow::executaComandoDaSequencia()
     // BUG: Com a sequência em execução, se clicar em uma linha diferente do comando que está sendo executado, a linha clicada é executada.
     int index_selected = ui->listSequenciaComandos->currentRow();
 
-    linhaCorrenteSequencia = index_selected;
-
     if(index_selected + 1 < ui->listSequenciaComandos->count())
     {
         ui->listSequenciaComandos->setCurrentRow(++index_selected);
-        linhaCorrenteSequencia = index_selected;
 
         while (!parser(ui->listSequenciaComandos->currentItem()->text()) &&
                 (index_selected + 1 < ui->listSequenciaComandos->count()) )
         {
             ui->listSequenciaComandos->setCurrentRow(++index_selected);
-            linhaCorrenteSequencia = index_selected;
         }
     }
     else
@@ -1098,7 +1250,15 @@ void MainWindow::executaComandoDaSequencia()
         else
         {
             seqEmExecucao = false;
-            ui->lblStatusSeqComandos->setText("Sequência parada");
+
+            if(ui->listSequenciaComandos->count() == 0)
+                ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_PARADA_VAZIA);
+            else
+            {
+                ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_PARADA_NAO_VAZIA);
+                ui->lblStatusSeqComandos->setFocus();
+            }
+
         }
     }
 }
@@ -1508,99 +1668,146 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
     // TODO: Aba Posições das Juntas: Botão de cinemática inversa
 }
 
+void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrossegundos)
+{
+    if(ui->chkEnviaComandoImediato->isChecked())
+    {
+        QString comandoJST = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(posicaoMicrossegundos, 4, 10, QChar('0'));
+
+        parser(comandoJST);
+    }
+}
+
+void MainWindow::enviaVelocidadeAssimQueMudar(int idxJunta, int velocidadeMicrossegundos)
+{
+    if(ui->chkEnviaComandoImediato->isChecked())
+    {
+        QString comando = QString("[VEL%1%2]").arg(junta[idxJunta]).arg(velocidadeMicrossegundos, 4, 10, QChar('0'));
+
+        parser(comando);
+    }
+}
+
+void MainWindow::enviaAceleracaoAssimQueMudar(int idxJunta, int aceleracaoMicrossegundos)
+{
+    if(ui->chkEnviaComandoImediato->isChecked())
+    {
+        QString comando = QString("[ACL%1%2]").arg(junta[idxJunta]).arg(aceleracaoMicrossegundos, 4, 10, QChar('0'));
+
+        parser(comando);
+    }
+}
+
 void MainWindow::on_spnJ0Alvo_valueChanged(int posicaoMicrossegundos)
 {
     converteSpnAlvoParaGraus(0, posicaoMicrossegundos);
+    enviaPosicaoAlvoAssimQueMudar(0, posicaoMicrossegundos);
 }
 
 void MainWindow::on_spnJ1Alvo_valueChanged(int posicaoMicrossegundos)
 {
     converteSpnAlvoParaGraus(1, posicaoMicrossegundos);
+    enviaPosicaoAlvoAssimQueMudar(1, posicaoMicrossegundos);
 }
 
 void MainWindow::on_spnJ2Alvo_valueChanged(int posicaoMicrossegundos)
 {
     converteSpnAlvoParaGraus(2, posicaoMicrossegundos);
+    enviaPosicaoAlvoAssimQueMudar(2, posicaoMicrossegundos);
 }
 
 void MainWindow::on_spnJ3Alvo_valueChanged(int posicaoMicrossegundos)
 {
     converteSpnAlvoParaGraus(3, posicaoMicrossegundos);
+    enviaPosicaoAlvoAssimQueMudar(3, posicaoMicrossegundos);
 }
 
 void MainWindow::on_spnJ4Alvo_valueChanged(int posicaoMicrossegundos)
 {
     converteSpnAlvoParaGraus(4, posicaoMicrossegundos);
+    enviaPosicaoAlvoAssimQueMudar(4, posicaoMicrossegundos);
 }
 
 void MainWindow::on_spnGRAlvo_valueChanged(int posicaoMicrossegundos)
 {
     converteSpnAlvoParaGraus(5, posicaoMicrossegundos);
+    enviaPosicaoAlvoAssimQueMudar(5, posicaoMicrossegundos);
 }
 
 void MainWindow::on_spnJ0Vel_valueChanged(int velTmpPulso)
 {
     converteSpnVelParaGrausPorSeg(0, velTmpPulso);
+    enviaVelocidadeAssimQueMudar(0, velTmpPulso);
 }
 
 void MainWindow::on_spnJ1Vel_valueChanged(int velTmpPulso)
 {
     converteSpnVelParaGrausPorSeg(1, velTmpPulso);
+    enviaVelocidadeAssimQueMudar(1, velTmpPulso);
 }
 
 void MainWindow::on_spnJ2Vel_valueChanged(int velTmpPulso)
 {
     converteSpnVelParaGrausPorSeg(2, velTmpPulso);
+    enviaVelocidadeAssimQueMudar(2, velTmpPulso);
 }
 
 void MainWindow::on_spnJ3Vel_valueChanged(int velTmpPulso)
 {
     converteSpnVelParaGrausPorSeg(3, velTmpPulso);
+    enviaVelocidadeAssimQueMudar(3, velTmpPulso);
 }
 
 void MainWindow::on_spnJ4Vel_valueChanged(int velTmpPulso)
 {
     converteSpnVelParaGrausPorSeg(4, velTmpPulso);
+    enviaVelocidadeAssimQueMudar(4, velTmpPulso);
 }
 
 void MainWindow::on_spnGRVel_valueChanged(int velTmpPulso)
 {
     converteSpnVelParaGrausPorSeg(5, velTmpPulso);
+    enviaVelocidadeAssimQueMudar(5, velTmpPulso);
 }
 
 void MainWindow::on_spnJ0Acl_valueChanged(int aclTmpPulso)
 {
     converteSpnAclParaGrausPorSegQuad(0, aclTmpPulso);
+    enviaAceleracaoAssimQueMudar(0, aclTmpPulso);
 }
 
 void MainWindow::on_spnJ1Acl_valueChanged(int aclTmpPulso)
 {
     converteSpnAclParaGrausPorSegQuad(1, aclTmpPulso);
+    enviaAceleracaoAssimQueMudar(1, aclTmpPulso);
 }
 
 void MainWindow::on_spnJ2Acl_valueChanged(int aclTmpPulso)
 {
     converteSpnAclParaGrausPorSegQuad(2, aclTmpPulso);
+    enviaAceleracaoAssimQueMudar(2, aclTmpPulso);
 }
 
 void MainWindow::on_spnJ3Acl_valueChanged(int aclTmpPulso)
 {
     converteSpnAclParaGrausPorSegQuad(3, aclTmpPulso);
+    enviaAceleracaoAssimQueMudar(3, aclTmpPulso);
 }
 
 void MainWindow::on_spnJ4Acl_valueChanged(int aclTmpPulso)
 {
     converteSpnAclParaGrausPorSegQuad(4, aclTmpPulso);
+    enviaAceleracaoAssimQueMudar(4, aclTmpPulso);
 }
 
 void MainWindow::on_spnGRAcl_valueChanged(int aclTmpPulso)
 {
     converteSpnAclParaGrausPorSegQuad(5, aclTmpPulso);
+    enviaAceleracaoAssimQueMudar(5, aclTmpPulso);
 }
 
 void MainWindow::on_spnJ0AlvoGraus_valueChanged(double posicaoGraus)
-{
-    // TODO: Aba posições das juntas: verificar se as conversões estão sendo calculadas corretamente.    
+{    
     converteSpnAlvoGrausParaTmpPulso(0, posicaoGraus);
 }
 
@@ -1689,7 +1896,6 @@ void MainWindow::on_spnGRAclGrausPorSegQuad_valueChanged(double aclGrausPorSegQu
     converteSpnAclGrausPorSegQuadParaTmpPulso(5, aclGrausPorSegQuad);
 }
 
-// TODO: Aba Posições das Juntas: Conectar checkboxes de habilitar junta
 void MainWindow::habilitaJunta(int idxJunta, bool checked)
 {
     if(checked)
@@ -1707,26 +1913,9 @@ void MainWindow::habilitaJunta(int idxJunta, bool checked)
             converteSpnAlvoParaGraus(idxJunta, valor);
         }
 
-        if(ui->chkMoverAssimQueMudarPosAlvo->isChecked())
-        {
-            if(ui->chkComVelocidadesEAceleracoes->isChecked())
-            {
-                int valorVel_Acl = lstSpnVel[idxJunta]->value();
-                QString comandoVEL_ACL = QString("[VEL%1%2]").arg(junta[idxJunta]).arg(valorVel_Acl, 4, 10, QChar('0'));
-
-                filaComandosMoverComVelAcl.enqueue(comandoVEL_ACL);
-
-                valorVel_Acl = lstSpnAcl[idxJunta]->value();
-                comandoVEL_ACL = QString("[ACL%1%2]").arg(junta[idxJunta]).arg(valorVel_Acl, 4, 10, QChar('0'));
-
-                filaComandosMoverComVelAcl.enqueue(comandoVEL_ACL);
-            }
-
-            QString comandoJST = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(valor, 4, 10, QChar('0'));
-            filaComandosMoverComVelAcl.enqueue(comandoJST);
-
-            parser(filaComandosMoverComVelAcl.dequeue());
-        }
+        enviaVelocidadeAssimQueMudar(idxJunta, lstSpnVel[idxJunta]->value());
+        enviaAceleracaoAssimQueMudar(idxJunta, lstSpnAcl[idxJunta]->value());
+        enviaPosicaoAlvoAssimQueMudar(idxJunta, valor);
     }
     else
     {
@@ -1737,11 +1926,7 @@ void MainWindow::habilitaJunta(int idxJunta, bool checked)
         // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (microssegundos)
         // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (graus)
 
-        if(ui->chkMoverAssimQueMudarPosAlvo->isChecked())
-        {
-            QString comandoJST = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(0, 4, 10, QChar('0'));
-            parser(comandoJST);
-        }
+        enviaPosicaoAlvoAssimQueMudar(idxJunta, 0);
     }
 }
 
@@ -1848,176 +2033,6 @@ void MainWindow::editarComandoNaSequencia(QString comando)
 
 
 
-/* NOTE: ***** Funções de conversão de posição, velocidade e aceleração ***** */
-double MainWindow::converteMicrossegundosParaGraus(int idxJunta, int posicaoMicrossegundos)
-{
-    double a, b, x, y;
-
-    a = coeffAng[idxJunta];
-    b = offsetAng[idxJunta];
-    x = posicaoMicrossegundos;
-
-    y = a * x + b;
-
-    return round(y*DIV_CD_POSICAO)/DIV_CD_POSICAO;
-}
-
-int MainWindow::converteGrausParaMicrossegundos(int idxJunta, double posicaoGraus)
-{
-    double a, b, x, y;
-
-    y = posicaoGraus;
-    a = coeffAng[idxJunta];
-    b = offsetAng[idxJunta];
-
-    x = (y - b)/a;
-
-    return qRound(x);
-}
-
-double MainWindow::converteVelTmpPulsoParaGrausPorSeg(int idxJunta, int velTmpPulso)
-{
-    double velGrausPorSeg;
-
-    if(ui->rdbReadyForPIC->isChecked())
-        velGrausPorSeg = velTmpPulso * incrementosAng[idxJunta] / 0.25 * 10e-3;
-    else
-        velGrausPorSeg = velTmpPulso * incrementosAng[idxJunta] * 10e-3;
-
-    return round(velGrausPorSeg * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
-
-}
-
-int MainWindow::converteVelGrausPorSegParaTmpPulso(int idxJunta, double velGrausPorSeg)
-{
-    double velTmpPulso;
-
-    if(ui->rdbReadyForPIC->isChecked())
-        velTmpPulso = velGrausPorSeg / (incrementosAng[idxJunta] / 0.25 * 10e-3);
-    else
-        velTmpPulso = velGrausPorSeg / (incrementosAng[idxJunta] * 10e-3);
-
-    return qRound(velTmpPulso);
-}
-
-double MainWindow::converteAclTmpPulsoParaGrausPorSegQuad(int idxJunta, int aclTmpPulso)
-{
-    double aclGrausPorSegQuad;
-
-    if(ui->rdbReadyForPIC->isChecked())
-        aclGrausPorSegQuad = aclTmpPulso * incrementosAng[idxJunta] / 0.25 * 10e-3 * 80e-3;
-    else
-        aclGrausPorSegQuad = aclTmpPulso * incrementosAng[idxJunta] * 10e-3 * 80e-3;
-
-    return round(aclGrausPorSegQuad * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
-}
-
-int MainWindow::converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad)
-{
-    double aclTmpPulso;
-    if(ui->rdbReadyForPIC->isChecked())
-        aclTmpPulso = aclGrausPorSegQuad / (incrementosAng[idxJunta] / 0.25 * 10e-3 * 80e-3);
-    else
-        aclTmpPulso = aclGrausPorSegQuad / (incrementosAng[idxJunta] * 10e-3 * 80e-3);
-
-    return qRound(aclTmpPulso);
-}
-
-void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
-{
-    if(posicaoAlvo > 0)
-    {
-        lstChkHab[idxJunta]->setChecked(true);
-        lstSpnAlvo[idxJunta]->setEnabled(true);
-        lstSpnAlvoGraus[idxJunta]->setEnabled(true);
-        lstChkHabGraus[idxJunta]->setChecked(true);
-        double angulo = converteMicrossegundosParaGraus(idxJunta, posicaoAlvo);
-        double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();
-        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (microssegundos)
-        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (graus)
-
-        // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-        if(angulo != anguloAtual)
-            lstSpnAlvoGraus[idxJunta]->setValue(angulo);
-    }
-    else
-    {
-        lstChkHab[idxJunta]->setChecked(false);
-        lstSpnAlvo[idxJunta]->setEnabled(false);
-        //lstSpnAlvo[idxJunta]->setValue(lstEdtAtual[idxJunta]->text().toInt());
-        lstSpnAlvoGraus[idxJunta]->setEnabled(false);
-        lstChkHabGraus[idxJunta]->setChecked(false);
-    }
-}
-
-void MainWindow::converteSpnVelParaGrausPorSeg(int idxJunta, int velocidade)
-{
-    double velocidadeAngular = converteVelTmpPulsoParaGrausPorSeg(idxJunta, velocidade);
-    double velocidadeAngularAtual = lstSpnVelGrausPorSeg[idxJunta]->value();
-
-    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-    if(velocidadeAngular != velocidadeAngularAtual)
-        lstSpnVelGrausPorSeg[idxJunta]->setValue(velocidadeAngular);
-}
-
-void MainWindow::converteSpnAclParaGrausPorSegQuad(int idxJunta, int aceleracao)
-{
-    double aceleracaoAngular = converteAclTmpPulsoParaGrausPorSegQuad(idxJunta, aceleracao);
-    double aceleracaoAngularAtual = lstSpnAclGrausPorSegQuad[idxJunta]->value();
-
-    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-    if(aceleracaoAngular != aceleracaoAngularAtual)
-        lstSpnAclGrausPorSegQuad[idxJunta]->setValue(aceleracaoAngular);
-}
-
-void MainWindow::converteSpnAlvoGrausParaTmpPulso(int idxJunta, double posicaoGraus)
-{
-    int posicaoMicrossegundos = converteGrausParaMicrossegundos(idxJunta, posicaoGraus);
-    int posicaoMicrossegundosAtual = lstSpnAlvo[idxJunta]->value();
-
-    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-    if(posicaoMicrossegundos != posicaoMicrossegundosAtual)
-        lstSpnAlvo[idxJunta]->setValue(posicaoMicrossegundos);
-
-    /*
-    double posicaoGrausRecalculada = converteMicrossegundosParaGraus(idxJunta, posicaoMicrossegundos);
-
-    if(posicaoGraus != posicaoGrausRecalculada)
-        lstSpnAlvoGraus[idxJunta]->setValue(posicaoGrausRecalculada);
-    */
-}
-
-void MainWindow::converteSpnVelGrausPorSegParaTmpPulso(int idxJunta, double velGrausPorSeg)
-{
-    int velocidadeTmpPulso = converteVelGrausPorSegParaTmpPulso(idxJunta, velGrausPorSeg);
-    int velocidadeTmpPulsoAtual = lstSpnVel[idxJunta]->value();
-
-    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-    if(velocidadeTmpPulso != velocidadeTmpPulsoAtual)
-        lstSpnVel[idxJunta]->setValue(velocidadeTmpPulso);
-
-    /*
-    double velGrausPorSegRecalculada = converteVelTmpPulsoParaGrausPorSeg(idxJunta, velocidadeTmpPulso);
-    if(velGrausPorSeg != velGrausPorSegRecalculada)
-        lstSpnVelGrausPorSeg[idxJunta]->setValue(velGrausPorSegRecalculada);
-    */
-}
-
-void MainWindow::converteSpnAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad)
-{
-    int aceleracaoTmpPulso = converteAclGrausPorSegQuadParaTmpPulso(idxJunta, aclGrausPorSegQuad);
-    int aceleracaoTmpPulsoAtual = lstSpnAcl[idxJunta]->value();
-
-    // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-    if(aceleracaoTmpPulso != aceleracaoTmpPulsoAtual)
-        lstSpnAcl[idxJunta]->setValue(aceleracaoTmpPulso);
-
-    /*
-    double aclGrausPorSegQuadRecalculada = converteAclTmpPulsoParaGrausPorSegQuad(idxJunta, aceleracaoTmpPulso);
-    if(aclGrausPorSegQuad != aclGrausPorSegQuadRecalculada)
-        lstSpnAclGrausPorSegQuad[idxJunta]->setValue(aclGrausPorSegQuadRecalculada);
-    */
-}
 
 
 
@@ -2190,8 +2205,7 @@ void MainWindow::on_btExecutarSeqComandos_clicked()
         seqEmExecucao = true;
         emLoop = false;
         ui->listSequenciaComandos->setCurrentRow(0);
-        linhaCorrenteSequencia = 0;
-        ui->lblStatusSeqComandos->setText("Em execução");
+        ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_EM_EXECUCAO);
         parser(ui->listSequenciaComandos->currentItem()->text());
     }
 }
@@ -2205,8 +2219,7 @@ void MainWindow::on_btContinuarSeqComandos_clicked()
         int index_selected = ui->listSequenciaComandos->currentRow();
         if(index_selected < 0 || index_selected > ui->listSequenciaComandos->count())
             ui->listSequenciaComandos->setCurrentRow(0);
-        linhaCorrenteSequencia = ui->listSequenciaComandos->currentRow();
-        ui->lblStatusSeqComandos->setText("Continuando execução");
+        ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_CONTINUANDO_EXEC);
         parser(ui->listSequenciaComandos->currentItem()->text());
     }
 }
@@ -2218,8 +2231,7 @@ void MainWindow::on_btExecutarLoopSeqComandos_clicked()
         seqEmExecucao = true;
         emLoop = true;
         ui->listSequenciaComandos->setCurrentRow(0);
-        linhaCorrenteSequencia = 0;
-        ui->lblStatusSeqComandos->setText("Em loop");
+        ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_EM_LOOP);
         parser(ui->listSequenciaComandos->currentItem()->text());
     }
 }
@@ -2233,8 +2245,7 @@ void MainWindow::on_btContinuarLoopSeqComandos_clicked()
         int index_selected = ui->listSequenciaComandos->currentRow();
         if(index_selected < 0 || index_selected > ui->listSequenciaComandos->count())
             ui->listSequenciaComandos->setCurrentRow(0);
-        linhaCorrenteSequencia = ui->listSequenciaComandos->currentRow();
-        ui->lblStatusSeqComandos->setText("Continuando loop");
+        ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_CONTINUANDO_LOOP);
         parser(ui->listSequenciaComandos->currentItem()->text());
     }
 }
@@ -2246,11 +2257,11 @@ void MainWindow::on_btPararSeqComandos_clicked()
     emDLYSemParam = false;
     if(ui->listSequenciaComandos->count() == 0)
     {
-        ui->lblStatusSeqComandos->setText("Sequência parada");
+        ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_PARADA_VAZIA);
     }
     else
     {
-        ui->lblStatusSeqComandos->setText("Sequência parada. ENTER ou duplo clique para executar um comando.");
+        ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_PARADA_NAO_VAZIA);
         ui->lblStatusSeqComandos->setFocus();
     }
 }
@@ -2335,8 +2346,7 @@ bool MainWindow::parser(QString comando)
 
                 if(idxJunta != -1)
                 {
-                    int valor = comando.mid(5*(i+1), 4).toInt();
-                    //lstChkHab[idxJunta]->setChecked(valor > 0);
+                    int valor = comando.mid(5*(i+1), 4).toInt();                    
 
                     if(valor > 0)
                     {
@@ -2344,8 +2354,6 @@ bool MainWindow::parser(QString comando)
                     }
                     else
                         lstChkHab[idxJunta]->setChecked(false);
-
-                    //lstSpnPosAlvo[idxJunta]->setEnabled(true);
                 }
             }
             enviaComando(comando);
@@ -2357,7 +2365,7 @@ bool MainWindow::parser(QString comando)
         for (int i = 0; i < QTD_SERVOS; i++)
         {
             int valor = ui->tabelaPosLimites->item(i, 3)->text().toInt();
-            this->lstSpnAlvo[i]->setValue(valor);            
+            this->lstSpnAlvo[i]->setValue(valor);
         }
 
         enviaComando(comando);
@@ -2377,7 +2385,7 @@ bool MainWindow::parser(QString comando)
         if(idxJunta != -1)
         {            
             int valor = ui->tabelaPosLimites->item(idxJunta, 2)->text().toInt();
-            lstSpnAlvo[idxJunta]->setValue(valor);            
+            lstSpnAlvo[idxJunta]->setValue(valor);
         }
         enviaComando(comando);
         return true;
@@ -2437,7 +2445,7 @@ void MainWindow::iniciaDLYSemParametro()
     posUltimoDLYSemParam = ui->listSequenciaComandos->currentRow();
     ultimoStatusSeqComandos = ui->lblStatusSeqComandos->text();
     ui->listSequenciaComandos->setFocus();
-    ui->lblStatusSeqComandos->setText("Em espera. Pressione ENTER ou duplo clique na sequência.");
+    ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_EM_DLY_SEM_PAR);
 }
 
 void MainWindow::timeoutDLY()
@@ -2585,8 +2593,3 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
 {
     console->setLocalEchoEnabled(checked);
 }
-
-
-
-
-

@@ -1026,7 +1026,7 @@ comandos</string>
           <x>0</x>
           <y>0</y>
           <width>229</width>
-          <height>171</height>
+          <height>175</height>
          </rect>
         </property>
         <layout class="QGridLayout" name="layoutChkESlider">
@@ -2787,7 +2787,7 @@ comandos</string>
        <string>Mover Com Velocidade e Aceleração</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="chkMoverAssimQueMudarPosAlvo">
+     <widget class="QCheckBox" name="chkEnviaComandoImediato">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -2795,28 +2795,14 @@ comandos</string>
        <rect>
         <x>10</x>
         <y>242</y>
-        <width>221</width>
-        <height>17</height>
+        <width>251</width>
+        <height>51</height>
        </rect>
       </property>
       <property name="text">
-       <string>Mover assim que mudar a posição alvo</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="chkComVelocidadesEAceleracoes">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>262</y>
-        <width>171</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>com velocidades e acelerações</string>
+       <string>Enviar posição alvo, velocidade ou aceleração
+para a placa de controle assim que qualquer
+delas for alterada.</string>
       </property>
      </widget>
     </widget>

@@ -45,14 +45,6 @@ public:
     double converteAclTmpPulsoParaGrausPorSegQuad(int idxJunta, int aclTmpPulso);
     int converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad);
 
-    void converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo);
-    void converteSpnVelParaGrausPorSeg(int idxJunta, int velocidade);
-    void converteSpnAclParaGrausPorSegQuad(int idxJunta, int aceleracao);
-
-    void converteSpnAlvoGrausParaTmpPulso(int idxJunta, double posicaoGraus);
-    void converteSpnVelGrausPorSegParaTmpPulso(int idxJunta, double velGrausPorSeg);
-    void converteSpnAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad);
-
 private slots:    
 
     void abrirPortaSerial();
@@ -252,7 +244,6 @@ private slots:
     void on_chkGRAng_clicked(bool checked);
 
 
-
 private:
     void preencheCombosPortaSerial();
     void showStatusMessage(const QString &message);
@@ -279,6 +270,19 @@ private:
     void setaValorItemTabela(QTableWidget *tableWidget, int idxLinha, int idxColuna, QString strValor);
     void setarVelOuAclResposta(QString resposta, QList<QSpinBox *> listaSpinBox);
 
+    void converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo);
+    void converteSpnVelParaGrausPorSeg(int idxJunta, int velocidade);
+    void converteSpnAclParaGrausPorSegQuad(int idxJunta, int aceleracao);
+
+    void converteSpnAlvoGrausParaTmpPulso(int idxJunta, double posicaoGraus);
+    void converteSpnVelGrausPorSegParaTmpPulso(int idxJunta, double velGrausPorSeg);
+    void converteSpnAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad);
+
+    void habilitaJunta(int idxJunta, bool checked);
+
+    void enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrossegundos);
+    void enviaVelocidadeAssimQueMudar(int idxJunta, int velocidadeMicrossegundos);
+    void enviaAceleracaoAssimQueMudar(int idxJunta, int aceleracaoMicrossegundos);
 
     /* Comandos */
     void abrirGarra();
@@ -299,9 +303,6 @@ private:
     bool parser(QString comando);
 
     void iniciaDLYSemParametro();
-
-    void habilitaJunta(int idxJunta, bool checked);
-
 
     Ui::MainWindow *ui;
     MontagemDeComandosDialog *montagemDeComandosDialog;
@@ -341,8 +342,7 @@ private:
     QQueue<QString> filaConfigPosLimites;
 
     bool seqEmExecucao = false;
-    bool emLoop = false;
-    int linhaCorrenteSequencia = -1;
+    bool emLoop = false;    
     bool itemClicado = false;
 
     QTimer *timer;
