@@ -54,8 +54,12 @@ MainWindow::MainWindow(QWidget *parent) :
     timer = new QTimer(this);
     timer->setSingleShot(true);
 
+    timerEnvioImediato = new QTimer(this);
+    timerEnvioImediato->setSingleShot(true);
+
     connect(timerDLY, &QTimer::timeout, this, &MainWindow::timeoutDLY);
     connect(timer, &QTimer::timeout, this, &MainWindow::timeoutConfig);
+    connect(timerEnvioImediato, &QTimer::timeout, this, &MainWindow::timeoutEnvioImediato);
 
     //configurarConversaoEntreMicrossegundosEAngulos(true);
 }
@@ -1808,12 +1812,14 @@ void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrosse
             lstSpnAlvo[idxJunta]->setValue(tempoPulsoMax[idxJunta]);
         }
         else if(ui->rdbReadyForPIC->isChecked())
-        {
-            QString comandoJST = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(posicaoMicrossegundos, 4, 10, QChar('0'));
+        {                        
+            comandoEnvioImediato = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(posicaoMicrossegundos, 4, 10, QChar('0'));
 
-            countAbaPosicoesValueChanged++;
+            if(!timerEnvioImediato->isActive())
+            {
+                timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_US);
+            }
 
-            enviaComando(comandoJST);
         }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
@@ -1833,11 +1839,19 @@ void MainWindow::enviaVelocidadeAssimQueMudar(int idxJunta, int velocidadeMicros
         }
         else if(ui->rdbReadyForPIC->isChecked())
         {
-            QString comando = QString("[VEL%1%2]").arg(junta[idxJunta]).arg(velocidadeMicrossegundos, 4, 10, QChar('0'));
+            if(velocidadeMicrossegundos > 0)
+            {
+                comandoEnvioImediato = QString("[VEL%1%2]").arg(junta[idxJunta]).arg(velocidadeMicrossegundos, 4, 10, QChar('0'));
 
-            countAbaPosicoesValueChanged++;
-
-            enviaComando(comando);
+                if(!timerEnvioImediato->isActive())
+                {
+                    timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_US);
+                }
+            }
+            else
+            {
+                lstSpnVel[idxJunta]->setValue(1);
+            }
         }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
@@ -1857,11 +1871,19 @@ void MainWindow::enviaAceleracaoAssimQueMudar(int idxJunta, int aceleracaoMicros
         }
         else if(ui->rdbReadyForPIC->isChecked())
         {
-            QString comando = QString("[ACL%1%2]").arg(junta[idxJunta]).arg(aceleracaoMicrossegundos, 4, 10, QChar('0'));
+            if(aceleracaoMicrossegundos > 0)
+            {
+                comandoEnvioImediato = QString("[ACL%1%2]").arg(junta[idxJunta]).arg(aceleracaoMicrossegundos, 4, 10, QChar('0'));
 
-            countAbaPosicoesValueChanged++;
-
-            enviaComando(comando);
+                if(!timerEnvioImediato->isActive())
+                {
+                    timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_US);
+                }
+            }
+            else
+            {
+                lstSpnAcl[idxJunta]->setValue(1);
+            }
         }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
@@ -2168,6 +2190,11 @@ void MainWindow::on_chkEnviaComandoImediato_toggled(bool checked)
     ui->btMoverComVelEAcl->setEnabled(!checked);
 }
 
+void MainWindow::timeoutEnvioImediato()
+{
+    countAbaPosicoesValueChanged++;
+    enviaComando(comandoEnvioImediato);
+}
 
 
 /* NOTE: ***** Aba Sequência de Comandos ***** */

@@ -54,6 +54,7 @@ private slots:
     void handleError(QSerialPort::SerialPortError error);
     void timeoutDLY();
     void timeoutConfig();
+    void timeoutEnvioImediato();
 
     void on_rdbReadyForPIC_clicked();
 
@@ -356,6 +357,9 @@ private:
     int posUltimoDLYSemParam = -1;
     QString ultimoStatusSeqComandos = "";
     int countAbaPosicoesValueChanged = -1;
+
+    QTimer *timerEnvioImediato;
+    QString comandoEnvioImediato;
 
 
     /**** Variáveis para conversão entre ângulos em graus e posições em microssegundos ****/

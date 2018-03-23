@@ -999,6 +999,9 @@ comandos</string>
            <property name="enabled">
             <bool>false</bool>
            </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
@@ -1011,6 +1014,9 @@ comandos</string>
           <widget class="QSpinBox" name="spnJ1Alvo">
            <property name="enabled">
             <bool>false</bool>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
@@ -1025,6 +1031,9 @@ comandos</string>
            <property name="enabled">
             <bool>false</bool>
            </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
@@ -1037,6 +1046,9 @@ comandos</string>
           <widget class="QSpinBox" name="spnJ3Alvo">
            <property name="enabled">
             <bool>false</bool>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
@@ -1051,6 +1063,9 @@ comandos</string>
            <property name="enabled">
             <bool>false</bool>
            </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
@@ -1063,6 +1078,9 @@ comandos</string>
           <widget class="QSpinBox" name="spnGRAlvo">
            <property name="enabled">
             <bool>false</bool>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>

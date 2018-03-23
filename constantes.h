@@ -21,6 +21,7 @@
 #define STATUS_SEQCOM_CONTINUANDO_LOOP  "Continuando loop"
 #define STATUS_SEQCOM_EM_DLY_SEM_PAR    "Em espera. Pressione ENTER ou duplo clique na sequência."
 
+#define TEMPO_TIMER_ENVIO_IMEDIATO_US   200
 
 static QString junta[QTD_SERVOS] = {"J0", "J1", "J2", "J3", "J4", "GR"};
 static QString idJST[QTD_SERVOS] = {"A", "B", "C", "D", "E", "G"};
