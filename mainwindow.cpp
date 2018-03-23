@@ -91,9 +91,6 @@ void MainWindow::alimentarListasDeComponentes()
     QString spnVel_template("spn%1Vel");
     QString spnAcl_template("spn%1Acl");
 
-    QString chkHabGraus_template("chk%1Ang");
-    QString sliderGraus_template("slider%1Ang");
-
     QString spnAlvoGraus_template("spn%1AlvoGraus");
     QString edtAtualGraus_template("edt%1AtualGraus");
     QString spnVelGrausPorSeg_template("spn%1VelGrausPorSeg");
@@ -101,16 +98,13 @@ void MainWindow::alimentarListasDeComponentes()
 
     for(int i = 0; i < QTD_SERVOS; i++)
     {
-        QCheckBox *chkHab = ui->tabLarguraDePulso->findChild<QCheckBox *>(chkHab_template.arg(junta[i]));
-        QSlider *slider = ui->tabLarguraDePulso->findChild<QSlider *>(slider_template.arg(junta[i]));
+        QCheckBox *chkHab = ui->tabPosicoesDasJuntas->findChild<QCheckBox *>(chkHab_template.arg(junta[i]));
+        QSlider *slider = ui->tabPosicoesDasJuntas->findChild<QSlider *>(slider_template.arg(junta[i]));
 
         QSpinBox *spnAlvo = ui->tabLarguraDePulso->findChild<QSpinBox *>(spnAlvo_template.arg(junta[i]));
         QLineEdit *edtAtual = ui->tabLarguraDePulso->findChild<QLineEdit *>(edtAtual_template.arg(junta[i]));
         QSpinBox *spnVel = ui->tabLarguraDePulso->findChild<QSpinBox *>(spnVel_template.arg(junta[i]));
         QSpinBox *spnAcl = ui->tabLarguraDePulso->findChild<QSpinBox *>(spnAcl_template.arg(junta[i]));
-
-        QCheckBox *chkHabGraus = ui->tabAngulosDasJuntas->findChild<QCheckBox *>(chkHabGraus_template.arg(junta[i]));
-        QSlider *sliderGraus = ui->tabAngulosDasJuntas->findChild<QSlider *>(sliderGraus_template.arg(junta[i]));
 
         QDoubleSpinBox *spnAlvoGraus = ui->tabAngulosDasJuntas->findChild<QDoubleSpinBox *>(spnAlvoGraus_template.arg(junta[i]));
         QLineEdit *edtAtualGraus = ui->tabAngulosDasJuntas->findChild<QLineEdit *>(edtAtualGraus_template.arg(junta[i]));
@@ -124,9 +118,6 @@ void MainWindow::alimentarListasDeComponentes()
         lstEdtAtual.append(edtAtual);
         lstSpnVel.append(spnVel);
         lstSpnAcl.append(spnAcl);
-
-        lstChkHabGraus.append(chkHabGraus);
-        lstSliderGraus.append(sliderGraus);
 
         lstSpnAlvoGraus.append(spnAlvoGraus);
         lstEdtAtualGraus.append(edtAtualGraus);
@@ -238,10 +229,6 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         tempoPulsoNeutro[i] = ui->tabelaPosLimites->item(i,2)->text().toInt();
         tempoPulsoRepouso[i] = ui->tabelaPosLimites->item(i,3)->text().toInt();
 
-        /*
-        lstSpnAlvo[i]->setMaximum(tempoPulsoMax[i]);
-        lstSpnAlvo[i]->setMinimum(tempoPulsoMin[i]);
-        */
         lstSlider[i]->setMaximum(tempoPulsoMax[i]);
         lstSlider[i]->setMinimum(tempoPulsoMin[i]);
         lstSlider[i]->setTickInterval(1);
@@ -431,8 +418,6 @@ void MainWindow::habilitarComponentes(bool estadoHab)
         lstSpnVel[i]->setEnabled(estadoHab);
         lstSpnAcl[i]->setEnabled(estadoHab);
 
-        lstChkHabGraus[i]->setEnabled(estadoHab);
-        lstSliderGraus[i]->setEnabled(estadoHab);
         lstSpnAlvoGraus[i]->setEnabled(estadoHab && ehNumeroEZero);
         lstSpnVelGrausPorSeg[i]->setEnabled(estadoHab);
         lstSpnAclGrausPorSegQuad[i]->setEnabled(estadoHab);
@@ -739,7 +724,7 @@ void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
         lstChkHab[idxJunta]->setChecked(true);
         lstSpnAlvo[idxJunta]->setEnabled(true);
         lstSpnAlvoGraus[idxJunta]->setEnabled(true);
-        lstChkHabGraus[idxJunta]->setChecked(true);
+
         double angulo = converteMicrossegundosParaGraus(idxJunta, posicaoAlvo);
         double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();
         // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (microssegundos)
@@ -754,7 +739,6 @@ void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
         lstChkHab[idxJunta]->setChecked(false);
         lstSpnAlvo[idxJunta]->setEnabled(false);
         lstSpnAlvoGraus[idxJunta]->setEnabled(false);
-        lstChkHabGraus[idxJunta]->setChecked(false);
     }
 }
 
@@ -917,21 +901,17 @@ void MainWindow::decodificaResposta()
                     }
 
                     if(!this->lstSpnAlvo[i]->isEnabled() || !this->lstSpnAlvoGraus[i]->isEnabled())
-                    {
-                        //habilitaCamposAbaPosicaoAlvoJunta(ui->tabUnidadePos->currentIndex(), i, true);
+                    {                        
                         habilitaCamposAbaPosicaoAlvoJunta(0, i, true);
                         habilitaCamposAbaPosicaoAlvoJunta(1, i, true);
-                        //this->lstSpnAlvo[i]->setEnabled(true);
+
                         this->lstChkHab[i]->setChecked(true);
-                        //this->lstSpnAlvoGraus[i]->setEnabled(true);
-                        this->lstChkHabGraus[i]->setChecked(true);                        
                     }
                 }
                 else
                 {
                     lstChkHab[i]->setChecked(false);
-                    lstSpnAlvo[i]->setEnabled(false);
-                    lstChkHabGraus[i]->setChecked(false);
+                    lstSpnAlvo[i]->setEnabled(false);                    
                     lstSpnAlvoGraus[i]->setEnabled(false);
                 }
 
@@ -990,20 +970,13 @@ void MainWindow::decodificaResposta()
 
                     if(!this->lstSpnAlvo[i]->isEnabled() || !this->lstSpnAlvoGraus[i]->isEnabled())
                     {
-                        //habilitaCamposAbaPosicaoAlvoJunta(0, i, true);
-                        //habilitaCamposAbaPosicaoAlvoJunta(1, i, true);
-
-                        //this->lstSpnAlvo[i]->setEnabled(true);
                         this->lstChkHab[i]->setChecked(true);
-                        //this->lstSpnAlvoGraus[i]->setEnabled(true);
-                        this->lstChkHabGraus[i]->setChecked(true);
                     }
                 }
                 else
                 {
                     lstChkHab[i]->setChecked(false);
                     lstSpnAlvo[i]->setEnabled(false);
-                    lstChkHabGraus[i]->setChecked(false);
                     lstSpnAlvoGraus[i]->setEnabled(false);
                 }
 
@@ -1105,8 +1078,7 @@ void MainWindow::decodificaResposta()
         {
             ui->spnGRAlvo->setEnabled(true);
             ui->chkGR->setChecked(true);
-            ui->spnGRAlvoGraus->setEnabled(true);
-            ui->chkGRAng->setChecked(true);
+            ui->spnGRAlvoGraus->setEnabled(true);            
         }
 
         ehRespostaFinal = true;
@@ -2115,10 +2087,8 @@ void MainWindow::habilitaJunta(int idxJunta, bool checked)
     {
         lstSpnAlvo[idxJunta]->setEnabled(false);
         lstSpnAlvoGraus[idxJunta]->setEnabled(false);
-        lstChkHab[idxJunta]->setChecked(false);
-        lstChkHabGraus[idxJunta]->setChecked(false);
-        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (microssegundos)
-        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (graus)
+        lstChkHab[idxJunta]->setChecked(false);        
+        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (microssegundos)        
 
         enviaPosicaoAlvoAssimQueMudar(idxJunta, 0);
     }
@@ -2817,7 +2787,5 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
 {
     console->setLocalEchoEnabled(checked);
 }
-
-
 
 

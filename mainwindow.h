@@ -325,10 +325,8 @@ private:
     QList<QDoubleSpinBox *> lstSpnAclGrausPorSegQuad;
 
     QList<QCheckBox *> lstChkHab;
-    QList<QCheckBox *> lstChkHabGraus;
 
     QList<QSlider *> lstSlider;
-    QList<QSlider *> lstSliderGraus;
 
     QList<QCheckBox *> lstChkLeds;
 
