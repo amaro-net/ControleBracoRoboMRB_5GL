@@ -518,7 +518,7 @@ comandos</string>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabLarguraDePulso">
        <attribute name="title">
@@ -673,6 +673,9 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -694,6 +697,9 @@ comandos</string>
              <width>55</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
            </property>
            <property name="maximum">
             <number>9999</number>
@@ -717,6 +723,9 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -738,6 +747,9 @@ comandos</string>
              <width>55</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
            </property>
            <property name="maximum">
             <number>9999</number>
@@ -761,6 +773,9 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -782,6 +797,9 @@ comandos</string>
              <width>55</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
            </property>
            <property name="maximum">
             <number>9999</number>
@@ -824,6 +842,9 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -845,6 +866,9 @@ comandos</string>
              <width>55</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
            </property>
            <property name="maximum">
             <number>9999</number>
@@ -868,6 +892,9 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -889,6 +916,9 @@ comandos</string>
              <width>55</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
            </property>
            <property name="maximum">
             <number>9999</number>
@@ -912,6 +942,9 @@ comandos</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -933,6 +966,9 @@ comandos</string>
              <width>55</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
            </property>
            <property name="maximum">
             <number>9999</number>
@@ -963,6 +999,9 @@ comandos</string>
            <property name="enabled">
             <bool>false</bool>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -971,6 +1010,9 @@ comandos</string>
          <item>
           <widget class="QSpinBox" name="spnJ1Alvo">
            <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="keyboardTracking">
             <bool>false</bool>
            </property>
            <property name="maximum">
@@ -983,6 +1025,9 @@ comandos</string>
            <property name="enabled">
             <bool>false</bool>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -991,6 +1036,9 @@ comandos</string>
          <item>
           <widget class="QSpinBox" name="spnJ3Alvo">
            <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="keyboardTracking">
             <bool>false</bool>
            </property>
            <property name="maximum">
@@ -1003,6 +1051,9 @@ comandos</string>
            <property name="enabled">
             <bool>false</bool>
            </property>
+           <property name="keyboardTracking">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -1011,6 +1062,9 @@ comandos</string>
          <item>
           <widget class="QSpinBox" name="spnGRAlvo">
            <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="keyboardTracking">
             <bool>false</bool>
            </property>
            <property name="maximum">
@@ -1026,7 +1080,7 @@ comandos</string>
           <x>0</x>
           <y>0</y>
           <width>229</width>
-          <height>175</height>
+          <height>170</height>
          </rect>
         </property>
         <layout class="QGridLayout" name="layoutChkESlider">

@@ -13,10 +13,9 @@ signals:
 public:
     explicit Console(QWidget *parent = nullptr);
 
-    void putData(const QByteArray &data);
+    void putData(const QByteArray &data, bool ehEnvioDeCaracteres = false);
 
     void setLocalEchoEnabled(bool set);
-
 protected:
     void keyPressEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
     void mousePressEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
@@ -25,7 +24,6 @@ protected:
 
 private:
     bool localEchoEnabled;
-
 };
 
 #endif // CONSOLE_H

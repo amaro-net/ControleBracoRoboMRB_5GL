@@ -243,6 +243,7 @@ private slots:
 
     void on_chkGRAng_clicked(bool checked);
 
+    void on_chkEnviaComandoImediato_toggled(bool checked);
 
 private:
     void preencheCombosPortaSerial();
@@ -280,6 +281,8 @@ private:
 
     void habilitaJunta(int idxJunta, bool checked);
 
+    void habilitaCamposAbaPosicaoAlvo(int posicaoAba, bool estadoHab);
+    void habilitaCamposAbaPosicaoAlvoJunta(int posicaoAba, int idxJunta, bool estadoHab);
     void enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrossegundos);
     void enviaVelocidadeAssimQueMudar(int idxJunta, int velocidadeMicrossegundos);
     void enviaAceleracaoAssimQueMudar(int idxJunta, int aceleracaoMicrossegundos);
@@ -352,6 +355,7 @@ private:
     bool emDLYSemParam = false;
     int posUltimoDLYSemParam = -1;
     QString ultimoStatusSeqComandos = "";
+    int countAbaPosicoesValueChanged = -1;
 
 
     /**** Variáveis para conversão entre ângulos em graus e posições em microssegundos ****/

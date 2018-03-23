@@ -234,13 +234,17 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         tempoPulsoNeutro[i] = ui->tabelaPosLimites->item(i,2)->text().toInt();
         tempoPulsoRepouso[i] = ui->tabelaPosLimites->item(i,3)->text().toInt();
 
+        /*
+        lstSpnAlvo[i]->setMaximum(tempoPulsoMax[i]);
+        lstSpnAlvo[i]->setMinimum(tempoPulsoMin[i]);
+        */
         lstSlider[i]->setMaximum(tempoPulsoMax[i]);
         lstSlider[i]->setMinimum(tempoPulsoMin[i]);
         lstSlider[i]->setTickInterval(1);
 
         angMax[i] = ui->tabelaPosLimitesGraus->item(i,0)->text().toInt();
         angMin[i] = ui->tabelaPosLimitesGraus->item(i,1)->text().toInt();
-        propInv[i] = (ui->tabelaPosLimitesGraus->item(i,4)->checkState() == Qt::CheckState::Checked);
+        propInv[i] = (ui->tabelaPosLimitesGraus->item(i,4)->checkState() == Qt::CheckState::Checked);        
     }
 
     for (int i = 0; i < QTD_SERVOS; i++)
@@ -592,8 +596,8 @@ void MainWindow::readData()
 {
     QByteArray data = serial->readAll();
     if(ui->rdbReadyForPIC->isChecked())
-    {
-        console->putData(data);
+    {        
+        console->putData(data, false);
         recebeCaracteresDeResposta(data);
     }
     else
@@ -895,14 +899,28 @@ void MainWindow::decodificaResposta()
 
                 if(valor > 0)
                 {
-                    lstSpnAlvo[i]->setValue(valor);
-
-                    if(!this->lstSpnAlvo[i]->isEnabled())
+                    if(valor != lstSpnAlvo[i]->value())
                     {
-                        this->lstSpnAlvo[i]->setEnabled(true);
+                        if(countAbaPosicoesValueChanged <= 0)
+                        {
+                            countAbaPosicoesValueChanged = -1;
+                            lstSpnAlvo[i]->setValue(valor);
+                        }
+                        else
+                        {
+                            countAbaPosicoesValueChanged--;
+                        }
+                    }
+
+                    if(!this->lstSpnAlvo[i]->isEnabled() || !this->lstSpnAlvoGraus[i]->isEnabled())
+                    {
+                        //habilitaCamposAbaPosicaoAlvoJunta(ui->tabUnidadePos->currentIndex(), i, true);
+                        habilitaCamposAbaPosicaoAlvoJunta(0, i, true);
+                        habilitaCamposAbaPosicaoAlvoJunta(1, i, true);
+                        //this->lstSpnAlvo[i]->setEnabled(true);
                         this->lstChkHab[i]->setChecked(true);
-                        this->lstSpnAlvoGraus[i]->setEnabled(true);
-                        this->lstChkHabGraus[i]->setChecked(true);
+                        //this->lstSpnAlvoGraus[i]->setEnabled(true);
+                        this->lstChkHabGraus[i]->setChecked(true);                        
                     }
                 }
                 else
@@ -953,13 +971,27 @@ void MainWindow::decodificaResposta()
             {
                 if(valor > 0)
                 {
-                    lstSpnAlvo[i]->setValue(valor);
-
-                    if(!this->lstSpnAlvo[i]->isEnabled())
+                    if(valor != lstSpnAlvo[i]->value())
                     {
-                        this->lstSpnAlvo[i]->setEnabled(true);
+                        if(countAbaPosicoesValueChanged <= 0)
+                        {
+                            countAbaPosicoesValueChanged = -1;
+                            lstSpnAlvo[i]->setValue(valor);
+                        }
+                        else
+                        {
+                            countAbaPosicoesValueChanged--;
+                        }
+                    }
+
+                    if(!this->lstSpnAlvo[i]->isEnabled() || !this->lstSpnAlvoGraus[i]->isEnabled())
+                    {
+                        //habilitaCamposAbaPosicaoAlvoJunta(0, i, true);
+                        //habilitaCamposAbaPosicaoAlvoJunta(1, i, true);
+
+                        //this->lstSpnAlvo[i]->setEnabled(true);
                         this->lstChkHab[i]->setChecked(true);
-                        this->lstSpnAlvoGraus[i]->setEnabled(true);
+                        //this->lstSpnAlvoGraus[i]->setEnabled(true);
                         this->lstChkHabGraus[i]->setChecked(true);
                     }
                 }
@@ -979,7 +1011,7 @@ void MainWindow::decodificaResposta()
         }
         else if(resposta.contains("VEL"))
         {
-            setarVelOuAclResposta(resposta, lstSpnVel);
+            setarVelOuAclResposta(resposta, lstSpnVel);            
             ehRespostaFinal = true;
             ehRespostaMoverComVelAcl = true;
         }
@@ -1204,7 +1236,21 @@ void MainWindow::setarVelOuAclResposta(QString resposta, QList<QSpinBox *> lista
     if(idxJunta != -1)
     {
         int valor = strValor.toInt();
-        listaSpinBox[idxJunta]->setValue(valor);
+        if(valor != listaSpinBox[idxJunta]->value())
+        {
+            if(countAbaPosicoesValueChanged <= 0)
+            {
+                countAbaPosicoesValueChanged = -1;
+                listaSpinBox[idxJunta]->setValue(valor);
+            }
+            else
+                countAbaPosicoesValueChanged--;
+        }
+
+        /*
+        if(ui->chkEnviaComandoImediato->isChecked())
+            habilitaCamposAbaPosicaoAlvo(ui->tabUnidadePos->currentIndex(), true);
+        */
     }
 }
 
@@ -1215,7 +1261,9 @@ void MainWindow::setarVelOuAclResposta(QString resposta, QList<QSpinBox *> lista
 void MainWindow::enviaComando(QString comando)
 {
     if(ui->chkEcoLocal->isChecked())
-        console->putData(comando.toLocal8Bit());
+    {
+        console->putData(comando.toLocal8Bit(), true);
+    }
     this->writeData(comando.toLocal8Bit());
 }
 
@@ -1377,6 +1425,7 @@ void MainWindow::comandoLEDSemParametros()
 void MainWindow::on_btAbrirGarra_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btAbrirGarra->text());
     ui->listaUltimoComandoAcionado->clear();
@@ -1393,6 +1442,7 @@ void MainWindow::on_btAbrirGarra_clicked()
 void MainWindow::on_btGarraSemiaberta_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btGarraSemiaberta->text());
     ui->listaUltimoComandoAcionado->clear();
@@ -1409,6 +1459,7 @@ void MainWindow::on_btGarraSemiaberta_clicked()
 void MainWindow::on_btFecharGarra_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btFecharGarra->text());
     ui->listaUltimoComandoAcionado->clear();
@@ -1425,6 +1476,7 @@ void MainWindow::on_btFecharGarra_clicked()
 void MainWindow::on_btGiroGarraMais90_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btGiroGarraMais90->text());
     int valor = ui->tabelaPosLimites->item(4,0)->text().toInt();
@@ -1444,6 +1496,7 @@ void MainWindow::on_btGiroGarraMais90_clicked()
 void MainWindow::on_btGarraPosNeutra_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btGarraPosNeutra->text());
     ui->listaUltimoComandoAcionado->clear();
@@ -1460,6 +1513,7 @@ void MainWindow::on_btGarraPosNeutra_clicked()
 void MainWindow::on_btGiroGarraMenos90_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btGiroGarraMenos90->text());
     int valor = ui->tabelaPosLimites->item(4,1)->text().toInt();
@@ -1479,6 +1533,7 @@ void MainWindow::on_btGiroGarraMenos90_clicked()
 void MainWindow::on_btPosicaoRepouso_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btPosicaoRepouso->text());
     ui->listaUltimoComandoAcionado->clear();
@@ -1495,6 +1550,7 @@ void MainWindow::on_btPosicaoRepouso_clicked()
 void MainWindow::on_btPosNeutraJST_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btPosNeutraJST->text());
 
@@ -1519,6 +1575,7 @@ void MainWindow::on_btPosNeutraJST_clicked()
 void MainWindow::on_btDesligaServos_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btDesligaServos->text());
     ui->listaUltimoComandoAcionado->clear();
@@ -1535,6 +1592,7 @@ void MainWindow::on_btDesligaServos_clicked()
 void MainWindow::on_btPosNeutraCTZ_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btPosNeutraCTZ->text());
     ui->listaUltimoComandoAcionado->clear();
@@ -1568,7 +1626,7 @@ void MainWindow::on_btAdicionarComandoAASeqComandos_clicked()
 
 void MainWindow::on_chkAtivarLeds_clicked(bool checked)
 {
-    on_btPararSeqComandos_clicked();
+    on_btPararSeqComandos_clicked();    
 
     QString cmdLED = "[LED";
 
@@ -1624,38 +1682,54 @@ void MainWindow::on_btAdicionarLedsSeqComandos_clicked()
 void MainWindow::on_btMover_clicked()
 {
     on_btPararSeqComandos_clicked();
-    comandoJST();
+
+    if(ui->rdbReadyForPIC->isChecked())
+        comandoJST();
+    else if(ui->rdbMiniMaestro24->isChecked())
+    {
+        // TODO: Aba sequência: botão mover para a Mini Maestro 24
+    }
 }
 
 void MainWindow::on_btMoverComVelEAcl_clicked()
-{
-    QString comando, comandoJST;
-    int valor;
-
+{    
     on_btPararSeqComandos_clicked();
 
-    filaComandosMoverComVelAcl.clear();
-
-    comandoJST = "[JST";
-    for(int i = 0; i < QTD_SERVOS; i++)
+    if(ui->rdbReadyForPIC->isChecked())
     {
-        valor = lstSpnVel[i]->value();
-        comando = QString("[VEL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
-        filaComandosMoverComVelAcl.enqueue(comando);
+        QString comando, comandoJST;
+        int valor;
 
-        valor = lstSpnAcl[i]->value();
-        comando = QString("[ACL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
-        filaComandosMoverComVelAcl.enqueue(comando);
+        on_btPararSeqComandos_clicked();
 
-        valor = lstSpnAlvo[i]->value();
-        comandoJST += idJST[i] + QString("%1").arg(valor, 4, 10, QChar('0'));
+        filaComandosMoverComVelAcl.clear();
+
+        comandoJST = "[JST";
+        for(int i = 0; i < QTD_SERVOS; i++)
+        {
+            valor = lstSpnVel[i]->value();
+            comando = QString("[VEL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
+            filaComandosMoverComVelAcl.enqueue(comando);
+
+            valor = lstSpnAcl[i]->value();
+            comando = QString("[ACL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
+            filaComandosMoverComVelAcl.enqueue(comando);
+
+            valor = lstSpnAlvo[i]->value();
+            comandoJST += idJST[i] + QString("%1").arg(valor, 4, 10, QChar('0'));
+        }
+
+        comandoJST += "]";
+
+        filaComandosMoverComVelAcl.enqueue(comandoJST);
+
+        enviaComando(filaComandosMoverComVelAcl.dequeue());
+    }
+    else if(ui->rdbMiniMaestro24->isChecked())
+    {
+        // TODO: Aba Posições das Juntas: botão mover com vel e acl para a placa Mini Maestro 24
     }
 
-    comandoJST += "]";
-
-    filaComandosMoverComVelAcl.enqueue(comandoJST);
-
-    enviaComando(filaComandosMoverComVelAcl.dequeue());
 }
 
 void MainWindow::on_btCalcularXYZAlvo_clicked()
@@ -1668,13 +1742,83 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
     // TODO: Aba Posições das Juntas: Botão de cinemática inversa
 }
 
+void MainWindow::habilitaCamposAbaPosicaoAlvo(int posicaoAba, bool estadoHab)
+{
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        lstChkHab[i]->setEnabled(estadoHab);
+        lstSlider[i]->setEnabled(estadoHab);
+    }
+
+    switch(posicaoAba)
+    {
+        case 0:
+            for(int i = 0; i < QTD_SERVOS; i++)
+            {
+                lstSpnAlvo[i]->setEnabled(estadoHab);
+                lstSpnVel[i]->setEnabled(estadoHab);
+                lstSpnAcl[i]->setEnabled(estadoHab);
+            }
+            break;
+
+        case 1:
+            for(int i = 0; i < QTD_SERVOS; i++)
+            {
+                lstSpnAlvoGraus[i]->setEnabled(estadoHab);
+                lstSpnVelGrausPorSeg[i]->setEnabled(estadoHab);
+                lstSpnAclGrausPorSegQuad[i]->setEnabled(estadoHab);
+            }
+            break;
+    }
+}
+
+void MainWindow::habilitaCamposAbaPosicaoAlvoJunta(int posicaoAba, int idxJunta, bool estadoHab)
+{
+    lstSlider[idxJunta]->setEnabled(estadoHab);
+    lstChkHab[idxJunta]->setEnabled(estadoHab);
+
+    switch(posicaoAba)
+    {
+        case 0:
+            lstSpnAlvo[idxJunta]->setEnabled(estadoHab);
+            lstSpnVel[idxJunta]->setEnabled(estadoHab);
+            lstSpnAcl[idxJunta]->setEnabled(estadoHab);
+            break;
+
+        case 1:
+            lstSpnAlvoGraus[idxJunta]->setEnabled(estadoHab);
+            lstSpnVelGrausPorSeg[idxJunta]->setEnabled(estadoHab);
+            lstSpnAclGrausPorSegQuad[idxJunta]->setEnabled(estadoHab);
+            break;
+    }
+}
+
 void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrossegundos)
 {
     if(ui->chkEnviaComandoImediato->isChecked())
     {
-        QString comandoJST = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(posicaoMicrossegundos, 4, 10, QChar('0'));
+        //habilitaCamposAbaPosicaoAlvo(ui->tabUnidadePos->currentIndex(), false);
 
-        parser(comandoJST);
+        if(posicaoMicrossegundos > 0 && posicaoMicrossegundos < tempoPulsoMin[idxJunta])
+        {
+            lstSpnAlvo[idxJunta]->setValue(tempoPulsoMin[idxJunta]);
+        }
+        else if(posicaoMicrossegundos > 0 && posicaoMicrossegundos > tempoPulsoMax[idxJunta])
+        {
+            lstSpnAlvo[idxJunta]->setValue(tempoPulsoMax[idxJunta]);
+        }
+        else if(ui->rdbReadyForPIC->isChecked())
+        {
+            QString comandoJST = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(posicaoMicrossegundos, 4, 10, QChar('0'));
+
+            countAbaPosicoesValueChanged++;
+
+            enviaComando(comandoJST);
+        }
+        else if(ui->rdbMiniMaestro24->isChecked())
+        {
+            // TODO: Aba Posições das Juntas: envio imediato de posicao alvo para a Mini Maestro 24
+        }
     }
 }
 
@@ -1682,9 +1826,23 @@ void MainWindow::enviaVelocidadeAssimQueMudar(int idxJunta, int velocidadeMicros
 {
     if(ui->chkEnviaComandoImediato->isChecked())
     {
-        QString comando = QString("[VEL%1%2]").arg(junta[idxJunta]).arg(velocidadeMicrossegundos, 4, 10, QChar('0'));
+        //habilitaCamposAbaPosicaoAlvo(ui->tabUnidadePos->currentIndex(), false);
+        if(velocidadeMicrossegundos > velocidadesMax[idxJunta])
+        {
+            lstSpnVel[idxJunta]->setValue(velocidadesMax[idxJunta]);
+        }
+        else if(ui->rdbReadyForPIC->isChecked())
+        {
+            QString comando = QString("[VEL%1%2]").arg(junta[idxJunta]).arg(velocidadeMicrossegundos, 4, 10, QChar('0'));
 
-        parser(comando);
+            countAbaPosicoesValueChanged++;
+
+            enviaComando(comando);
+        }
+        else if(ui->rdbMiniMaestro24->isChecked())
+        {
+            // TODO: Aba Posições das Juntas: envio imediato de velocidade para a Mini Maestro 24
+        }
     }
 }
 
@@ -1692,9 +1850,23 @@ void MainWindow::enviaAceleracaoAssimQueMudar(int idxJunta, int aceleracaoMicros
 {
     if(ui->chkEnviaComandoImediato->isChecked())
     {
-        QString comando = QString("[ACL%1%2]").arg(junta[idxJunta]).arg(aceleracaoMicrossegundos, 4, 10, QChar('0'));
+        //habilitaCamposAbaPosicaoAlvo(ui->tabUnidadePos->currentIndex(), false);
+        if(aceleracaoMicrossegundos > aceleracoesMax[idxJunta])
+        {
+            lstSpnAcl[idxJunta]->setValue(aceleracoesMax[idxJunta]);
+        }
+        else if(ui->rdbReadyForPIC->isChecked())
+        {
+            QString comando = QString("[ACL%1%2]").arg(junta[idxJunta]).arg(aceleracaoMicrossegundos, 4, 10, QChar('0'));
 
-        parser(comando);
+            countAbaPosicoesValueChanged++;
+
+            enviaComando(comando);
+        }
+        else if(ui->rdbMiniMaestro24->isChecked())
+        {
+            // TODO: Aba Posições das Juntas: envio imediato de aceleração para a Mini Maestro 24
+        }
     }
 }
 
@@ -1990,6 +2162,12 @@ void MainWindow::on_chkGRAng_clicked(bool checked)
     habilitaJunta(5, checked);
 }
 
+void MainWindow::on_chkEnviaComandoImediato_toggled(bool checked)
+{
+    ui->btMover->setEnabled(!checked);
+    ui->btMoverComVelEAcl->setEnabled(!checked);
+}
+
 
 
 /* NOTE: ***** Aba Sequência de Comandos ***** */
@@ -1997,7 +2175,7 @@ void MainWindow::on_chkGRAng_clicked(bool checked)
 void MainWindow::on_btNovaSequencia_clicked()
 {
     on_btPararSeqComandos_clicked();
-    // TODO: Adicionar messagebox de confirmação para nova sequência de comandos
+    // TODO: Adicionar messagebox de confirmação para nova sequência de comandos    
     ui->lblNomeArquivoSequencia->setText("Nova sequência");
     ui->listSequenciaComandos->clear();
 
@@ -2030,11 +2208,6 @@ void MainWindow::editarComandoNaSequencia(QString comando)
     ui->listSequenciaComandos->currentItem()->setText(comando);
     on_btPararSeqComandos_clicked();
 }
-
-
-
-
-
 
 void MainWindow::on_btAdicionarPosCorrente_clicked()
 {
@@ -2201,12 +2374,18 @@ void MainWindow::on_btSalvarSeqComandos_clicked()
 void MainWindow::on_btExecutarSeqComandos_clicked()
 {    
     if(ui->listSequenciaComandos->count() > 0)
-    {
+    {        
+        ui->chkEnviaComandoImediato->setChecked(false);
         seqEmExecucao = true;
         emLoop = false;
         ui->listSequenciaComandos->setCurrentRow(0);
         ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_EM_EXECUCAO);
-        parser(ui->listSequenciaComandos->currentItem()->text());
+        if(ui->rdbReadyForPIC->isChecked())
+            parser(ui->listSequenciaComandos->currentItem()->text());
+        else if(ui->rdbMiniMaestro24->isChecked())
+        {
+            // TODO: Aba sequência: parser para a Mini Maestro 24
+        }
     }
 }
 
@@ -2214,13 +2393,19 @@ void MainWindow::on_btContinuarSeqComandos_clicked()
 {    
     if(ui->listSequenciaComandos->count() > 0)
     {
+        ui->chkEnviaComandoImediato->setChecked(false);
         seqEmExecucao = true;
         emLoop = false;
         int index_selected = ui->listSequenciaComandos->currentRow();
         if(index_selected < 0 || index_selected > ui->listSequenciaComandos->count())
             ui->listSequenciaComandos->setCurrentRow(0);
         ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_CONTINUANDO_EXEC);
-        parser(ui->listSequenciaComandos->currentItem()->text());
+        if(ui->rdbReadyForPIC->isChecked())
+            parser(ui->listSequenciaComandos->currentItem()->text());
+        else if(ui->rdbMiniMaestro24->isChecked())
+        {
+            // TODO: Aba sequência: parser para a Mini Maestro 24
+        }
     }
 }
 
@@ -2228,11 +2413,17 @@ void MainWindow::on_btExecutarLoopSeqComandos_clicked()
 {    
     if(ui->listSequenciaComandos->count() > 0)
     {
+        ui->chkEnviaComandoImediato->setChecked(false);
         seqEmExecucao = true;
         emLoop = true;
         ui->listSequenciaComandos->setCurrentRow(0);
         ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_EM_LOOP);
-        parser(ui->listSequenciaComandos->currentItem()->text());
+        if(ui->rdbReadyForPIC->isChecked())
+            parser(ui->listSequenciaComandos->currentItem()->text());
+        else if(ui->rdbMiniMaestro24->isChecked())
+        {
+            // TODO: Aba sequência: parser para a Mini Maestro 24
+        }
     }
 }
 
@@ -2240,13 +2431,19 @@ void MainWindow::on_btContinuarLoopSeqComandos_clicked()
 {    
     if(ui->listSequenciaComandos->count() > 0)
     {
+        ui->chkEnviaComandoImediato->setChecked(false);
         seqEmExecucao = true;
         emLoop = true;
         int index_selected = ui->listSequenciaComandos->currentRow();
         if(index_selected < 0 || index_selected > ui->listSequenciaComandos->count())
             ui->listSequenciaComandos->setCurrentRow(0);
         ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_CONTINUANDO_LOOP);
-        parser(ui->listSequenciaComandos->currentItem()->text());
+        if(ui->rdbReadyForPIC->isChecked())
+            parser(ui->listSequenciaComandos->currentItem()->text());
+        else if(ui->rdbMiniMaestro24->isChecked())
+        {
+            // TODO: Aba sequência: parser para a Mini Maestro 24
+        }
     }
 }
 
@@ -2593,3 +2790,7 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
 {
     console->setLocalEchoEnabled(checked);
 }
+
+
+
+
