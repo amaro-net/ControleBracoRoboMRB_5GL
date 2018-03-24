@@ -1257,7 +1257,7 @@ comandos</string>
       </widget>
       <widget class="QWidget" name="tabAngulosDasJuntas">
        <attribute name="title">
-        <string>Ângulos das Juntas (graus)</string>
+        <string>Ângulos das juntas (graus)</string>
        </attribute>
        <widget class="QWidget" name="layoutWidget">
         <property name="geometry">

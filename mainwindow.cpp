@@ -77,8 +77,6 @@ void MainWindow::conectarComponentes()
     connect(ui->chkLEDP5, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
     connect(ui->chkLEDP6, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
     connect(ui->chkLEDP7, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
-
-    // TODO: Aba Posições das Juntas: Conectar checkboxes de mover assim que mudar posição    
 }
 
 void MainWindow::alimentarListasDeComponentes()
@@ -725,10 +723,12 @@ void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
         lstSpnAlvo[idxJunta]->setEnabled(true);
         lstSpnAlvoGraus[idxJunta]->setEnabled(true);
 
+        lstSlider[idxJunta]->setEnabled(true);
+        if(posicaoAlvo != lstSlider[idxJunta]->value())
+            lstSlider[idxJunta]->setValue(posicaoAlvo);
+
         double angulo = converteMicrossegundosParaGraus(idxJunta, posicaoAlvo);
-        double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();
-        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (microssegundos)
-        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (graus)
+        double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();        
 
         // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
         if(angulo != anguloAtual)
@@ -875,6 +875,7 @@ void MainWindow::decodificaResposta()
             {
                 graus = converteMicrossegundosParaGraus(i, valor);
                 lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
+                // TODO: Aba Posições das Juntas: incluir widgets que plotem no slider a posição atual da junta
             }
         }
 
@@ -915,8 +916,6 @@ void MainWindow::decodificaResposta()
                     lstSpnAlvoGraus[i]->setEnabled(false);
                 }
 
-                // TODO: Aba Posição das Juntas: Slider para posição alvo (microssegundos)
-                // TODO: Aba Posição das Juntas: Slider para posição alvo (graus)
                 // TODO: Cinemática direta
             }
             HabilitarComponentesComServosLigados();
@@ -1222,11 +1221,6 @@ void MainWindow::setarVelOuAclResposta(QString resposta, QList<QSpinBox *> lista
             else
                 countAbaPosicoesValueChanged--;
         }
-
-        /*
-        if(ui->chkEnviaComandoImediato->isChecked())
-            habilitaCamposAbaPosicaoAlvo(ui->tabUnidadePos->currentIndex(), true);
-        */
     }
 }
 
@@ -1663,7 +1657,7 @@ void MainWindow::on_btMover_clicked()
         comandoJST();
     else if(ui->rdbMiniMaestro24->isChecked())
     {
-        // TODO: Aba sequência: botão mover para a Mini Maestro 24
+        // TODO: Aba Posições das Juntas: botão mover para a Mini Maestro 24
     }
 }
 
@@ -2087,8 +2081,8 @@ void MainWindow::habilitaJunta(int idxJunta, bool checked)
     {
         lstSpnAlvo[idxJunta]->setEnabled(false);
         lstSpnAlvoGraus[idxJunta]->setEnabled(false);
-        lstChkHab[idxJunta]->setChecked(false);        
-        // TODO: Aba Posição das Juntas: Tratamento do slider para posição alvo (microssegundos)        
+        lstChkHab[idxJunta]->setChecked(false);
+        lstSlider[idxJunta]->setEnabled(false);
 
         enviaPosicaoAlvoAssimQueMudar(idxJunta, 0);
     }
@@ -2164,6 +2158,44 @@ void MainWindow::timeoutEnvioImediato()
 {
     countAbaPosicoesValueChanged++;
     enviaComando(comandoEnvioImediato);
+}
+
+void MainWindow::sliderValueChanged(int idxJunta, int value)
+{
+    if(value != lstSpnAlvo[idxJunta]->value())
+    {
+        lstSpnAlvo[idxJunta]->setValue(value);
+    }
+}
+
+void MainWindow::on_sliderJ0_valueChanged(int value)
+{
+    sliderValueChanged(0, value);
+}
+
+void MainWindow::on_sliderJ1_valueChanged(int value)
+{
+    sliderValueChanged(1, value);
+}
+
+void MainWindow::on_sliderJ2_valueChanged(int value)
+{
+    sliderValueChanged(2, value);
+}
+
+void MainWindow::on_sliderJ3_valueChanged(int value)
+{
+    sliderValueChanged(3, value);
+}
+
+void MainWindow::on_sliderJ4_valueChanged(int value)
+{
+    sliderValueChanged(4, value);
+}
+
+void MainWindow::on_sliderGR_valueChanged(int value)
+{
+    sliderValueChanged(5, value);
 }
 
 

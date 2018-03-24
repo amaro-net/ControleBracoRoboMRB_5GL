@@ -45,6 +45,6 @@ static int velTmpPulsoDefault[QTD_SERVOS] = {64, 32, 32, 32, 128, 100};
 static int aclTmpPulsoDefault[QTD_SERVOS] = {8, 4, 8, 8, 32, 0};
 
 static int velocidadesMax[QTD_SERVOS] = {128, 128, 128, 92, 128, 100};
-static int aceleracoesMax[QTD_SERVOS] = {8, 4, 8, 8, 32, 100};
+static int aceleracoesMax[QTD_SERVOS] = {128, 128, 128, 92, 128, 100};
 
 #endif // CONSTANTES_H

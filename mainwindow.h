@@ -246,6 +246,18 @@ private slots:
 
     void on_chkEnviaComandoImediato_toggled(bool checked);
 
+    void on_sliderJ0_valueChanged(int value);
+
+    void on_sliderJ1_valueChanged(int value);
+
+    void on_sliderJ2_valueChanged(int value);
+
+    void on_sliderJ3_valueChanged(int value);
+
+    void on_sliderJ4_valueChanged(int value);
+
+    void on_sliderGR_valueChanged(int value);
+
 private:
     void preencheCombosPortaSerial();
     void showStatusMessage(const QString &message);
@@ -287,6 +299,8 @@ private:
     void enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrossegundos);
     void enviaVelocidadeAssimQueMudar(int idxJunta, int velocidadeMicrossegundos);
     void enviaAceleracaoAssimQueMudar(int idxJunta, int aceleracaoMicrossegundos);
+
+    void sliderValueChanged(int idxJunta, int value);
 
     /* Comandos */
     void abrirGarra();
