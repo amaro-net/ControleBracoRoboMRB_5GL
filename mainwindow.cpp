@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     montagemDeComandosDialog = new MontagemDeComandosDialog(this);
     montagemDeComandosDialog->setMainWindow(this);
 
-    preencheCombosPortaSerial();    
+    preencheCombosPortaSerial();
 
     connect(serial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
             this, &MainWindow::handleError);
@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     conectarComponentes();
 
-    alimentarListasDeComponentes();    
+    alimentarListasDeComponentes();
 
     bufferProto = "";
 
@@ -142,7 +142,7 @@ void MainWindow::alimentarFilaDeComandosDeInicializacao()
     filaComandosInicializacao.clear();
 
     filaComandosInicializacao.enqueue("[FRS1]");
-    filaComandosInicializacao.enqueue("[CSB0]");    
+    filaComandosInicializacao.enqueue("[CSB0]");
 
     filaComandosInicializacao.enqueue("[TMXJ0]");
     filaComandosInicializacao.enqueue("[TMXJ1]");
@@ -227,7 +227,7 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
     bool propInv[QTD_SERVOS];
 
     for(int i = 0; i < QTD_SERVOS; i++)
-    {                
+    {
         tempoPulsoMax[i] = ui->tabelaPosLimites->item(i,0)->text().toInt();
         tempoPulsoMin[i] = ui->tabelaPosLimites->item(i,1)->text().toInt();
         tempoPulsoNeutro[i] = ui->tabelaPosLimites->item(i,2)->text().toInt();
@@ -239,7 +239,7 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
 
         angMax[i] = ui->tabelaPosLimitesGraus->item(i,0)->text().toInt();
         angMin[i] = ui->tabelaPosLimitesGraus->item(i,1)->text().toInt();
-        propInv[i] = (ui->tabelaPosLimitesGraus->item(i,4)->checkState() == Qt::CheckState::Checked);        
+        propInv[i] = (ui->tabelaPosLimitesGraus->item(i,4)->checkState() == Qt::CheckState::Checked);
     }
 
     for (int i = 0; i < QTD_SERVOS; i++)
@@ -258,7 +258,7 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         double anguloNeutro = coeffAng[i] * tempoPulsoNeutro[i] + offsetAng[i];
         anguloNeutro = round(anguloNeutro * DIV_CD_POSICAO) / DIV_CD_POSICAO;
         setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 2, QString("%1").arg(anguloNeutro));
-        double anguloRepouso = coeffAng[i] * tempoPulsoRepouso[i] + offsetAng[i];        
+        double anguloRepouso = coeffAng[i] * tempoPulsoRepouso[i] + offsetAng[i];
         anguloRepouso = round(anguloRepouso * DIV_CD_POSICAO) / DIV_CD_POSICAO;
         setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 3, QString("%1").arg(anguloRepouso));
 
@@ -295,12 +295,12 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
 
             int velTmpPulso = lstSpnVel[i]->value();
             double velGrausPorSeg = velTmpPulso * incrementosAng[i] / 0.25 * (10e-3);  // (0.25us)/(10ms)
-                            // (0.25us)/(10ms) * Graus/(us) / 0.25
-                            // (0.25us)/(10ms) * Graus/(0.25us)
-                            //        1/(10ms) * Graus
-                            //     Graus /(10ms)
-                            // Graus / (10e-3 s) * 10e-3
-                            // Graus / s
+            // (0.25us)/(10ms) * Graus/(us) / 0.25
+            // (0.25us)/(10ms) * Graus/(0.25us)
+            //        1/(10ms) * Graus
+            //     Graus /(10ms)
+            // Graus / (10e-3 s) * 10e-3
+            // Graus / s
             velGrausPorSeg = round(velGrausPorSeg * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
             lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg);
 
@@ -334,22 +334,22 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
 
             int velTmpPulso = lstSpnVel[i]->value();
             double velGrausPorSeg = velTmpPulso * incrementosAng[i] * (10e-3);  // (0.25us)/(10ms)
-                            // (0.25us)/(10ms) * Graus/(0.25us) * 10 * 10e-3
-                            //      1 / (10ms) * Graus          * 10 * 10e-3
-                            //       Graus / ((10e-3) * s) * (10e-3)
-                            //       Graus / s
+            // (0.25us)/(10ms) * Graus/(0.25us) * 10 * 10e-3
+            //      1 / (10ms) * Graus          * 10 * 10e-3
+            //       Graus / ((10e-3) * s) * (10e-3)
+            //       Graus / s
             velGrausPorSeg = round(velGrausPorSeg * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
             lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg);
 
 
             int aclTmpPulso = lstSpnAcl[i]->value();
             double aclGrausPorSegQuad = aclTmpPulso * incrementosAng[i] * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
-                            // (0.25us)/(10ms)/(80ms) * Graus/(0.25us)
-                            // 1/(10ms)/(80ms) * Graus/1
-                            // Graus/(10ms)/(80ms)
-                            // Graus/((10ms)*(80ms))
-                            // Graus / (10e-3 * s  * 80e-3 * s) * 10e-3 * 80e-3
-                            // Graus / s^2
+            // (0.25us)/(10ms)/(80ms) * Graus/(0.25us)
+            // 1/(10ms)/(80ms) * Graus/1
+            // Graus/(10ms)/(80ms)
+            // Graus/((10ms)*(80ms))
+            // Graus / (10e-3 * s  * 80e-3 * s) * 10e-3 * 80e-3
+            // Graus / s^2
             aclGrausPorSegQuad = round(aclGrausPorSegQuad * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
             lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad);
         }
@@ -532,17 +532,17 @@ void MainWindow::abrirPortaSerial()
         baudRate = ui->cmbBaudRate->currentText().toInt();
     } else {
         baudRate = static_cast<QSerialPort::BaudRate>(
-                    ui->cmbBaudRate->itemData(ui->cmbBaudRate->currentIndex()).toInt());
+                       ui->cmbBaudRate->itemData(ui->cmbBaudRate->currentIndex()).toInt());
     }
 
     QSerialPort::DataBits dataBits = static_cast<QSerialPort::DataBits>(
-                ui->cmbBitsDeDados->itemData(ui->cmbBitsDeDados->currentIndex()).toInt());;
+                                         ui->cmbBitsDeDados->itemData(ui->cmbBitsDeDados->currentIndex()).toInt());
 
     QSerialPort::Parity parity = static_cast<QSerialPort::Parity>(
-                    ui->cmbParidade->itemData(ui->cmbParidade->currentIndex()).toInt());
+                                     ui->cmbParidade->itemData(ui->cmbParidade->currentIndex()).toInt());
 
     QSerialPort::StopBits stopBits = static_cast<QSerialPort::StopBits>(
-                ui->cmbBitDeParada->itemData(ui->cmbBitDeParada->currentIndex()).toInt());
+                                         ui->cmbBitDeParada->itemData(ui->cmbBitDeParada->currentIndex()).toInt());
 
     serial->setPortName(porta);
     serial->setBaudRate(baudRate);
@@ -590,7 +590,7 @@ void MainWindow::readData()
 {
     QByteArray data = serial->readAll();
     if(ui->rdbReadyForPIC->isChecked())
-    {        
+    {
         console->putData(data, false);
         recebeCaracteresDeResposta(data);
     }
@@ -735,7 +735,7 @@ void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
             lstSlider[idxJunta]->setValue(posicaoAlvo);
 
         double angulo = converteMicrossegundosParaGraus(idxJunta, posicaoAlvo);
-        double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();        
+        double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();
 
         // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
         if(angulo != anguloAtual)
@@ -932,7 +932,7 @@ void MainWindow::decodificaResposta()
                     }
 
                     if(!this->lstSpnAlvo[i]->isEnabled() || !this->lstSpnAlvoGraus[i]->isEnabled())
-                    {                        
+                    {
                         habilitaCamposAbaPosicaoAlvoJunta(0, i, true);
                         habilitaCamposAbaPosicaoAlvoJunta(1, i, true);
 
@@ -942,7 +942,7 @@ void MainWindow::decodificaResposta()
                 else
                 {
                     lstChkHab[i]->setChecked(false);
-                    lstSpnAlvo[i]->setEnabled(false);                    
+                    lstSpnAlvo[i]->setEnabled(false);
                     lstSpnAlvoGraus[i]->setEnabled(false);
                 }
 
@@ -1020,10 +1020,10 @@ void MainWindow::decodificaResposta()
                 ehRespostaCTZ = resposta.contains("CTZ");
             }
 
-        }        
+        }
         else if(resposta.contains("VEL"))
         {
-            setarVelOuAclResposta(resposta, lstSpnVel);            
+            setarVelOuAclResposta(resposta, lstSpnVel);
             ehRespostaFinal = true;
             ehRespostaMoverComVelAcl = true;
         }
@@ -1120,7 +1120,7 @@ void MainWindow::decodificaResposta()
     else if(resposta.contains("CSB"))
     {
         ui->chkComandosBloqueantesDeMovimento->setChecked(resposta.at(4) == '1');
-    }    
+    }
     else if(resposta.contains("RST"))
     {
         //habilitarComponentesConn(false);
@@ -1156,7 +1156,7 @@ void MainWindow::decodificaResposta()
     {
         if (inicializando && serial->isOpen())
         {
-            habilitarComponentesConn(true);            
+            habilitarComponentesConn(true);
         }
         inicializando = false;
 
@@ -1176,7 +1176,7 @@ void MainWindow::decodificaResposta()
                 configurarConversaoEntreMicrossegundosEAngulos();
         }
         else if(seqEmExecucao && ehRespostaFinal)
-        {            
+        {
             executaComandoDaSequencia();
         }
 
@@ -1286,7 +1286,7 @@ void MainWindow::executaComandoDaSequencia()
         ui->listSequenciaComandos->setCurrentRow(++index_selected);
 
         while (!parser(ui->listSequenciaComandos->currentItem()->text()) &&
-                (index_selected + 1 < ui->listSequenciaComandos->count()) )
+               (index_selected + 1 < ui->listSequenciaComandos->count()) )
         {
             ui->listSequenciaComandos->setCurrentRow(++index_selected);
         }
@@ -1299,7 +1299,7 @@ void MainWindow::executaComandoDaSequencia()
             ui->listSequenciaComandos->setCurrentRow(index_selected);
 
             while (!parser(ui->listSequenciaComandos->currentItem()->text()) &&
-                    (index_selected + 1 < ui->listSequenciaComandos->count()) )
+                   (index_selected + 1 < ui->listSequenciaComandos->count()) )
             {
                 ui->listSequenciaComandos->setCurrentRow(++index_selected);
             }
@@ -1337,7 +1337,7 @@ void MainWindow::fecharGarra()
 
 void MainWindow::giroGarraMais90()
 {
-    int valor = ui->tabelaPosLimites->item(4,0)->text().toInt();    
+    int valor = ui->tabelaPosLimites->item(4,0)->text().toInt();
 
     QString comandoGiroGarra = QString("[JSTE%1]").arg(valor, 4, 10, QChar('0'));
 
@@ -1351,7 +1351,7 @@ void MainWindow::garraPosNeutra()
 
 void MainWindow::giroGarraMenos90()
 {
-    int valor = ui->tabelaPosLimites->item(4,1)->text().toInt();    
+    int valor = ui->tabelaPosLimites->item(4,1)->text().toInt();
 
     QString comandoGiroGarra = QString("[JSTE%1]").arg(valor, 4, 10, QChar('0'));
 
@@ -1435,7 +1435,7 @@ void MainWindow::comandoLEDSemParametros()
 void MainWindow::on_btAbrirGarra_clicked()
 {
     on_btPararSeqComandos_clicked();
-    ui->chkEnviaComandoImediato->setChecked(false);    
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btAbrirGarra->text());
     ui->listaUltimoComandoAcionado->clear();
@@ -1452,7 +1452,7 @@ void MainWindow::on_btAbrirGarra_clicked()
 void MainWindow::on_btGarraSemiaberta_clicked()
 {
     on_btPararSeqComandos_clicked();
-    ui->chkEnviaComandoImediato->setChecked(false);    
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     ui->lblComandoAcionado->setText(ui->btGarraSemiaberta->text());
     ui->listaUltimoComandoAcionado->clear();
@@ -1636,7 +1636,7 @@ void MainWindow::on_btAdicionarComandoAASeqComandos_clicked()
 
 void MainWindow::on_chkAtivarLeds_clicked(bool checked)
 {
-    on_btPararSeqComandos_clicked();    
+    on_btPararSeqComandos_clicked();
 
     QString cmdLED = "[LED";
 
@@ -1818,7 +1818,7 @@ void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrosse
             lstSpnAlvo[idxJunta]->setValue(tempoPulsoMax[idxJunta]);
         }
         else if(ui->rdbReadyForPIC->isChecked())
-        {                        
+        {
             comandoEnvioImediato = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(posicaoMicrossegundos, 4, 10, QChar('0'));
 
             if(!timerEnvioImediato->isActive())
@@ -2214,7 +2214,7 @@ void MainWindow::on_sliderGR_valueChanged(int value)
 void MainWindow::on_btNovaSequencia_clicked()
 {
     on_btPararSeqComandos_clicked();
-    // TODO: Adicionar messagebox de confirmação para nova sequência de comandos    
+    // TODO: Adicionar messagebox de confirmação para nova sequência de comandos
     ui->lblNomeArquivoSequencia->setText("Nova sequência");
     ui->listSequenciaComandos->clear();
 
@@ -2373,7 +2373,9 @@ void MainWindow::on_btCarregarSeqComandos_clicked()
     on_btPararSeqComandos_clicked();
 
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Carregar Sequência de Comandos"), "", tr("Sequência (*.seq);;Arquivo TXT(*.txt)"));
+                                                    tr("Carregar Sequência de Comandos"),
+                                                    "",
+                                                    tr("Sequência (*.seq);;Arquivo TXT(*.txt)"));
 
     QFile file(fileName);
 
@@ -2398,7 +2400,9 @@ void MainWindow::on_btCarregarSeqComandos_clicked()
 void MainWindow::on_btSalvarSeqComandos_clicked()
 {    
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Salvar sequência de comandos"), "", tr("Sequência (*.seq);;Arquivo TXT(*.txt)"));
+                                                    tr("Salvar sequência de comandos"),
+                                                    "",
+                                                    tr("Sequência (*.seq);;Arquivo TXT(*.txt)"));
 
     QFile file(fileName);
     if ( file.open(QIODevice::ReadWrite | QIODevice::Text) )
@@ -2434,7 +2438,7 @@ void MainWindow::habilitaBotoesContinuarDLYSemParam()
 void MainWindow::on_btExecutarSeqComandos_clicked()
 {    
     if(ui->listSequenciaComandos->count() > 0)
-    {        
+    {
         ui->chkEnviaComandoImediato->setChecked(false);
         habilitaBotoesExecComandos(false);
         seqEmExecucao = true;
@@ -2638,7 +2642,7 @@ bool MainWindow::parser(QString comando)
 
                 if(idxJunta != -1)
                 {
-                    int valor = comando.mid(5*(i+1), 4).toInt();                    
+                    int valor = comando.mid(5*(i+1), 4).toInt();
 
                     if(valor > 0)
                     {
@@ -2675,7 +2679,7 @@ bool MainWindow::parser(QString comando)
             idxJunta = 5;
 
         if(idxJunta != -1)
-        {            
+        {
             int valor = ui->tabelaPosLimites->item(idxJunta, 2)->text().toInt();
             lstSpnAlvo[idxJunta]->setValue(valor);
         }
@@ -2683,7 +2687,7 @@ bool MainWindow::parser(QString comando)
         return true;
     }
     else if(comando.contains("GA"))
-    {        
+    {
         int valor = ui->tabelaPosLimites->item(5, 0)->text().toInt();
         ui->spnGRAlvo->setValue(valor);
 
@@ -2691,7 +2695,7 @@ bool MainWindow::parser(QString comando)
         return true;
     }
     else if(comando.contains("GF"))
-    {        
+    {
         int valor = ui->tabelaPosLimites->item(5, 1)->text().toInt();
         ui->spnGRAlvo->setValue(valor);
 

@@ -20,7 +20,7 @@ MontagemDeComandosDialog::MontagemDeComandosDialog(QWidget *parent) :
     connect(ui->chkLEDP6, &QCheckBox::clicked, this, MontagemDeComandosDialog::on_chkLEDPi_clicked);
     connect(ui->chkLEDP7, &QCheckBox::clicked, this, MontagemDeComandosDialog::on_chkLEDPi_clicked);
 
-    alimentarListasDeComponentes();    
+    alimentarListasDeComponentes();
 }
 
 MontagemDeComandosDialog::~MontagemDeComandosDialog()
@@ -247,7 +247,7 @@ void MontagemDeComandosDialog::setTabelaPosLimites(QTableWidget *tabelaPosLimite
 void MontagemDeComandosDialog::setTabelaPosLimitesGraus(QTableWidget *tabelaPosLimitesGraus)
 {
     for (int i = 0; i < QTD_SERVOS; i++)
-    {        
+    {
         for(int j = 0; j < 4; j++)
         {
             this->tabelaPosLimitesGraus[i][j] = tabelaPosLimitesGraus->item(i,j)->text().toInt();
@@ -819,7 +819,7 @@ void MontagemDeComandosDialog::on_spnAcl_valueChanged(int aclTmpPulso)
     }
 
     if(ui->edtComando->text().contains("ACL"))
-        on_btAcl_clicked();    
+        on_btAcl_clicked();
 }
 
 void MontagemDeComandosDialog::on_spnAclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad)

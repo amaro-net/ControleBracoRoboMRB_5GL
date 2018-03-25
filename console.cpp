@@ -90,7 +90,7 @@ void Console::keyPressEvent(QKeyEvent *e)
             //QPlainTextEdit::keyPressEvent(e);
             break;
         }
-        //case Qt::Key_Enter:
+            //case Qt::Key_Enter:
         case Qt::Key_Left:
         case Qt::Key_Right:
         case Qt::Key_Up:

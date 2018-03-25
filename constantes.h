@@ -33,19 +33,19 @@ static QString junta[QTD_SERVOS] = {"J0", "J1", "J2", "J3", "J4", "GR"};
 static QString idJST[QTD_SERVOS] = {"A", "B", "C", "D", "E", "G"};
 
 static const int tabelaPosLimitesDefault[QTD_SERVOS][4] = {{2432, 480, 1405,          480},
-                                                     {2256, 768, 1798,         2256},
-                                                     {2208, 800, 2208,          959},
-                                                     {2480, 528, 1251,         1836},
-                                                     {2432, 512, 1472,         1472},
-                                                     {2000, 416, (2000+416)/2, 2000}};
+                                                           {2256, 768, 1798,         2256},
+                                                           {2208, 800, 2208,          959},
+                                                           {2480, 528, 1251,         1836},
+                                                           {2432, 512, 1472,         1472},
+                                                           {2000, 416, (2000+416)/2, 2000}};
 
 // Estes ângulos condizem com a notação de Denavit-Hatenberg para o nosso braço-robô
 static const double tabelaPosLimitesGrausDefault[QTD_SERVOS][5] = {{100,  -90, 0, 0, 0},
-                                                             {130,    0, 0, 0, 0},
-                                                             {  0, -133, 0, 0, 0},
-                                                             {164,  -36, 0, 0, 1},
-                                                             { 90,  -90, 0, 0, 0},
-                                                             {180,    0, 0, 0, 0}};
+                                                                   {130,    0, 0, 0, 0},
+                                                                   {  0, -133, 0, 0, 0},
+                                                                   {164,  -36, 0, 0, 1},
+                                                                   { 90,  -90, 0, 0, 0},
+                                                                   {180,    0, 0, 0, 0}};
 
 static const int velTmpPulsoDefault[QTD_SERVOS] = {64, 32, 32, 32, 128, 100};
 static const int aclTmpPulsoDefault[QTD_SERVOS] = {8, 4, 8, 8, 32, 0};
