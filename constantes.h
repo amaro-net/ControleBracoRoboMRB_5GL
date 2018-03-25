@@ -19,7 +19,7 @@
 #define STATUS_SEQCOM_CONTINUANDO_EXEC  "Continuando execução"
 #define STATUS_SEQCOM_EM_LOOP           "Em loop"
 #define STATUS_SEQCOM_CONTINUANDO_LOOP  "Continuando loop"
-#define STATUS_SEQCOM_EM_DLY_SEM_PAR    "Em espera. Pressione ENTER ou duplo clique na sequência."
+#define STATUS_SEQCOM_EM_DLY_SEM_PAR    "Em espera. Pressione ENTER, duplo clique na sequência, Continuar ou Continuar loop."
 
 #define TEMPO_TIMER_ENVIO_IMEDIATO_US   200
 

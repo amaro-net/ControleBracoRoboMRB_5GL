@@ -293,7 +293,6 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             lstSpnAclGrausPorSegQuad[i]->setDecimals(CASAS_DECIMAIS_ACELERACAO);
             lstSpnAclGrausPorSegQuad[i]->setSingleStep(incAclGrausPorSegQuad[i]);
 
-            // TODO: Verificar se estes vetores serão usados nas velocidades e acelerações
             int velTmpPulso = lstSpnVel[i]->value();
             double velGrausPorSeg = velTmpPulso * incrementosAng[i] / 0.25 * (10e-3);  // (0.25us)/(10ms)
                             // (0.25us)/(10ms) * Graus/(us) / 0.25
@@ -333,7 +332,6 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             lstSpnVelGrausPorSeg[i]->setSingleStep(incVelGrausPorSeg[i]);
             lstSpnAclGrausPorSegQuad[i]->setSingleStep(incAclGrausPorSegQuad[i]);
 
-            // TODO: Verificar se estes vetores serão usados nas velocidades e acelerações
             int velTmpPulso = lstSpnVel[i]->value();
             double velGrausPorSeg = velTmpPulso * incrementosAng[i] * (10e-3);  // (0.25us)/(10ms)
                             // (0.25us)/(10ms) * Graus/(0.25us) * 10 * 10e-3
@@ -1317,7 +1315,7 @@ void MainWindow::executaComandoDaSequencia()
                 ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_PARADA_NAO_VAZIA);
                 ui->lblStatusSeqComandos->setFocus();
             }
-
+            habilitaBotoesExecComandos(true);
         }
     }
 }
@@ -2412,17 +2410,36 @@ void MainWindow::on_btSalvarSeqComandos_clicked()
     }
 }
 
+void MainWindow::habilitaBotoesExecComandos(bool estadoHab)
+{
+    ui->btExecutarSeqComandos->setEnabled(estadoHab);
+    ui->btContinuarSeqComandos->setEnabled(estadoHab);
+    ui->btExecutarLoopSeqComandos->setEnabled(estadoHab);
+    ui->btContinuarLoopSeqComandos->setEnabled(estadoHab);
+}
+
+void MainWindow::habilitaBotoesContinuarDLYSemParam()
+{
+    ui->btContinuarSeqComandos->setEnabled(true);
+    ui->btContinuarLoopSeqComandos->setEnabled(true);
+}
+
+
 void MainWindow::on_btExecutarSeqComandos_clicked()
 {    
     if(ui->listSequenciaComandos->count() > 0)
     {        
         ui->chkEnviaComandoImediato->setChecked(false);
+        habilitaBotoesExecComandos(false);
         seqEmExecucao = true;
         emLoop = false;
         ui->listSequenciaComandos->setCurrentRow(0);
         ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_EM_EXECUCAO);
         if(ui->rdbReadyForPIC->isChecked())
+        {
+            // TODO: Aba sequência: permitir pular varias linhas de comentarios quando estes forem as primeiras linhas
             parser(ui->listSequenciaComandos->currentItem()->text());
+        }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
             // TODO: Aba sequência: parser para a Mini Maestro 24
@@ -2435,17 +2452,29 @@ void MainWindow::on_btContinuarSeqComandos_clicked()
     if(ui->listSequenciaComandos->count() > 0)
     {
         ui->chkEnviaComandoImediato->setChecked(false);
+        habilitaBotoesExecComandos(false);
         seqEmExecucao = true;
         emLoop = false;
-        int index_selected = ui->listSequenciaComandos->currentRow();
-        if(index_selected < 0 || index_selected > ui->listSequenciaComandos->count())
-            ui->listSequenciaComandos->setCurrentRow(0);
-        ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_CONTINUANDO_EXEC);
-        if(ui->rdbReadyForPIC->isChecked())
-            parser(ui->listSequenciaComandos->currentItem()->text());
-        else if(ui->rdbMiniMaestro24->isChecked())
+
+        if(emDLYSemParam)
         {
-            // TODO: Aba sequência: parser para a Mini Maestro 24
+            continuaExecucaoPartindoDoDLYSemParam();
+        }
+        else
+        {
+            int index_selected = ui->listSequenciaComandos->currentRow();
+            if(index_selected < 0 || index_selected > ui->listSequenciaComandos->count())
+                ui->listSequenciaComandos->setCurrentRow(0);
+            ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_CONTINUANDO_EXEC);
+            if(ui->rdbReadyForPIC->isChecked())
+            {
+                // TODO: Aba sequência: permitir pular varias linhas de comentarios quando estes forem as primeiras linhas
+                parser(ui->listSequenciaComandos->currentItem()->text());
+            }
+            else if(ui->rdbMiniMaestro24->isChecked())
+            {
+                // TODO: Aba sequência: parser para a Mini Maestro 24
+            }
         }
     }
 }
@@ -2455,12 +2484,16 @@ void MainWindow::on_btExecutarLoopSeqComandos_clicked()
     if(ui->listSequenciaComandos->count() > 0)
     {
         ui->chkEnviaComandoImediato->setChecked(false);
+        habilitaBotoesExecComandos(false);
         seqEmExecucao = true;
         emLoop = true;
         ui->listSequenciaComandos->setCurrentRow(0);
         ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_EM_LOOP);
         if(ui->rdbReadyForPIC->isChecked())
+        {
+            // TODO: Aba sequência: permitir pular varias linhas de comentarios quando estes forem as primeiras linhas
             parser(ui->listSequenciaComandos->currentItem()->text());
+        }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
             // TODO: Aba sequência: parser para a Mini Maestro 24
@@ -2473,23 +2506,37 @@ void MainWindow::on_btContinuarLoopSeqComandos_clicked()
     if(ui->listSequenciaComandos->count() > 0)
     {
         ui->chkEnviaComandoImediato->setChecked(false);
+        habilitaBotoesExecComandos(false);
+
         seqEmExecucao = true;
         emLoop = true;
-        int index_selected = ui->listSequenciaComandos->currentRow();
-        if(index_selected < 0 || index_selected > ui->listSequenciaComandos->count())
-            ui->listSequenciaComandos->setCurrentRow(0);
-        ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_CONTINUANDO_LOOP);
-        if(ui->rdbReadyForPIC->isChecked())
-            parser(ui->listSequenciaComandos->currentItem()->text());
-        else if(ui->rdbMiniMaestro24->isChecked())
+
+        if(emDLYSemParam)
         {
-            // TODO: Aba sequência: parser para a Mini Maestro 24
+            continuaExecucaoPartindoDoDLYSemParam();
+        }
+        else
+        {
+            int index_selected = ui->listSequenciaComandos->currentRow();
+            if(index_selected < 0 || index_selected > ui->listSequenciaComandos->count())
+                ui->listSequenciaComandos->setCurrentRow(0);
+            ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_CONTINUANDO_LOOP);
+            if(ui->rdbReadyForPIC->isChecked())
+            {
+                // TODO: Aba sequência: permitir pular varias linhas de comentarios quando estes forem as primeiras linhas
+                parser(ui->listSequenciaComandos->currentItem()->text());
+            }
+            else if(ui->rdbMiniMaestro24->isChecked())
+            {
+                // TODO: Aba sequência: parser para a Mini Maestro 24
+            }
         }
     }
 }
 
 void MainWindow::on_btPararSeqComandos_clicked()
-{    
+{
+    // TODO: Avaliar se é possivel enviar a posição atual para parar completamente o braço robô ao clicar em parar.
     seqEmExecucao = false;
     emLoop = false;
     emDLYSemParam = false;
@@ -2502,6 +2549,7 @@ void MainWindow::on_btPararSeqComandos_clicked()
         ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_PARADA_NAO_VAZIA);
         ui->lblStatusSeqComandos->setFocus();
     }
+    habilitaBotoesExecComandos(true);
 }
 
 bool MainWindow::parser(QString comando)
@@ -2684,12 +2732,28 @@ void MainWindow::iniciaDLYSemParametro()
     ultimoStatusSeqComandos = ui->lblStatusSeqComandos->text();
     ui->listSequenciaComandos->setFocus();
     ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_EM_DLY_SEM_PAR);
+    habilitaBotoesContinuarDLYSemParam();
 }
 
 void MainWindow::timeoutDLY()
 {
     if(!seqEmExecucao)
         return;
+
+    executaComandoDaSequencia();
+}
+
+void MainWindow::continuaExecucaoPartindoDoDLYSemParam()
+{
+    ui->lblStatusSeqComandos->setText(ultimoStatusSeqComandos);
+
+    emDLYSemParam = false;
+
+    if(posUltimoDLYSemParam >= 0)
+    {
+        ui->listSequenciaComandos->setCurrentRow(posUltimoDLYSemParam);
+        posUltimoDLYSemParam = -1;
+    }
 
     executaComandoDaSequencia();
 }
@@ -2712,17 +2776,7 @@ void MainWindow::on_listSequenciaComandos_itemActivated(QListWidgetItem *item)
         return;
     }
 
-    ui->lblStatusSeqComandos->setText(ultimoStatusSeqComandos);
-
-    emDLYSemParam = false;
-
-    if(posUltimoDLYSemParam >= 0)
-    {
-        ui->listSequenciaComandos->setCurrentRow(posUltimoDLYSemParam);
-        posUltimoDLYSemParam = -1;
-    }
-
-    executaComandoDaSequencia();
+    continuaExecucaoPartindoDoDLYSemParam();
 }
 
 

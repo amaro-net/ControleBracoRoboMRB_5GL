@@ -292,6 +292,10 @@ private:
 
     void sliderValueChanged(int idxJunta, int value);
 
+    void habilitaBotoesExecComandos(bool estadoHab);
+    void habilitaBotoesContinuarDLYSemParam();
+    void continuaExecucaoPartindoDoDLYSemParam();
+
     /* Comandos */
     void abrirGarra();
     void garraSemiaberta();
