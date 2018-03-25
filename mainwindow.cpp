@@ -885,7 +885,7 @@ void MainWindow::decodificaResposta()
     int tamanhoResposta = resposta.length();
     bool ehRespostaFinal = false;
     bool ehRespostaConfigPosLimite = false;
-    bool ehRespostaCTZ = false;
+    bool ehRespostaMovAbaComandos = false;
     bool ehRespostaMoverComVelAcl = false;
 
     if(tamanhoResposta == 35 && (resposta.contains("MOV") || resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN2")) )
@@ -960,6 +960,8 @@ void MainWindow::decodificaResposta()
 
             ehRespostaFinal = true;
             ehRespostaMoverComVelAcl = resposta.contains("JST");
+            ehRespostaMovAbaComandos = resposta.contains("[JSTA0000B0000C0000D0000E0000G0000]") ||
+                                       resposta.contains("RPS");
         }
     }
     else if(tamanhoResposta == 11)
@@ -1031,7 +1033,7 @@ void MainWindow::decodificaResposta()
 
                 HabilitarComponentesComServosLigados();
                 ehRespostaFinal = true;
-                ehRespostaCTZ = resposta.contains("CTZ");
+                ehRespostaMovAbaComandos = resposta.contains("CTZ");
             }
 
         }
@@ -1174,9 +1176,13 @@ void MainWindow::decodificaResposta()
         }
         inicializando = false;
 
-        if(filaComandosPosicaoNeutraCTZ.count() > 0 && ehRespostaCTZ)
+        if(seqEmExecucao && ehRespostaFinal)
         {
-            parser(filaComandosPosicaoNeutraCTZ.dequeue());
+            executaComandoDaSequencia();
+        }
+        else if(filaComandosMovimentacaoAbaComandos.count() > 0 && ehRespostaMovAbaComandos)
+        {
+            parser(filaComandosMovimentacaoAbaComandos.dequeue());
         }
         else if(filaComandosMoverComVelAcl.count() > 0 && ehRespostaMoverComVelAcl)
         {
@@ -1189,11 +1195,6 @@ void MainWindow::decodificaResposta()
             else
                 configurarConversaoEntreMicrossegundosEAngulos();
         }
-        else if(seqEmExecucao && ehRespostaFinal)
-        {
-            executaComandoDaSequencia();
-        }
-
     }
 }
 
@@ -1392,22 +1393,24 @@ void MainWindow::posicaoNeutraJST()
 
 void MainWindow::posicaoNeutraCTZ()
 {    
-    filaComandosPosicaoNeutraCTZ.clear();
+    filaComandosMovimentacaoAbaComandos.clear();
 
-    filaComandosPosicaoNeutraCTZ.enqueue("[CTZJ0]");
-    filaComandosPosicaoNeutraCTZ.enqueue("[CTZJ1]");
-    filaComandosPosicaoNeutraCTZ.enqueue("[CTZJ2]");
-    filaComandosPosicaoNeutraCTZ.enqueue("[CTZJ3]");
-    filaComandosPosicaoNeutraCTZ.enqueue("[CTZJ4]");
-    filaComandosPosicaoNeutraCTZ.enqueue("[CTZGR]");
+    filaComandosMovimentacaoAbaComandos.enqueue("[CTZJ0]");
+    filaComandosMovimentacaoAbaComandos.enqueue("[CTZJ1]");
+    filaComandosMovimentacaoAbaComandos.enqueue("[CTZJ2]");
+    filaComandosMovimentacaoAbaComandos.enqueue("[CTZJ3]");
+    filaComandosMovimentacaoAbaComandos.enqueue("[CTZJ4]");
+    filaComandosMovimentacaoAbaComandos.enqueue("[CTZGR]");
 
-    parser(filaComandosPosicaoNeutraCTZ.dequeue());
+    parser(filaComandosMovimentacaoAbaComandos.dequeue());
 }
 
 void MainWindow::desligaServos()
-{
-    // TODO: Aba comandos: Fazer o braço robô ir para a posição de repouso antes de desligar
-    parser("[JSTA0000B0000C0000D0000E0000G0000]");
+{    
+    filaComandosMovimentacaoAbaComandos.enqueue("[RPS]");
+    filaComandosMovimentacaoAbaComandos.enqueue("[JSTA0000B0000C0000D0000E0000G0000]");
+
+    parser(filaComandosMovimentacaoAbaComandos.dequeue());
 }
 
 void MainWindow::comandoJST()

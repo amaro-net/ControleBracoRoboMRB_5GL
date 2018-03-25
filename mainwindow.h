@@ -349,7 +349,7 @@ class MainWindow : public QMainWindow
         bool ecoCaracteresAtivado = false;
 
         QQueue<QString> filaComandosInicializacao;
-        QQueue<QString> filaComandosPosicaoNeutraCTZ;
+        QQueue<QString> filaComandosMovimentacaoAbaComandos;
         QQueue<QString> filaComandosMoverComVelAcl;
         QQueue<QString> filaConfigPosLimites;
 

@@ -88,12 +88,14 @@ void Console::keyPressEvent(QKeyEvent *e)
             if(qtLinhas > this->document()->blockCount())
                 insertPlainText(QString("\n"));
             //QPlainTextEdit::keyPressEvent(e);
+            emit getData(e->text().toLocal8Bit());
             break;
         }
             //case Qt::Key_Enter:
         case Qt::Key_Left:
         case Qt::Key_Right:
         case Qt::Key_Up:
+            // TODO: Incluir lista/fila de comandos já executados. Avaliar se faz sentido incluir os que foram executados automaticamente.
         case Qt::Key_Down:
             break;
         default:
