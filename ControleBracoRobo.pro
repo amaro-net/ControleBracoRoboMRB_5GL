@@ -40,3 +40,6 @@ FORMS += \
     montagemdecomandosdialog.ui
 
 QT += serialport
+
+RESOURCES += \
+    controlebracoroboresorcefile.qrc

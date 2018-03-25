@@ -23,6 +23,12 @@
 
 #define TEMPO_TIMER_ENVIO_IMEDIATO_US   200
 
+#define LBL_POS_ATUAL_X_MIN 50
+#define LBL_POS_ATUAL_X_MAX 218
+
+#define STR_UND_MICROSSEGUNDOS " μs"
+#define STR_UND_GRAUS " º"
+
 static QString junta[QTD_SERVOS] = {"J0", "J1", "J2", "J3", "J4", "GR"};
 static QString idJST[QTD_SERVOS] = {"A", "B", "C", "D", "E", "G"};
 

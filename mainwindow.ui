@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>503</width>
+    <width>536</width>
     <height>547</height>
    </rect>
   </property>
@@ -17,38 +17,14 @@
    <widget class="QTabWidget" name="tabPrincipal">
     <property name="geometry">
      <rect>
-      <x>8</x>
+      <x>3</x>
       <y>61</y>
-      <width>490</width>
+      <width>531</width>
       <height>461</height>
      </rect>
     </property>
-    <property name="tabPosition">
-     <enum>QTabWidget::North</enum>
-    </property>
-    <property name="tabShape">
-     <enum>QTabWidget::Rounded</enum>
-    </property>
     <property name="currentIndex">
      <number>1</number>
-    </property>
-    <property name="elideMode">
-     <enum>Qt::ElideNone</enum>
-    </property>
-    <property name="usesScrollButtons">
-     <bool>true</bool>
-    </property>
-    <property name="documentMode">
-     <bool>false</bool>
-    </property>
-    <property name="tabsClosable">
-     <bool>false</bool>
-    </property>
-    <property name="movable">
-     <bool>false</bool>
-    </property>
-    <property name="tabBarAutoHide">
-     <bool>false</bool>
     </property>
     <widget class="QWidget" name="tabComandos">
      <attribute name="title">
@@ -511,10 +487,10 @@ comandos</string>
      <widget class="QTabWidget" name="tabUnidadePos">
       <property name="geometry">
        <rect>
-        <x>0</x>
+        <x>230</x>
         <y>0</y>
-        <width>478</width>
-        <height>220</height>
+        <width>295</width>
+        <height>234</height>
        </rect>
       </property>
       <property name="currentIndex">
@@ -522,18 +498,18 @@ comandos</string>
       </property>
       <widget class="QWidget" name="tabLarguraDePulso">
        <attribute name="title">
-        <string>Largura de pulso (us)</string>
+        <string>Largura de pulso (μs)</string>
        </attribute>
        <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
-          <x>227</x>
+          <x>0</x>
           <y>1</y>
-          <width>245</width>
+          <width>288</width>
           <height>193</height>
          </rect>
         </property>
-        <layout class="QGridLayout" name="gridLayout">
+        <layout class="QGridLayout" name="layoutPosLarguraDePulso">
          <property name="horizontalSpacing">
           <number>0</number>
          </property>
@@ -639,6 +615,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> μs</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -657,13 +636,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -679,21 +658,27 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
@@ -704,21 +689,27 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv/80ms</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
@@ -745,6 +736,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> μs</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -763,13 +757,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -785,21 +779,27 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
@@ -810,21 +810,27 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv/80ms</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
@@ -851,6 +857,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> μs</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -869,13 +878,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -891,21 +900,27 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
@@ -916,21 +931,27 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv/80ms</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
@@ -957,6 +978,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> μs</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -975,13 +999,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -997,21 +1021,27 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
@@ -1022,21 +1052,27 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv/80ms</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
@@ -1063,6 +1099,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> μs</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -1081,13 +1120,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -1103,21 +1142,27 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
@@ -1128,21 +1173,27 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv/80ms</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
@@ -1169,6 +1220,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> μs</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
            </property>
@@ -1187,13 +1241,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -1209,21 +1263,27 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
@@ -1234,25 +1294,44 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> unv/80ms</string>
+           </property>
            <property name="maximum">
             <number>9999</number>
+           </property>
+           <property name="value">
+            <number>999</number>
            </property>
           </widget>
          </item>
         </layout>
+       </widget>
+       <widget class="QLabel" name="lblUnv">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>193</y>
+          <width>241</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>unv = unidade de velocidade = 0,25μs/10ms</string>
+        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="tabAngulosDasJuntas">
@@ -1262,13 +1341,13 @@ comandos</string>
        <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
-          <x>227</x>
+          <x>0</x>
           <y>1</y>
-          <width>245</width>
+          <width>288</width>
           <height>193</height>
          </rect>
         </property>
-        <layout class="QGridLayout" name="gridLayout_2">
+        <layout class="QGridLayout" name="layoutPosAngulos">
          <property name="horizontalSpacing">
           <number>0</number>
          </property>
@@ -1368,6 +1447,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> º</string>
+           </property>
            <property name="decimals">
             <number>3</number>
            </property>
@@ -1395,13 +1477,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -1417,18 +1499,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s</string>
            </property>
            <property name="decimals">
             <number>3</number>
@@ -1439,6 +1524,9 @@ comandos</string>
            <property name="singleStep">
             <double>0.000000000000000</double>
            </property>
+           <property name="value">
+            <double>9.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="1" column="3">
@@ -1448,18 +1536,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s²</string>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -1492,6 +1583,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> º</string>
+           </property>
            <property name="decimals">
             <number>3</number>
            </property>
@@ -1519,13 +1613,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -1541,18 +1635,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s</string>
            </property>
            <property name="decimals">
             <number>3</number>
@@ -1563,6 +1660,9 @@ comandos</string>
            <property name="singleStep">
             <double>0.000000000000000</double>
            </property>
+           <property name="value">
+            <double>9.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="2" column="3">
@@ -1572,18 +1672,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s²</string>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -1616,6 +1719,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> º</string>
+           </property>
            <property name="decimals">
             <number>3</number>
            </property>
@@ -1646,13 +1752,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -1668,18 +1774,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s</string>
            </property>
            <property name="decimals">
             <number>3</number>
@@ -1690,6 +1799,9 @@ comandos</string>
            <property name="singleStep">
             <double>0.000000000000000</double>
            </property>
+           <property name="value">
+            <double>9.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="3" column="3">
@@ -1699,18 +1811,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s²</string>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -1743,6 +1858,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> º</string>
+           </property>
            <property name="decimals">
             <number>3</number>
            </property>
@@ -1770,13 +1888,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -1792,18 +1910,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s</string>
            </property>
            <property name="decimals">
             <number>3</number>
@@ -1814,6 +1935,9 @@ comandos</string>
            <property name="singleStep">
             <double>0.000000000000000</double>
            </property>
+           <property name="value">
+            <double>9.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="4" column="3">
@@ -1823,18 +1947,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s²</string>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -1867,6 +1994,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> º</string>
+           </property>
            <property name="decimals">
             <number>3</number>
            </property>
@@ -1894,13 +2024,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -1916,18 +2046,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s</string>
            </property>
            <property name="decimals">
             <number>3</number>
@@ -1938,6 +2071,9 @@ comandos</string>
            <property name="singleStep">
             <double>0.000000000000000</double>
            </property>
+           <property name="value">
+            <double>9.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="5" column="3">
@@ -1947,18 +2083,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s²</string>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -1991,6 +2130,9 @@ comandos</string>
            <property name="keyboardTracking">
             <bool>false</bool>
            </property>
+           <property name="suffix">
+            <string> º</string>
+           </property>
            <property name="decimals">
             <number>3</number>
            </property>
@@ -2018,13 +2160,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>55</width>
              <height>24</height>
             </size>
            </property>
@@ -2040,18 +2182,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>66</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s</string>
            </property>
            <property name="decimals">
             <number>3</number>
@@ -2062,6 +2207,9 @@ comandos</string>
            <property name="singleStep">
             <double>0.000000000000000</double>
            </property>
+           <property name="value">
+            <double>9.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="6" column="3">
@@ -2071,18 +2219,21 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
+           </property>
+           <property name="suffix">
+            <string> º/s²</string>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -2174,17 +2325,17 @@ comandos</string>
          <property name="enabled">
           <bool>false</bool>
          </property>
-         <property name="minimum">
-          <number>480</number>
-         </property>
-         <property name="maximum">
-          <number>2432</number>
-         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
+         <property name="invertedAppearance">
+          <bool>false</bool>
+         </property>
          <property name="tickPosition">
           <enum>QSlider::TicksAbove</enum>
+         </property>
+         <property name="tickInterval">
+          <number>25</number>
          </property>
         </widget>
        </item>
@@ -2200,7 +2351,7 @@ comandos</string>
           <enum>QSlider::TicksAbove</enum>
          </property>
          <property name="tickInterval">
-          <number>1</number>
+          <number>25</number>
          </property>
         </widget>
        </item>
@@ -2216,7 +2367,7 @@ comandos</string>
           <enum>QSlider::TicksAbove</enum>
          </property>
          <property name="tickInterval">
-          <number>1</number>
+          <number>25</number>
          </property>
         </widget>
        </item>
@@ -2252,7 +2403,7 @@ comandos</string>
           <enum>QSlider::TicksAbove</enum>
          </property>
          <property name="tickInterval">
-          <number>1</number>
+          <number>25</number>
          </property>
         </widget>
        </item>
@@ -2285,7 +2436,7 @@ comandos</string>
           <enum>QSlider::TicksAbove</enum>
          </property>
          <property name="tickInterval">
-          <number>1</number>
+          <number>25</number>
          </property>
         </widget>
        </item>
@@ -2318,7 +2469,7 @@ comandos</string>
           <enum>QSlider::TicksAbove</enum>
          </property>
          <property name="tickInterval">
-          <number>1</number>
+          <number>25</number>
          </property>
         </widget>
        </item>
@@ -2342,13 +2493,32 @@ comandos</string>
         </widget>
        </item>
       </layout>
+      <zorder>chkJ1</zorder>
+      <zorder>lblHab</zorder>
+      <zorder>lblJ4</zorder>
+      <zorder>lblJ0</zorder>
+      <zorder>sliderJ0</zorder>
+      <zorder>lblJ2</zorder>
+      <zorder>sliderJ2</zorder>
+      <zorder>chkJ3</zorder>
+      <zorder>sliderJ1</zorder>
+      <zorder>chkGR</zorder>
+      <zorder>chkJ0</zorder>
+      <zorder>sliderGR</zorder>
+      <zorder>lblJ3</zorder>
+      <zorder>chkJ2</zorder>
+      <zorder>sliderJ4</zorder>
+      <zorder>chkJ4</zorder>
+      <zorder>lblGR</zorder>
+      <zorder>sliderJ3</zorder>
+      <zorder>lblJ1</zorder>
      </widget>
      <widget class="QGroupBox" name="grpPosXYZDaGarra">
       <property name="geometry">
        <rect>
         <x>2</x>
-        <y>227</y>
-        <width>261</width>
+        <y>228</y>
+        <width>252</width>
         <height>191</height>
        </rect>
       </property>
@@ -2861,7 +3031,7 @@ comandos</string>
        </property>
        <property name="geometry">
         <rect>
-         <x>203</x>
+         <x>198</x>
          <y>47</y>
          <width>49</width>
          <height>47</height>
@@ -2879,7 +3049,7 @@ Alvo</string>
        </property>
        <property name="geometry">
         <rect>
-         <x>203</x>
+         <x>198</x>
          <y>100</y>
          <width>49</width>
          <height>47</height>
@@ -2895,8 +3065,8 @@ alvo</string>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>300</x>
-        <y>236</y>
+        <x>321</x>
+        <y>237</y>
         <width>114</width>
         <height>179</height>
        </rect>
@@ -2942,6 +3112,130 @@ alterada.</string>
        </item>
       </layout>
      </widget>
+     <widget class="QLabel" name="lblSliderPosAtualJ0">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>41</y>
+        <width>8</width>
+        <height>8</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="controlebracoroboresorcefile.qrc">:/images/esfera_cristal_verde.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblSliderPosAtualJ3">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>131</y>
+        <width>8</width>
+        <height>8</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="controlebracoroboresorcefile.qrc">:/images/esfera_cristal_verde.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblSliderPosAtualJ4">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>161</y>
+        <width>8</width>
+        <height>8</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="controlebracoroboresorcefile.qrc">:/images/esfera_cristal_verde.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblSliderPosAtualJ2">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>101</y>
+        <width>8</width>
+        <height>8</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="controlebracoroboresorcefile.qrc">:/images/esfera_cristal_verde.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblSliderPosAtualJ1">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>71</y>
+        <width>8</width>
+        <height>8</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="controlebracoroboresorcefile.qrc">:/images/esfera_cristal_verde.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblSliderPosAtualGR">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>191</y>
+        <width>8</width>
+        <height>8</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="controlebracoroboresorcefile.qrc">:/images/esfera_cristal_verde.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <zorder>tabUnidadePos</zorder>
+     <zorder>layoutWidget</zorder>
+     <zorder>grpPosXYZDaGarra</zorder>
+     <zorder>layoutWidget</zorder>
+     <zorder>lblSliderPosAtualJ3</zorder>
+     <zorder>lblSliderPosAtualJ0</zorder>
+     <zorder>lblSliderPosAtualJ4</zorder>
+     <zorder>lblSliderPosAtualGR</zorder>
+     <zorder>lblSliderPosAtualJ1</zorder>
+     <zorder>lblSliderPosAtualJ2</zorder>
     </widget>
     <widget class="QWidget" name="tabSeqComandos">
      <attribute name="title">
@@ -4134,6 +4428,151 @@ Inversa</string>
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <tabstops>
+  <tabstop>cmbPortaSerial</tabstop>
+  <tabstop>cmbBaudRate</tabstop>
+  <tabstop>cmbParidade</tabstop>
+  <tabstop>cmbBitsDeDados</tabstop>
+  <tabstop>cmbBitDeParada</tabstop>
+  <tabstop>btAbrirPortaSerial</tabstop>
+  <tabstop>btFecharPortaSerial</tabstop>
+  <tabstop>tabPrincipal</tabstop>
+  <tabstop>btAbrirGarra</tabstop>
+  <tabstop>btGarraSemiaberta</tabstop>
+  <tabstop>btFecharGarra</tabstop>
+  <tabstop>btGiroGarraMais90</tabstop>
+  <tabstop>btGarraPosNeutra</tabstop>
+  <tabstop>btGiroGarraMenos90</tabstop>
+  <tabstop>btPosicaoRepouso</tabstop>
+  <tabstop>btPosNeutraJST</tabstop>
+  <tabstop>btDesligaServos</tabstop>
+  <tabstop>btPosNeutraCTZ</tabstop>
+  <tabstop>listaUltimoComandoAcionado</tabstop>
+  <tabstop>btAdicionarComandoAASeqComandos</tabstop>
+  <tabstop>chkLEDP0</tabstop>
+  <tabstop>chkLEDP1</tabstop>
+  <tabstop>chkLEDP2</tabstop>
+  <tabstop>chkLEDP3</tabstop>
+  <tabstop>chkLEDP4</tabstop>
+  <tabstop>chkLEDP5</tabstop>
+  <tabstop>chkLEDP6</tabstop>
+  <tabstop>chkLEDP7</tabstop>
+  <tabstop>chkAtivarLeds</tabstop>
+  <tabstop>btAtualizarLeds</tabstop>
+  <tabstop>edtComandoLEDAcionado</tabstop>
+  <tabstop>btAdicionarLedsSeqComandos</tabstop>
+  <tabstop>chkJ0</tabstop>
+  <tabstop>chkJ1</tabstop>
+  <tabstop>chkJ2</tabstop>
+  <tabstop>chkJ3</tabstop>
+  <tabstop>chkJ4</tabstop>
+  <tabstop>chkGR</tabstop>
+  <tabstop>sliderJ0</tabstop>
+  <tabstop>sliderJ1</tabstop>
+  <tabstop>sliderJ2</tabstop>
+  <tabstop>sliderJ3</tabstop>
+  <tabstop>sliderJ4</tabstop>
+  <tabstop>sliderGR</tabstop>
+  <tabstop>tabUnidadePos</tabstop>
+  <tabstop>spnJ0Alvo</tabstop>
+  <tabstop>spnJ1Alvo</tabstop>
+  <tabstop>spnJ2Alvo</tabstop>
+  <tabstop>spnJ3Alvo</tabstop>
+  <tabstop>spnJ4Alvo</tabstop>
+  <tabstop>spnGRAlvo</tabstop>
+  <tabstop>edtJ0Atual</tabstop>
+  <tabstop>edtJ1Atual</tabstop>
+  <tabstop>edtJ2Atual</tabstop>
+  <tabstop>edtJ3Atual</tabstop>
+  <tabstop>edtJ4Atual</tabstop>
+  <tabstop>edtGRAtual</tabstop>
+  <tabstop>spnJ0Vel</tabstop>
+  <tabstop>spnJ1Vel</tabstop>
+  <tabstop>spnJ2Vel</tabstop>
+  <tabstop>spnJ3Vel</tabstop>
+  <tabstop>spnJ4Vel</tabstop>
+  <tabstop>spnGRVel</tabstop>
+  <tabstop>spnJ0Acl</tabstop>
+  <tabstop>spnJ1Acl</tabstop>
+  <tabstop>spnJ2Acl</tabstop>
+  <tabstop>spnJ3Acl</tabstop>
+  <tabstop>spnJ4Acl</tabstop>
+  <tabstop>spnGRAcl</tabstop>
+  <tabstop>spnJ0AlvoGraus</tabstop>
+  <tabstop>spnJ1AlvoGraus</tabstop>
+  <tabstop>spnJ2AlvoGraus</tabstop>
+  <tabstop>spnJ3AlvoGraus</tabstop>
+  <tabstop>spnJ4AlvoGraus</tabstop>
+  <tabstop>spnGRAlvoGraus</tabstop>
+  <tabstop>edtJ0AtualGraus</tabstop>
+  <tabstop>edtJ1AtualGraus</tabstop>
+  <tabstop>edtJ2AtualGraus</tabstop>
+  <tabstop>edtJ3AtualGraus</tabstop>
+  <tabstop>edtJ4AtualGraus</tabstop>
+  <tabstop>edtGRAtualGraus</tabstop>
+  <tabstop>spnJ0VelGrausPorSeg</tabstop>
+  <tabstop>spnJ1VelGrausPorSeg</tabstop>
+  <tabstop>spnJ2VelGrausPorSeg</tabstop>
+  <tabstop>spnJ3VelGrausPorSeg</tabstop>
+  <tabstop>spnJ4VelGrausPorSeg</tabstop>
+  <tabstop>spnGRVelGrausPorSeg</tabstop>
+  <tabstop>spnJ0AclGrausPorSegQuad</tabstop>
+  <tabstop>spnJ1AclGrausPorSegQuad</tabstop>
+  <tabstop>spnJ2AclGrausPorSegQuad</tabstop>
+  <tabstop>spnJ3AclGrausPorSegQuad</tabstop>
+  <tabstop>spnJ4AclGrausPorSegQuad</tabstop>
+  <tabstop>spnGRAclGrausPorSegQuad</tabstop>
+  <tabstop>spnPosXAlvo</tabstop>
+  <tabstop>spnPosYAlvo</tabstop>
+  <tabstop>spnPosZAlvo</tabstop>
+  <tabstop>spnRxAlvo</tabstop>
+  <tabstop>spnRyAlvo</tabstop>
+  <tabstop>spnRzAlvo</tabstop>
+  <tabstop>edtPosXAtual</tabstop>
+  <tabstop>edtPosYAtual</tabstop>
+  <tabstop>edtPosZAtual</tabstop>
+  <tabstop>edtRxAtual</tabstop>
+  <tabstop>edtRyAtual</tabstop>
+  <tabstop>edtRzAtual</tabstop>
+  <tabstop>btCalcularXYZAlvo</tabstop>
+  <tabstop>btCalcularAngulosAlvo</tabstop>
+  <tabstop>btMover</tabstop>
+  <tabstop>btMoverComVelEAcl</tabstop>
+  <tabstop>chkEnviaComandoImediato</tabstop>
+  <tabstop>listSequenciaComandos</tabstop>
+  <tabstop>btNovaSequencia</tabstop>
+  <tabstop>btCarregarSeqComandos</tabstop>
+  <tabstop>btSalvarSeqComandos</tabstop>
+  <tabstop>btComandoUp</tabstop>
+  <tabstop>btComandoDown</tabstop>
+  <tabstop>btAdicionarComando</tabstop>
+  <tabstop>btAdicionarPosCorrente</tabstop>
+  <tabstop>chkComVelocidades</tabstop>
+  <tabstop>chkComAceleracoes</tabstop>
+  <tabstop>btEditarComando</tabstop>
+  <tabstop>btRemoverComando</tabstop>
+  <tabstop>btExecutarSeqComandos</tabstop>
+  <tabstop>btContinuarSeqComandos</tabstop>
+  <tabstop>btExecutarLoopSeqComandos</tabstop>
+  <tabstop>btContinuarLoopSeqComandos</tabstop>
+  <tabstop>btPararSeqComandos</tabstop>
+  <tabstop>rdbReadyForPIC</tabstop>
+  <tabstop>rdbMiniMaestro24</tabstop>
+  <tabstop>tabelaPosLimites</tabstop>
+  <tabstop>btObterPosLimites</tabstop>
+  <tabstop>btConfigurarPosLimites</tabstop>
+  <tabstop>rdbSemFeedback</tabstop>
+  <tabstop>rdbPosicoesCorrentesDasJuntas</tabstop>
+  <tabstop>rdbSinalDeMovimento</tabstop>
+  <tabstop>chkComandosBloqueantesDeMovimento</tabstop>
+  <tabstop>tabelaPosLimitesGraus</tabstop>
+  <tabstop>btConfigurarPosLimitesGraus</tabstop>
+  <tabstop>btResetarPlacaControle</tabstop>
+  <tabstop>btResetarPlacaServos</tabstop>
+  <tabstop>chkEcoLocal</tabstop>
+ </tabstops>
+ <resources>
+  <include location="controlebracoroboresorcefile.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -94,6 +94,8 @@ void MainWindow::alimentarListasDeComponentes()
     QString spnVelGrausPorSeg_template("spn%1VelGrausPorSeg");
     QString spnAclGrausPorSegQuad_template("spn%1AclGrausPorSegQuad");
 
+    QString lblSliderPosAtual_template("lblSliderPosAtual%1");
+
     for(int i = 0; i < QTD_SERVOS; i++)
     {
         QCheckBox *chkHab = ui->tabPosicoesDasJuntas->findChild<QCheckBox *>(chkHab_template.arg(junta[i]));
@@ -109,6 +111,8 @@ void MainWindow::alimentarListasDeComponentes()
         QDoubleSpinBox *spnVelGrausPorSeg  = ui->tabAngulosDasJuntas->findChild<QDoubleSpinBox *>(spnVelGrausPorSeg_template.arg(junta[i]));
         QDoubleSpinBox *spnAclGrausPorSegQuad = ui->tabAngulosDasJuntas->findChild<QDoubleSpinBox *>(spnAclGrausPorSegQuad_template.arg(junta[i]));
 
+        QLabel *lblSliderPosAtual = ui->tabPosicoesDasJuntas->findChild<QLabel *>(lblSliderPosAtual_template.arg(junta[i]));
+
         lstChkHab.append(chkHab);
         lstSlider.append(slider);
 
@@ -121,6 +125,8 @@ void MainWindow::alimentarListasDeComponentes()
         lstEdtAtualGraus.append(edtAtualGraus);
         lstSpnVelGrausPorSeg.append(spnVelGrausPorSeg);
         lstSpnAclGrausPorSegQuad.append(spnAclGrausPorSegQuad);
+
+        lstPontoVerdeSliderPosAtual.append(lblSliderPosAtual);
     }
 
     QString chkLed_template("chkLEDP%1");
@@ -229,7 +235,7 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
 
         lstSlider[i]->setMaximum(tempoPulsoMax[i]);
         lstSlider[i]->setMinimum(tempoPulsoMin[i]);
-        lstSlider[i]->setTickInterval(1);
+        lstSlider[i]->setTickInterval((tempoPulsoMax[i] - tempoPulsoMin[i]) / 4);
 
         angMax[i] = ui->tabelaPosLimitesGraus->item(i,0)->text().toInt();
         angMin[i] = ui->tabelaPosLimitesGraus->item(i,1)->text().toInt();
@@ -255,6 +261,10 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         double anguloRepouso = coeffAng[i] * tempoPulsoRepouso[i] + offsetAng[i];        
         anguloRepouso = round(anguloRepouso * DIV_CD_POSICAO) / DIV_CD_POSICAO;
         setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 3, QString("%1").arg(anguloRepouso));
+
+        // 1.0 serve para que o resultado seja float ou double
+        coeffPontoVerde[i] = (1.0 * (LBL_POS_ATUAL_X_MAX - LBL_POS_ATUAL_X_MIN))/(tempoPulsoMax[i] - tempoPulsoMin[i]);
+        offsetPontoVerde[i] = LBL_POS_ATUAL_X_MAX - tempoPulsoMax[i] * coeffPontoVerde[i];
 
         if(ui->rdbReadyForPIC->isChecked())
         {
@@ -285,20 +295,20 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
 
             // TODO: Verificar se estes vetores serão usados nas velocidades e acelerações
             int velTmpPulso = lstSpnVel[i]->value();
-            velGrausPorSeg[i] = velTmpPulso * incrementosAng[i] / 0.25 * (10e-3);  // (0.25us)/(10ms)
+            double velGrausPorSeg = velTmpPulso * incrementosAng[i] / 0.25 * (10e-3);  // (0.25us)/(10ms)
                             // (0.25us)/(10ms) * Graus/(us) / 0.25
                             // (0.25us)/(10ms) * Graus/(0.25us)
                             //        1/(10ms) * Graus
                             //     Graus /(10ms)
                             // Graus / (10e-3 s) * 10e-3
                             // Graus / s
-            velGrausPorSeg[i] = round(velGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
-            lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg[i]);
+            velGrausPorSeg = round(velGrausPorSeg * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+            lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg);
 
             int aclTmpPulso = lstSpnAcl[i]->value();
-            aclGrausPorSegQuad[i] = aclTmpPulso * incrementosAng[i] / 0.25 * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
-            aclGrausPorSegQuad[i] = round(aclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
-            lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad[i]);
+            double aclGrausPorSegQuad = aclTmpPulso * incrementosAng[i] / 0.25 * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
+            aclGrausPorSegQuad = round(aclGrausPorSegQuad * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+            lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad);
         }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
@@ -325,25 +335,25 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
 
             // TODO: Verificar se estes vetores serão usados nas velocidades e acelerações
             int velTmpPulso = lstSpnVel[i]->value();
-            velGrausPorSeg[i] = velTmpPulso * incrementosAng[i] * (10e-3);  // (0.25us)/(10ms)
+            double velGrausPorSeg = velTmpPulso * incrementosAng[i] * (10e-3);  // (0.25us)/(10ms)
                             // (0.25us)/(10ms) * Graus/(0.25us) * 10 * 10e-3
                             //      1 / (10ms) * Graus          * 10 * 10e-3
                             //       Graus / ((10e-3) * s) * (10e-3)
                             //       Graus / s
-            velGrausPorSeg[i] = round(velGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
-            lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg[i]);
+            velGrausPorSeg = round(velGrausPorSeg * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+            lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg);
 
 
             int aclTmpPulso = lstSpnAcl[i]->value();
-            aclGrausPorSegQuad[i] = aclTmpPulso * incrementosAng[i] * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
+            double aclGrausPorSegQuad = aclTmpPulso * incrementosAng[i] * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
                             // (0.25us)/(10ms)/(80ms) * Graus/(0.25us)
                             // 1/(10ms)/(80ms) * Graus/1
                             // Graus/(10ms)/(80ms)
                             // Graus/((10ms)*(80ms))
                             // Graus / (10e-3 * s  * 80e-3 * s) * 10e-3 * 80e-3
                             // Graus / s^2
-            aclGrausPorSegQuad[i] = round(aclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
-            lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad[i]);
+            aclGrausPorSegQuad = round(aclGrausPorSegQuad * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+            lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad);
         }
     }
 }
@@ -403,20 +413,20 @@ void MainWindow::habilitarComponentes(bool estadoHab)
     {
         lstChkHab[i]->setEnabled(estadoHab);
         lstSlider[i]->setEnabled(estadoHab);
-        bool ehNumeroEZero = false;
+        bool ehNumeroMaiorQueZero = false;
 
-        lstEdtAtual[i]->text().toInt(&ehNumeroEZero);
+        lstEdtAtual[i]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt(&ehNumeroMaiorQueZero);
 
-        if(ehNumeroEZero)
+        if(ehNumeroMaiorQueZero)
         {
-            ehNumeroEZero = (lstEdtAtual[i]->text().toInt() > 0);
+            ehNumeroMaiorQueZero = (lstEdtAtual[i]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt() > 0);
         }
 
-        lstSpnAlvo[i]->setEnabled(estadoHab && ehNumeroEZero);
+        lstSpnAlvo[i]->setEnabled(estadoHab && ehNumeroMaiorQueZero);
         lstSpnVel[i]->setEnabled(estadoHab);
         lstSpnAcl[i]->setEnabled(estadoHab);
 
-        lstSpnAlvoGraus[i]->setEnabled(estadoHab && ehNumeroEZero);
+        lstSpnAlvoGraus[i]->setEnabled(estadoHab && ehNumeroMaiorQueZero);
         lstSpnVelGrausPorSeg[i]->setEnabled(estadoHab);
         lstSpnAclGrausPorSegQuad[i]->setEnabled(estadoHab);
     }
@@ -482,7 +492,7 @@ void MainWindow::HabilitarComponentesComServosLigados()
     for(int i = 0; (i < QTD_SERVOS - 1) && estadoHab; i++)
     {
         bool conversaoOk = false;
-        float posAtual = lstEdtAtual[i]->text().toFloat(&conversaoOk);
+        float posAtual = lstEdtAtual[i]->text().replace(STR_UND_MICROSSEGUNDOS, "").toFloat(&conversaoOk);
         estadoHab = (conversaoOk && (posAtual > 0));
     }
 
@@ -552,8 +562,6 @@ void MainWindow::abrirPortaSerial()
         console->setEnabled(true);
         inicializando = true;
         configuracoesIniciais();
-
-        //habilitarComponentesConn(true);        
     }
     else
     {
@@ -568,6 +576,7 @@ void MainWindow::fecharPortaSerial()
     if (serial->isOpen())
         serial->close();
     console->setEnabled(false);
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     habilitarComponentesConn(false);
 
@@ -849,6 +858,24 @@ void MainWindow::recebeCaracteresDeResposta(QByteArray data)
     }
 }
 
+void MainWindow::setaPosicaoPontoVerde(int idxJunta, int posicao)
+{    
+    int x, y, width, height;
+    float xf;
+
+    QRect geometry = lstPontoVerdeSliderPosAtual[idxJunta]->geometry();
+
+    geometry.getRect(&x, &y, &width, &height);
+
+    xf = coeffPontoVerde[idxJunta] * posicao + offsetPontoVerde[idxJunta];
+
+    x = qRound(xf);
+
+    geometry.setRect(x, y, width, height);
+
+    lstPontoVerdeSliderPosAtual[idxJunta]->setGeometry(geometry);
+}
+
 void MainWindow::decodificaResposta()
 {
     QString resposta = filaBufferEntrada.dequeue();
@@ -858,7 +885,7 @@ void MainWindow::decodificaResposta()
     bool ehRespostaCTZ = false;
     bool ehRespostaMoverComVelAcl = false;
 
-    if(tamanhoResposta == 35 && (resposta.contains("MOV") || resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN1")) )
+    if(tamanhoResposta == 35 && (resposta.contains("MOV") || resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN2")) )
     {
         QString strValor;
         int valor;
@@ -869,17 +896,22 @@ void MainWindow::decodificaResposta()
             strValor = resposta.mid(5*(i+1), 4);
             valor = strValor.toInt();
 
-            lstEdtAtual[i]->setText(strValor.setNum(valor));
+            lstEdtAtual[i]->setText(strValor.setNum(valor) + STR_UND_MICROSSEGUNDOS);
 
             if(valor > 0)
             {
                 graus = converteMicrossegundosParaGraus(i, valor);
-                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
-                // TODO: Aba Posições das Juntas: incluir widgets que plotem no slider a posição atual da junta
+                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO) + STR_UND_GRAUS);
+                lstPontoVerdeSliderPosAtual[i]->setVisible(true);
+                setaPosicaoPontoVerde(i, valor);
+            }
+            else
+            {
+                lstPontoVerdeSliderPosAtual[i]->setVisible(false);
             }
         }
 
-        //if(resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN1"))
+        //if(resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN2"))
         if(!resposta.contains("MOV"))
         {
             for(int i = 0; i < QTD_SERVOS; i++)
@@ -890,7 +922,7 @@ void MainWindow::decodificaResposta()
                 {
                     if(valor != lstSpnAlvo[i]->value())
                     {
-                        if(countAbaPosicoesValueChanged <= 0)
+                        if(!ui->chkEnviaComandoImediato->isChecked() || countAbaPosicoesValueChanged <= 0)
                         {
                             countAbaPosicoesValueChanged = -1;
                             lstSpnAlvo[i]->setValue(valor);
@@ -941,12 +973,18 @@ void MainWindow::decodificaResposta()
 
             valor = strValor.toInt();
 
-            lstEdtAtual[i]->setText(strValor.setNum(valor));
+            lstEdtAtual[i]->setText(strValor.setNum(valor) + STR_UND_MICROSSEGUNDOS);
 
             if(valor > 0)
             {
                 double graus = converteMicrossegundosParaGraus(i, valor);
-                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
+                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO) + STR_UND_GRAUS);
+                lstPontoVerdeSliderPosAtual[i]->setVisible(true);
+                setaPosicaoPontoVerde(i, valor);
+            }
+            else
+            {
+                lstPontoVerdeSliderPosAtual[i]->setVisible(false);
             }
 
             //if(resposta.contains("CTZ") || resposta.contains("IN1"))
@@ -956,7 +994,7 @@ void MainWindow::decodificaResposta()
                 {
                     if(valor != lstSpnAlvo[i]->value())
                     {
-                        if(countAbaPosicoesValueChanged <= 0)
+                        if(!ui->chkEnviaComandoImediato->isChecked() || countAbaPosicoesValueChanged <= 0)
                         {
                             countAbaPosicoesValueChanged = -1;
                             lstSpnAlvo[i]->setValue(valor);
@@ -984,7 +1022,7 @@ void MainWindow::decodificaResposta()
                 ehRespostaCTZ = resposta.contains("CTZ");
             }
 
-        }
+        }        
         else if(resposta.contains("VEL"))
         {
             setarVelOuAclResposta(resposta, lstSpnVel);            
@@ -1002,6 +1040,29 @@ void MainWindow::decodificaResposta()
             setarValorPosLimiteResposta(resposta);
             ehRespostaConfigPosLimite = true;
         }
+    }
+    else if(resposta.length() == 8 && (resposta.contains("GA") || resposta.contains("GF")))
+    {
+        QString valor = resposta.mid(3,4);
+        valor.setNum(valor.toInt());
+
+        ui->edtGRAtual->setText(valor);
+        double graus = converteMicrossegundosParaGraus(5, valor.toInt());
+        ui->edtGRAtualGraus->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
+
+        lstPontoVerdeSliderPosAtual[5]->setVisible(true);
+        setaPosicaoPontoVerde(5, valor.toInt());
+
+        ui->spnGRAlvo->setValue(valor.toInt());
+
+        if(!ui->spnGRAlvo->isEnabled())
+        {
+            ui->spnGRAlvo->setEnabled(true);
+            ui->chkGR->setChecked(true);
+            ui->spnGRAlvoGraus->setEnabled(true);
+        }
+
+        ehRespostaFinal = true;
     }
     else if(resposta.contains("[PRONTO]"))
     {
@@ -1061,27 +1122,7 @@ void MainWindow::decodificaResposta()
     else if(resposta.contains("CSB"))
     {
         ui->chkComandosBloqueantesDeMovimento->setChecked(resposta.at(4) == '1');
-    }
-    else if(resposta.length() == 8 && (resposta.contains("GA") || resposta.contains("GF")))
-    {
-        QString valor = resposta.mid(3,4);
-        valor.setNum(valor.toInt());
-
-        ui->edtGRAtual->setText(valor);
-        double graus = converteMicrossegundosParaGraus(5, valor.toInt());
-        ui->edtGRAtualGraus->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
-
-        ui->spnGRAlvo->setValue(valor.toInt());
-
-        if(!ui->spnGRAlvo->isEnabled())
-        {
-            ui->spnGRAlvo->setEnabled(true);
-            ui->chkGR->setChecked(true);
-            ui->spnGRAlvoGraus->setEnabled(true);            
-        }
-
-        ehRespostaFinal = true;
-    }
+    }    
     else if(resposta.contains("RST"))
     {
         //habilitarComponentesConn(false);
@@ -1352,7 +1393,8 @@ void MainWindow::posicaoNeutraCTZ()
 }
 
 void MainWindow::desligaServos()
-{    
+{
+    // TODO: Aba comandos: Fazer o braço robô ir para a posição de repouso antes de desligar
     parser("[JSTA0000B0000C0000D0000E0000G0000]");
 }
 
@@ -1395,7 +1437,7 @@ void MainWindow::comandoLEDSemParametros()
 void MainWindow::on_btAbrirGarra_clicked()
 {
     on_btPararSeqComandos_clicked();
-    ui->chkEnviaComandoImediato->setChecked(false);
+    ui->chkEnviaComandoImediato->setChecked(false);    
 
     ui->lblComandoAcionado->setText(ui->btAbrirGarra->text());
     ui->listaUltimoComandoAcionado->clear();
@@ -1412,7 +1454,7 @@ void MainWindow::on_btAbrirGarra_clicked()
 void MainWindow::on_btGarraSemiaberta_clicked()
 {
     on_btPararSeqComandos_clicked();
-    ui->chkEnviaComandoImediato->setChecked(false);
+    ui->chkEnviaComandoImediato->setChecked(false);    
 
     ui->lblComandoAcionado->setText(ui->btGarraSemiaberta->text());
     ui->listaUltimoComandoAcionado->clear();
@@ -2118,36 +2160,6 @@ void MainWindow::on_chkGR_clicked(bool checked)
     habilitaJunta(5, checked);
 }
 
-void MainWindow::on_chkJ0Ang_clicked(bool checked)
-{
-    habilitaJunta(0, checked);
-}
-
-void MainWindow::on_chkJ1Ang_clicked(bool checked)
-{
-    habilitaJunta(1, checked);
-}
-
-void MainWindow::on_chkJ2Ang_clicked(bool checked)
-{
-    habilitaJunta(2, checked);
-}
-
-void MainWindow::on_chkJ3Ang_clicked(bool checked)
-{
-    habilitaJunta(3, checked);
-}
-
-void MainWindow::on_chkJ4Ang_clicked(bool checked)
-{
-    habilitaJunta(4, checked);
-}
-
-void MainWindow::on_chkGRAng_clicked(bool checked)
-{
-    habilitaJunta(5, checked);
-}
-
 void MainWindow::on_chkEnviaComandoImediato_toggled(bool checked)
 {
     ui->btMover->setEnabled(!checked);
@@ -2262,7 +2274,7 @@ void MainWindow::on_btAdicionarPosCorrente_clicked()
             ui->listSequenciaComandos->addItem(comando);
         }
 
-        comandoJST += idJST[i] + QString("%1").arg(lstEdtAtual[i]->text().toInt(), 4, 10, QChar('0'));
+        comandoJST += idJST[i] + QString("%1").arg(lstEdtAtual[i]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt(), 4, 10, QChar('0'));
     }
 
     comandoJST += "]";
@@ -2730,6 +2742,8 @@ void MainWindow::on_btObterPosLimites_clicked()
 {
     on_btPararSeqComandos_clicked();
 
+    ui->chkEnviaComandoImediato->setChecked(false);
+
     QString comandoConfig[4] = {"TMX", "TMN", "T90", "TRP"};
 
     for(int i = 0; i < QTD_SERVOS; i++)
@@ -2744,6 +2758,8 @@ void MainWindow::on_btObterPosLimites_clicked()
 void MainWindow::on_btConfigurarPosLimites_clicked()
 {
     on_btPararSeqComandos_clicked();
+
+    ui->chkEnviaComandoImediato->setChecked(false);
 
     QString comandoConfig[4] = {"TMX", "TMN", "T90", "TRP"};
 
@@ -2760,7 +2776,8 @@ void MainWindow::on_btConfigurarPosLimites_clicked()
 }
 
 void MainWindow::on_btConfigurarPosLimitesGraus_clicked()
-{    
+{
+    ui->chkEnviaComandoImediato->setChecked(false);
     configurarConversaoEntreMicrossegundosEAngulos();
 }
 
@@ -2769,6 +2786,7 @@ void MainWindow::on_rdbSemFeedback_clicked(bool checked)
     if(checked)
     {
         on_btPararSeqComandos_clicked();
+        ui->chkEnviaComandoImediato->setChecked(false);
         enviaComando("[FRS0]");
     };
 }
@@ -2778,6 +2796,7 @@ void MainWindow::on_rdbPosicoesCorrentesDasJuntas_clicked(bool checked)
     if(checked)
     {
         on_btPararSeqComandos_clicked();
+        ui->chkEnviaComandoImediato->setChecked(false);
         enviaComando("[FRS1]");
     }
 }
@@ -2787,6 +2806,7 @@ void MainWindow::on_rdbSinalDeMovimento_clicked(bool checked)
     if(checked)
     {
         on_btPararSeqComandos_clicked();
+        ui->chkEnviaComandoImediato->setChecked(false);
         enviaComando("[FRS2]");
     }
 }
@@ -2794,6 +2814,8 @@ void MainWindow::on_rdbSinalDeMovimento_clicked(bool checked)
 void MainWindow::on_chkComandosBloqueantesDeMovimento_clicked(bool checked)
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
+
     if(checked)
         enviaComando("[CSB1]");
     else
@@ -2803,12 +2825,16 @@ void MainWindow::on_chkComandosBloqueantesDeMovimento_clicked(bool checked)
 void MainWindow::on_btResetarPlacaControle_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
+
     enviaComando("[RST]");
 }
 
 void MainWindow::on_btResetarPlacaServos_clicked()
 {
     on_btPararSeqComandos_clicked();
+    ui->chkEnviaComandoImediato->setChecked(false);
+
     enviaComando("[RSTM]");
 }
 
@@ -2819,5 +2845,4 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
 {
     console->setLocalEchoEnabled(checked);
 }
-
 

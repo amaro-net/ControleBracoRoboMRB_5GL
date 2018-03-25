@@ -15,6 +15,7 @@
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QTableWidget>
+#include <QtWidgets/QLabel>
 #include <QListWidgetItem>
 #include <qqueue.h>
 #include <QTimer>
@@ -232,18 +233,6 @@ private slots:
 
     void on_chkGR_clicked(bool checked);
 
-    void on_chkJ0Ang_clicked(bool checked);
-
-    void on_chkJ1Ang_clicked(bool checked);
-
-    void on_chkJ2Ang_clicked(bool checked);
-
-    void on_chkJ3Ang_clicked(bool checked);
-
-    void on_chkJ4Ang_clicked(bool checked);
-
-    void on_chkGRAng_clicked(bool checked);
-
     void on_chkEnviaComandoImediato_toggled(bool checked);
 
     void on_sliderJ0_valueChanged(int value);
@@ -278,6 +267,7 @@ private:
     void executaComandoDaSequencia();
 
     void recebeCaracteresDeResposta(QByteArray data);
+    void setaPosicaoPontoVerde(int idxJunta, int posicao);
     void decodificaResposta();
 
     void setarValorPosLimiteResposta(QString resposta);
@@ -344,6 +334,8 @@ private:
 
     QList<QCheckBox *> lstChkLeds;
 
+    QList<QLabel *> lstPontoVerdeSliderPosAtual;
+
     QQueue<QString> filaBufferEntrada;
     bool bufferPronto = false;
     bool flagProtocolo = false;
@@ -382,11 +374,12 @@ private:
     double angMax[QTD_SERVOS];
     double angMin[QTD_SERVOS];
     int qtdPosicoesTmpPulso[QTD_SERVOS];
-    double incrementosAng[QTD_SERVOS];
-    double velGrausPorSeg[QTD_SERVOS];
-    double aclGrausPorSegQuad[QTD_SERVOS];
+    double incrementosAng[QTD_SERVOS];    
     double incVelGrausPorSeg[QTD_SERVOS];
     double incAclGrausPorSegQuad[QTD_SERVOS];
+
+    double coeffPontoVerde[QTD_SERVOS];
+    double offsetPontoVerde[QTD_SERVOS];
 };
 
 #endif // MAINWINDOW_H
