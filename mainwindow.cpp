@@ -61,6 +61,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timer, &QTimer::timeout, this, &MainWindow::timeoutConfig);
     connect(timerEnvioImediato, &QTimer::timeout, this, &MainWindow::timeoutEnvioImediato);
 
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        lstPontoVerdeSliderPosAtual[i]->setVisible(false);
+    }
+
     //configurarConversaoEntreMicrossegundosEAngulos(true);
 }
 
@@ -924,6 +929,12 @@ void MainWindow::decodificaResposta()
                         {
                             countAbaPosicoesValueChanged = -1;
                             lstSpnAlvo[i]->setValue(valor);
+
+                            if(resposta.contains("IN2"))
+                            {
+                                habilitaCamposAbaPosicaoAlvoJunta(0, i, false);
+                                habilitaCamposAbaPosicaoAlvoJunta(1, i, false);
+                            }
                         }
                         else
                         {
@@ -933,9 +944,6 @@ void MainWindow::decodificaResposta()
 
                     if(!this->lstSpnAlvo[i]->isEnabled() || !this->lstSpnAlvoGraus[i]->isEnabled())
                     {
-                        habilitaCamposAbaPosicaoAlvoJunta(0, i, true);
-                        habilitaCamposAbaPosicaoAlvoJunta(1, i, true);
-
                         this->lstChkHab[i]->setChecked(true);
                     }
                 }
@@ -996,6 +1004,12 @@ void MainWindow::decodificaResposta()
                         {
                             countAbaPosicoesValueChanged = -1;
                             lstSpnAlvo[i]->setValue(valor);
+
+                            if(resposta.contains("IN1"))
+                            {
+                                habilitaCamposAbaPosicaoAlvoJunta(0, i, false);
+                                habilitaCamposAbaPosicaoAlvoJunta(1, i, false);
+                            }
                         }
                         else
                         {
