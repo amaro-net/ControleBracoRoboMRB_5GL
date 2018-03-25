@@ -89,7 +89,7 @@ class MainWindow : public QMainWindow
 
         void on_btMoverComVelEAcl_clicked();
 
-        void on_btNovaSequencia_clicked();
+        void on_btNovaSequencia_clicked(bool inicializando = false);
 
         void on_btAdicionarComando_clicked();
 
