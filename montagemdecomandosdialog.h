@@ -35,6 +35,11 @@ public:
     void setTextEdtComando(QString comando);
     void setTabelaPosLimites(QTableWidget* tabelaPosLimites);
     void setTabelaPosLimitesGraus(QTableWidget* tabelaPosLimitesGraus);
+
+    void setIncrementosAng(double incrementosAng[]);
+    void setIncVelGrausPorSeg(double incVelGrausPorSeg[]);
+    void setIncAclGrausPorSegQuad(double incAclGrausPorSegQuad[]);
+
     void setPosicoesAlvo(QList<QSpinBox *> lstSpnPosAlvo);
     void setVelocidades(QList<QSpinBox *> lstSpnVel);
     void setAceleracoes(QList<QSpinBox *> lstSpnAcl);
@@ -78,29 +83,29 @@ private slots:
 
     void on_chkGarra_clicked(bool checked);
 
-    void on_spnJ0Alvo_valueChanged(int arg1);
+    void on_spnJ0Alvo_valueChanged(int posicaoMicrossegundos);
 
-    void on_spnJ1Alvo_valueChanged(int arg1);
+    void on_spnJ1Alvo_valueChanged(int posicaoMicrossegundos);
 
-    void on_spnJ2Alvo_valueChanged(int arg1);
+    void on_spnJ2Alvo_valueChanged(int posicaoMicrossegundos);
 
-    void on_spnJ3Alvo_valueChanged(int arg1);
+    void on_spnJ3Alvo_valueChanged(int posicaoMicrossegundos);
 
-    void on_spnJ4Alvo_valueChanged(int arg1);
+    void on_spnJ4Alvo_valueChanged(int posicaoMicrossegundos);
 
-    void on_spnGRAlvo_valueChanged(int arg1);
+    void on_spnGRAlvo_valueChanged(int posicaoMicrossegundos);
 
-    void on_spnJ0AlvoGraus_valueChanged(double arg1);
+    void on_spnJ0AlvoGraus_valueChanged(double posicaoGraus);
 
-    void on_spnJ1AlvoGraus_valueChanged(double arg1);
+    void on_spnJ1AlvoGraus_valueChanged(double posicaoGraus);
 
-    void on_spnJ2AlvoGraus_valueChanged(double arg1);
+    void on_spnJ2AlvoGraus_valueChanged(double posicaoGraus);
 
-    void on_spnJ3AlvoGraus_valueChanged(double arg1);
+    void on_spnJ3AlvoGraus_valueChanged(double posicaoGraus);
 
-    void on_spnJ4AlvoGraus_valueChanged(double arg1);
+    void on_spnJ4AlvoGraus_valueChanged(double posicaoGraus);
 
-    void on_spnGRAlvoGraus_valueChanged(double arg1);
+    void on_spnGRAlvoGraus_valueChanged(double posicaoGraus);
 
     void on_btVel_clicked();
 
@@ -116,9 +121,9 @@ private slots:
 
     void on_rdbGarraVel_clicked();
 
-    void on_spnVel_valueChanged(int arg1);
+    void on_spnVel_valueChanged(int velTmpPulso);
 
-    void on_spnVelGrausPorSeg_valueChanged(double arg1);
+    void on_spnVelGrausPorSeg_valueChanged(double velGrausPorSeg);
 
     void on_btAcl_clicked();
 
@@ -138,9 +143,9 @@ private slots:
 
     void on_edtComando_textChanged(const QString &newText);
 
-    void on_spnAcl_valueChanged(int arg1);
+    void on_spnAcl_valueChanged(int aclTmpPulso);
 
-    void on_spnAclGrausPorSegQuad_valueChanged(double arg1);
+    void on_spnAclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad);
 
     void on_btLED_clicked();
 
@@ -154,7 +159,16 @@ private:
     MainWindow *mainWindow;
 
     int tabelaPosLimites[QTD_SERVOS][4];
-    double tabelaPosLimitesGraus[QTD_SERVOS][4];
+    double tabelaPosLimitesGraus[QTD_SERVOS][4];    
+    double incVelGrausPorSeg[QTD_SERVOS];
+    double incAclGrausPorSegQuad[QTD_SERVOS];
+
+    int tempoPulsoMax[QTD_SERVOS];
+    int tempoPulsoMin[QTD_SERVOS];
+
+    double angMax[QTD_SERVOS];
+    double angMin[QTD_SERVOS];
+
     int posAlvo[QTD_SERVOS];
     int velocidade[QTD_SERVOS];
     int aceleracao[QTD_SERVOS];
@@ -170,6 +184,15 @@ private:
 
     void alimentarListasDeComponentes();
     void setarVelOuAcl(QString comando, QSpinBox *spinBox);
+    void onRdbJuntaCTZClicked(int idxJunta);
+    void onChkJuntaJSTClicked(int idxJunta, bool checked);
+    void onSpnAlvo_valueChanged(int idxJunta, int posicaoMicrossegundos);
+    void onSpnJuntaAlvoGraus_valueChanged(int idxJunta, double posicaoGraus);
+    void onRdbJuntaVelClicked(int idxJunta);
+    void onRdbJuntaAclClicked(int idxJunta);
+
+    int pegaJuntaMarcadaVel();
+    int pegaJuntaMarcadaAcl();
 };
 
 #endif // MONTAGEMDECOMANDOSDIALOG_H

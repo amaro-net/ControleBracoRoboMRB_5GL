@@ -2230,6 +2230,9 @@ void MainWindow::on_btAdicionarComando_clicked()
     montagemDeComandosDialog->setTextEdtComando("");
     montagemDeComandosDialog->setTabelaPosLimites(ui->tabelaPosLimites);
     montagemDeComandosDialog->setTabelaPosLimitesGraus(ui->tabelaPosLimitesGraus);
+    montagemDeComandosDialog->setIncrementosAng(this->incrementosAng);
+    montagemDeComandosDialog->setIncVelGrausPorSeg(this->incVelGrausPorSeg);
+    montagemDeComandosDialog->setIncAclGrausPorSegQuad(this->incAclGrausPorSegQuad);
     montagemDeComandosDialog->setVelocidades(this->lstSpnVel);
     montagemDeComandosDialog->setAceleracoes(this->lstSpnAcl);
 
@@ -2327,6 +2330,9 @@ void MainWindow::on_btEditarComando_clicked()
         montagemDeComandosDialog->setTextEdtComando(ui->listSequenciaComandos->item(index_selected)->text());
         montagemDeComandosDialog->setTabelaPosLimites(ui->tabelaPosLimites);
         montagemDeComandosDialog->setTabelaPosLimitesGraus(ui->tabelaPosLimitesGraus);
+        montagemDeComandosDialog->setIncrementosAng(this->incrementosAng);
+        montagemDeComandosDialog->setIncVelGrausPorSeg(this->incVelGrausPorSeg);
+        montagemDeComandosDialog->setIncAclGrausPorSegQuad(this->incAclGrausPorSegQuad);
         montagemDeComandosDialog->setVelocidades(this->lstSpnVel);
         montagemDeComandosDialog->setAceleracoes(this->lstSpnAcl);
 
@@ -2412,10 +2418,10 @@ void MainWindow::on_btSalvarSeqComandos_clicked()
 
 void MainWindow::habilitaBotoesExecComandos(bool estadoHab)
 {
-    ui->btExecutarSeqComandos->setEnabled(estadoHab);
-    ui->btContinuarSeqComandos->setEnabled(estadoHab);
-    ui->btExecutarLoopSeqComandos->setEnabled(estadoHab);
-    ui->btContinuarLoopSeqComandos->setEnabled(estadoHab);
+    ui->btExecutarSeqComandos->setEnabled(estadoHab && serial->isOpen());
+    ui->btContinuarSeqComandos->setEnabled(estadoHab && serial->isOpen());
+    ui->btExecutarLoopSeqComandos->setEnabled(estadoHab && serial->isOpen());
+    ui->btContinuarLoopSeqComandos->setEnabled(estadoHab && serial->isOpen());
 }
 
 void MainWindow::habilitaBotoesContinuarDLYSemParam()
@@ -2760,7 +2766,7 @@ void MainWindow::continuaExecucaoPartindoDoDLYSemParam()
 
 void MainWindow::on_listSequenciaComandos_itemActivated(QListWidgetItem *item)
 {
-    Q_UNUSED(item);
+    Q_UNUSED(item)
 
     if(!seqEmExecucao)
     {

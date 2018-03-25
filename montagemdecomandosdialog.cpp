@@ -238,19 +238,51 @@ void MontagemDeComandosDialog::setTabelaPosLimites(QTableWidget *tabelaPosLimite
         {
             this->tabelaPosLimites[i][j] = tabelaPosLimites->item(i,j)->text().toInt();
         }
+
+        tempoPulsoMax[i] = this->tabelaPosLimites[i][0];
+        tempoPulsoMin[i] = this->tabelaPosLimites[i][1];
     }
 }
 
 void MontagemDeComandosDialog::setTabelaPosLimitesGraus(QTableWidget *tabelaPosLimitesGraus)
 {
     for (int i = 0; i < QTD_SERVOS; i++)
-    {
-        // TODO: Montagem de comandos: Lembrar de mudar de j < 2 para j < 4 após implementar a conversão para graus
-        for(int j = 0; j < 2; j++)
+    {        
+        for(int j = 0; j < 4; j++)
         {
             this->tabelaPosLimitesGraus[i][j] = tabelaPosLimitesGraus->item(i,j)->text().toInt();
         }
+
+        angMax[i] = this->tabelaPosLimitesGraus[i][0];
+        angMin[i] = this->tabelaPosLimitesGraus[i][1];
     }
+}
+
+void MontagemDeComandosDialog::setIncrementosAng(double incrementosAng[])
+{
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        lstSpnPosAlvoGraus[i]->setDecimals(CASAS_DECIMAIS_POSICAO);
+        lstSpnPosAlvoGraus[i]->setSingleStep(incrementosAng[i]);
+    }
+}
+
+void MontagemDeComandosDialog::setIncVelGrausPorSeg(double incVelGrausPorSeg[])
+{
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        this->incVelGrausPorSeg[i] = incVelGrausPorSeg[i];
+    }
+    ui->spnVelGrausPorSeg->setDecimals(CASAS_DECIMAIS_VELOCIDADE);
+}
+
+void MontagemDeComandosDialog::setIncAclGrausPorSegQuad(double incAclGrausPorSegQuad[])
+{
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        this->incAclGrausPorSegQuad[i] = incAclGrausPorSegQuad[i];
+    }
+    ui->spnAclGrausPorSegQuad->setDecimals(CASAS_DECIMAIS_ACELERACAO);
 }
 
 void MontagemDeComandosDialog::setVelocidades(QList<QSpinBox *> lstSpnVel)
@@ -348,82 +380,47 @@ void MontagemDeComandosDialog::on_btCTZ_clicked()
     }
 }
 
-void MontagemDeComandosDialog::on_rdbJunta0_clicked()
+void MontagemDeComandosDialog::onRdbJuntaCTZClicked(int idxJunta)
 {
-    ui->rdbJunta0->setChecked(true);
-    ui->rdbJunta1->setChecked(false);
-    ui->rdbJunta2->setChecked(false);
-    ui->rdbJunta3->setChecked(false);
-    ui->rdbJunta4->setChecked(false);
-    ui->rdbGarra->setChecked(false);
+    ui->rdbJunta0->setChecked(idxJunta == 0);
+    ui->rdbJunta2->setChecked(idxJunta == 1);
+    ui->rdbJunta1->setChecked(idxJunta == 2);
+    ui->rdbJunta3->setChecked(idxJunta == 3);
+    ui->rdbJunta4->setChecked(idxJunta == 4);
+    ui->rdbGarra->setChecked(idxJunta == 5);
 
     if(ui->edtComando->text().contains("CTZ"))
         on_btCTZ_clicked();
+}
+
+void MontagemDeComandosDialog::on_rdbJunta0_clicked()
+{
+    onRdbJuntaCTZClicked(0);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta1_clicked()
 {
-    ui->rdbJunta0->setChecked(false);
-    ui->rdbJunta1->setChecked(true);
-    ui->rdbJunta2->setChecked(false);
-    ui->rdbJunta3->setChecked(false);
-    ui->rdbJunta4->setChecked(false);
-    ui->rdbGarra->setChecked(false);
-
-    if(ui->edtComando->text().contains("CTZ"))
-        on_btCTZ_clicked();
+    onRdbJuntaCTZClicked(1);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta2_clicked()
 {
-    ui->rdbJunta0->setChecked(false);
-    ui->rdbJunta1->setChecked(false);
-    ui->rdbJunta2->setChecked(true);
-    ui->rdbJunta3->setChecked(false);
-    ui->rdbJunta4->setChecked(false);
-    ui->rdbGarra->setChecked(false);
-
-    if(ui->edtComando->text().contains("CTZ"))
-        on_btCTZ_clicked();
+    onRdbJuntaCTZClicked(2);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta3_clicked()
 {
-    ui->rdbJunta0->setChecked(false);
-    ui->rdbJunta1->setChecked(false);
-    ui->rdbJunta2->setChecked(false);
-    ui->rdbJunta3->setChecked(true);
-    ui->rdbJunta4->setChecked(false);
-    ui->rdbGarra->setChecked(false);
-
-    if(ui->edtComando->text().contains("CTZ"))
-        on_btCTZ_clicked();
+    onRdbJuntaCTZClicked(3);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta4_clicked()
 {
-    ui->rdbJunta0->setChecked(false);
-    ui->rdbJunta1->setChecked(false);
-    ui->rdbJunta2->setChecked(false);
-    ui->rdbJunta3->setChecked(false);
-    ui->rdbJunta4->setChecked(true);
-    ui->rdbGarra->setChecked(false);
-
-    if(ui->edtComando->text().contains("CTZ"))
-        on_btCTZ_clicked();
+    onRdbJuntaCTZClicked(4);
 }
 
 void MontagemDeComandosDialog::on_rdbGarra_clicked()
 {
-    ui->rdbJunta0->setChecked(false);
-    ui->rdbJunta1->setChecked(false);
-    ui->rdbJunta2->setChecked(false);
-    ui->rdbJunta3->setChecked(false);
-    ui->rdbJunta4->setChecked(false);
-    ui->rdbGarra->setChecked(true);
-
-    if(ui->edtComando->text().contains("CTZ"))
-        on_btCTZ_clicked();
+    onRdbJuntaCTZClicked(5);
 }
 
 void MontagemDeComandosDialog::on_btJST_clicked()
@@ -444,130 +441,140 @@ void MontagemDeComandosDialog::on_btJST_clicked()
     ui->edtComando->setText(comandoJST);
 }
 
-void MontagemDeComandosDialog::on_chkJunta0_clicked(bool checked)
+void MontagemDeComandosDialog::onChkJuntaJSTClicked(int idxJunta, bool checked)
 {
-    ui->spnJ0Alvo->setEnabled(checked);
-    ui->spnJ0AlvoGraus->setEnabled(checked);
+    lstSpnPosAlvo[idxJunta]->setEnabled(checked);
+    lstSpnPosAlvoGraus[idxJunta]->setEnabled(checked);
 
     if(ui->edtComando->text().contains("JST"))
         on_btJST_clicked();
+}
+
+void MontagemDeComandosDialog::on_chkJunta0_clicked(bool checked)
+{
+    onChkJuntaJSTClicked(0, checked);
 }
 
 void MontagemDeComandosDialog::on_chkJunta1_clicked(bool checked)
 {
-    ui->spnJ1Alvo->setEnabled(checked);
-    ui->spnJ1AlvoGraus->setEnabled(checked);
-
-    if(ui->edtComando->text().contains("JST"))
-        on_btJST_clicked();
+    onChkJuntaJSTClicked(1, checked);
 }
 
 void MontagemDeComandosDialog::on_chkJunta2_clicked(bool checked)
 {
-    ui->spnJ2Alvo->setEnabled(checked);
-    ui->spnJ2AlvoGraus->setEnabled(checked);
-
-    if(ui->edtComando->text().contains("JST"))
-        on_btJST_clicked();
+    onChkJuntaJSTClicked(2, checked);
 }
 
 void MontagemDeComandosDialog::on_chkJunta3_clicked(bool checked)
 {
-    ui->spnJ3Alvo->setEnabled(checked);
-    ui->spnJ3AlvoGraus->setEnabled(checked);
-
-    if(ui->edtComando->text().contains("JST"))
-        on_btJST_clicked();
+    onChkJuntaJSTClicked(3, checked);
 }
 
 void MontagemDeComandosDialog::on_chkJunta4_clicked(bool checked)
 {
-    ui->spnJ4Alvo->setEnabled(checked);
-    ui->spnJ4AlvoGraus->setEnabled(checked);
-
-    if(ui->edtComando->text().contains("JST"))
-        on_btJST_clicked();
+    onChkJuntaJSTClicked(4, checked);
 }
 
 void MontagemDeComandosDialog::on_chkGarra_clicked(bool checked)
 {
-    ui->spnGRAlvo->setEnabled(checked);
-    ui->spnGRAlvoGraus->setEnabled(checked);
+    onChkJuntaJSTClicked(5, checked);
+}
 
+void MontagemDeComandosDialog::onSpnAlvo_valueChanged(int idxJunta, int posicaoMicrossegundos)
+{
+    if(posicaoMicrossegundos > 1 && posicaoMicrossegundos <= tempoPulsoMin[idxJunta] - 1)
+        lstSpnPosAlvo[idxJunta]->setValue(0);
+    else if(posicaoMicrossegundos == 1)
+        lstSpnPosAlvo[idxJunta]->setValue(tempoPulsoMin[idxJunta]);
+    else if(posicaoMicrossegundos > 0 && posicaoMicrossegundos > tempoPulsoMax[idxJunta])
+        lstSpnPosAlvo[idxJunta]->setValue(tempoPulsoMax[idxJunta]);
+    else if(posicaoMicrossegundos >= tempoPulsoMin[idxJunta] &&
+            posicaoMicrossegundos <= tempoPulsoMax[idxJunta])
+    {
+        double angulo = mainWindow->converteMicrossegundosParaGraus(idxJunta, posicaoMicrossegundos);
+        double anguloAtual = lstSpnPosAlvoGraus[idxJunta]->value();
+
+        if(angulo != anguloAtual)
+            lstSpnPosAlvoGraus[idxJunta]->setValue(angulo);
+    }
     if(ui->edtComando->text().contains("JST"))
         on_btJST_clicked();
 }
 
-void MontagemDeComandosDialog::on_spnJ0Alvo_valueChanged(int arg1)
+void MontagemDeComandosDialog::on_spnJ0Alvo_valueChanged(int posicaoMicrossegundos)
 {
-    if(ui->edtComando->text().contains("JST"))
-        on_btJST_clicked();
-    // TODO: Montagem de comandos: Conversão para graus J0
+    onSpnAlvo_valueChanged(0, posicaoMicrossegundos);
 }
 
-void MontagemDeComandosDialog::on_spnJ1Alvo_valueChanged(int arg1)
-{
-    if(ui->edtComando->text().contains("JST"))
-        on_btJST_clicked();
-    // TODO: Montagem de comandos: Conversão para graus J1
+void MontagemDeComandosDialog::on_spnJ1Alvo_valueChanged(int posicaoMicrossegundos)
+{    
+    onSpnAlvo_valueChanged(1, posicaoMicrossegundos);
 }
 
-void MontagemDeComandosDialog::on_spnJ2Alvo_valueChanged(int arg1)
+void MontagemDeComandosDialog::on_spnJ2Alvo_valueChanged(int posicaoMicrossegundos)
 {
-    if(ui->edtComando->text().contains("JST"))
-        on_btJST_clicked();
-    // TODO: Montagem de comandos: Conversão para graus J2
+    onSpnAlvo_valueChanged(2, posicaoMicrossegundos);
 }
 
-void MontagemDeComandosDialog::on_spnJ3Alvo_valueChanged(int arg1)
+void MontagemDeComandosDialog::on_spnJ3Alvo_valueChanged(int posicaoMicrossegundos)
 {
-    if(ui->edtComando->text().contains("JST"))
-        on_btJST_clicked();
-    // TODO: Montagem de comandos: Conversão para graus J3
+    onSpnAlvo_valueChanged(3, posicaoMicrossegundos);
 }
 
-void MontagemDeComandosDialog::on_spnJ4Alvo_valueChanged(int arg1)
+void MontagemDeComandosDialog::on_spnJ4Alvo_valueChanged(int posicaoMicrossegundos)
 {
-    if(ui->edtComando->text().contains("JST"))
-        on_btJST_clicked();
-    // TODO: Montagem de comandos: Conversão para graus J4
+    onSpnAlvo_valueChanged(4, posicaoMicrossegundos);
 }
 
-void MontagemDeComandosDialog::on_spnGRAlvo_valueChanged(int arg1)
+void MontagemDeComandosDialog::on_spnGRAlvo_valueChanged(int posicaoMicrossegundos)
 {
-    if(ui->edtComando->text().contains("JST"))
-        on_btJST_clicked();
-    // TODO: Montagem de comandos: Conversão para graus Garra
+    onSpnAlvo_valueChanged(5, posicaoMicrossegundos);
 }
 
-void MontagemDeComandosDialog::on_spnJ0AlvoGraus_valueChanged(double arg1)
+void MontagemDeComandosDialog::onSpnJuntaAlvoGraus_valueChanged(int idxJunta, double posicaoGraus)
 {
-    // TODO: Montagem de comandos: Conversão para microssegundos J0
+    if(posicaoGraus < angMin[idxJunta])
+        lstSpnPosAlvoGraus[idxJunta]->setValue(angMin[idxJunta]);
+    else if(posicaoGraus > angMax[idxJunta])
+        lstSpnPosAlvoGraus[idxJunta]->setValue(angMax[idxJunta]);
+    else
+    {
+        int posicaoMicrossegundos = mainWindow->converteGrausParaMicrossegundos(idxJunta, posicaoGraus);
+        int posicaoMicrossegundosAtual = lstSpnPosAlvo[idxJunta]->value();
+
+        if(posicaoMicrossegundos != posicaoMicrossegundosAtual)
+            lstSpnPosAlvo[idxJunta]->setValue(posicaoMicrossegundos);
+    }
 }
 
-void MontagemDeComandosDialog::on_spnJ1AlvoGraus_valueChanged(double arg1)
+void MontagemDeComandosDialog::on_spnJ0AlvoGraus_valueChanged(double posicaoGraus)
 {
-    // TODO: Montagem de comandos: Conversão para microssegundos J1
+    onSpnJuntaAlvoGraus_valueChanged(0, posicaoGraus);
 }
 
-void MontagemDeComandosDialog::on_spnJ2AlvoGraus_valueChanged(double arg1)
+void MontagemDeComandosDialog::on_spnJ1AlvoGraus_valueChanged(double posicaoGraus)
 {
-    // TODO: Montagem de comandos: Conversão para microssegundos J2
+    onSpnJuntaAlvoGraus_valueChanged(1, posicaoGraus);
 }
 
-void MontagemDeComandosDialog::on_spnJ3AlvoGraus_valueChanged(double arg1)
+void MontagemDeComandosDialog::on_spnJ2AlvoGraus_valueChanged(double posicaoGraus)
 {
-    // TODO: Montagem de comandos: Conversão para microssegundos J3
+    onSpnJuntaAlvoGraus_valueChanged(2, posicaoGraus);
 }
 
-void MontagemDeComandosDialog::on_spnJ4AlvoGraus_valueChanged(double arg1)
+void MontagemDeComandosDialog::on_spnJ3AlvoGraus_valueChanged(double posicaoGraus)
 {
-    // TODO: Montagem de comandos: Conversão para microssegundos J4
+    onSpnJuntaAlvoGraus_valueChanged(3, posicaoGraus);
 }
 
-void MontagemDeComandosDialog::on_spnGRAlvoGraus_valueChanged(double arg1)
+void MontagemDeComandosDialog::on_spnJ4AlvoGraus_valueChanged(double posicaoGraus)
 {
-    // TODO: Montagem de comandos: Conversão para microssegundos Garra
+    onSpnJuntaAlvoGraus_valueChanged(4, posicaoGraus);
+}
+
+void MontagemDeComandosDialog::on_spnGRAlvoGraus_valueChanged(double posicaoGraus)
+{
+    onSpnJuntaAlvoGraus_valueChanged(5, posicaoGraus);
 }
 
 
@@ -581,6 +588,8 @@ void MontagemDeComandosDialog::on_btVel_clicked()
     {
         if(lstRdbJuntaVEL[i]->isChecked())
         {
+            ui->spnVelGrausPorSeg->setSingleStep(incVelGrausPorSeg[i]);
+
             int valor = ui->spnVel->value();
             comandoVEL += QString("%1%2").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
             temAlgumaJuntaMarcada = true;
@@ -590,6 +599,9 @@ void MontagemDeComandosDialog::on_btVel_clicked()
     if(!temAlgumaJuntaMarcada)
     {
         ui->rdbJunta0Vel->setChecked(true);
+
+        ui->spnVelGrausPorSeg->setSingleStep(incVelGrausPorSeg[0]);
+
         int valor = ui->spnVel->value();
         comandoVEL += QString("%1%2").arg(junta[0]).arg(valor, 4, 10, QChar('0'));
     }
@@ -599,96 +611,100 @@ void MontagemDeComandosDialog::on_btVel_clicked()
     ui->edtComando->setText(comandoVEL);
 }
 
-void MontagemDeComandosDialog::on_rdbJunta0Vel_clicked()
+void MontagemDeComandosDialog::onRdbJuntaVelClicked(int idxJunta)
 {
-    ui->rdbJunta0Vel->setChecked(true);
-    ui->rdbJunta1Vel->setChecked(false);
-    ui->rdbJunta2Vel->setChecked(false);
-    ui->rdbJunta3Vel->setChecked(false);
-    ui->rdbJunta4Vel->setChecked(false);
-    ui->rdbGarraVel->setChecked(false);
+    ui->rdbJunta0Vel->setChecked(idxJunta == 0);
+    ui->rdbJunta1Vel->setChecked(idxJunta == 1);
+    ui->rdbJunta2Vel->setChecked(idxJunta == 2);
+    ui->rdbJunta3Vel->setChecked(idxJunta == 3);
+    ui->rdbJunta4Vel->setChecked(idxJunta == 4);
+    ui->rdbGarraVel->setChecked(idxJunta == 5);
+
+    ui->spnVelGrausPorSeg->setSingleStep(incVelGrausPorSeg[idxJunta]);
 
     if(ui->edtComando->text().contains("VEL"))
         on_btVel_clicked();
+}
+
+void MontagemDeComandosDialog::on_rdbJunta0Vel_clicked()
+{
+    onRdbJuntaVelClicked(0);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta1Vel_clicked()
 {
-    ui->rdbJunta0Vel->setChecked(false);
-    ui->rdbJunta1Vel->setChecked(true);
-    ui->rdbJunta2Vel->setChecked(false);
-    ui->rdbJunta3Vel->setChecked(false);
-    ui->rdbJunta4Vel->setChecked(false);
-    ui->rdbGarraVel->setChecked(false);
-
-    if(ui->edtComando->text().contains("VEL"))
-        on_btVel_clicked();
+    onRdbJuntaVelClicked(1);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta2Vel_clicked()
 {
-    ui->rdbJunta0Vel->setChecked(false);
-    ui->rdbJunta1Vel->setChecked(false);
-    ui->rdbJunta2Vel->setChecked(true);
-    ui->rdbJunta3Vel->setChecked(false);
-    ui->rdbJunta4Vel->setChecked(false);
-    ui->rdbGarraVel->setChecked(false);
-
-    if(ui->edtComando->text().contains("VEL"))
-        on_btVel_clicked();
+    onRdbJuntaVelClicked(2);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta3Vel_clicked()
 {
-    ui->rdbJunta0Vel->setChecked(false);
-    ui->rdbJunta1Vel->setChecked(false);
-    ui->rdbJunta2Vel->setChecked(false);
-    ui->rdbJunta3Vel->setChecked(true);
-    ui->rdbJunta4Vel->setChecked(false);
-    ui->rdbGarraVel->setChecked(false);
-
-    if(ui->edtComando->text().contains("VEL"))
-        on_btVel_clicked();
+    onRdbJuntaVelClicked(3);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta4Vel_clicked()
 {
-    ui->rdbJunta0Vel->setChecked(false);
-    ui->rdbJunta1Vel->setChecked(false);
-    ui->rdbJunta2Vel->setChecked(false);
-    ui->rdbJunta3Vel->setChecked(false);
-    ui->rdbJunta4Vel->setChecked(true);
-    ui->rdbGarraVel->setChecked(false);
-
-    if(ui->edtComando->text().contains("VEL"))
-        on_btVel_clicked();
+    onRdbJuntaVelClicked(4);
 }
 
 void MontagemDeComandosDialog::on_rdbGarraVel_clicked()
 {
-    ui->rdbJunta0Vel->setChecked(false);
-    ui->rdbJunta1Vel->setChecked(false);
-    ui->rdbJunta2Vel->setChecked(false);
-    ui->rdbJunta3Vel->setChecked(false);
-    ui->rdbJunta4Vel->setChecked(false);
-    ui->rdbGarraVel->setChecked(true);
+    onRdbJuntaVelClicked(5);
+}
+
+int MontagemDeComandosDialog::pegaJuntaMarcadaVel()
+{
+    int idxJunta = -1;
+
+    for(int i = 0; i < QTD_SERVOS && idxJunta == -1; i++)
+    {
+        if(lstRdbJuntaVEL[i]->isChecked())
+        {
+            idxJunta = i;
+        }
+    }
+
+    if(idxJunta == -1)
+    {
+        idxJunta = 0;
+        lstRdbJuntaVEL[idxJunta]->setChecked(true);
+        onRdbJuntaVelClicked(idxJunta);
+    }
+
+    return idxJunta;
+}
+
+void MontagemDeComandosDialog::on_spnVel_valueChanged(int velTmpPulso)
+{
+    int idxJunta = pegaJuntaMarcadaVel();
+
+    double velocidadeAngular = mainWindow->converteVelTmpPulsoParaGrausPorSeg(idxJunta, velTmpPulso);
+    double velocidadeAngularAtual = ui->spnVelGrausPorSeg->value();
+
+    if(velocidadeAngular != velocidadeAngularAtual)
+    {
+        ui->spnVelGrausPorSeg->setValue(velocidadeAngular);
+    }
 
     if(ui->edtComando->text().contains("VEL"))
         on_btVel_clicked();
 }
 
-void MontagemDeComandosDialog::on_spnVel_valueChanged(int arg1)
+void MontagemDeComandosDialog::on_spnVelGrausPorSeg_valueChanged(double velGrausPorSeg)
 {
-    if(ui->edtComando->text().contains("VEL"))
-        on_btVel_clicked();
-    // TODO: Montagem de comandos: Conversão para graus por segundo    
-}
+    int idxJunta = pegaJuntaMarcadaVel();
 
-void MontagemDeComandosDialog::on_spnVelGrausPorSeg_valueChanged(double arg1)
-{
-    if(ui->edtComando->text().contains("VEL"))
-        on_btVel_clicked();
-    // TODO: Montagem de comandos: Conversão para 0,25us/10ms
+    int velTmpPulso = mainWindow->converteVelGrausPorSegParaTmpPulso(idxJunta, velGrausPorSeg);
+    int velTmpPulsoAtual = ui->spnVel->value();
+
+    if(velTmpPulso != velTmpPulsoAtual)
+    {
+        ui->spnVel->setValue(velTmpPulso);
+    }
 }
 
 void MontagemDeComandosDialog::on_btAcl_clicked()
@@ -700,6 +716,8 @@ void MontagemDeComandosDialog::on_btAcl_clicked()
     {
         if(lstRdbJuntaACL[i]->isChecked())
         {
+            ui->spnAclGrausPorSegQuad->setSingleStep(incAclGrausPorSegQuad[i]);
+
             int valor = ui->spnAcl->value();
             comandoACL += QString("%1%2").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
             temAlgumaJuntaMarcada = true;
@@ -709,6 +727,9 @@ void MontagemDeComandosDialog::on_btAcl_clicked()
     if(!temAlgumaJuntaMarcada)
     {
         ui->rdbJunta0Acl->setChecked(true);
+
+        ui->spnAclGrausPorSegQuad->setSingleStep(incAclGrausPorSegQuad[0]);
+
         int valor = ui->spnAcl->value();
         comandoACL += QString("%1%2").arg(junta[0]).arg(valor, 4, 10, QChar('0'));
     }
@@ -718,97 +739,100 @@ void MontagemDeComandosDialog::on_btAcl_clicked()
     ui->edtComando->setText(comandoACL);
 }
 
-void MontagemDeComandosDialog::on_rdbJunta0Acl_clicked()
+void MontagemDeComandosDialog::onRdbJuntaAclClicked(int idxJunta)
 {
-    ui->rdbJunta0Acl->setChecked(true);
-    ui->rdbJunta1Acl->setChecked(false);
-    ui->rdbJunta2Acl->setChecked(false);
-    ui->rdbJunta3Acl->setChecked(false);
-    ui->rdbJunta4Acl->setChecked(false);
-    ui->rdbGarraAcl->setChecked(false);
+    ui->rdbJunta0Acl->setChecked(idxJunta == 0);
+    ui->rdbJunta1Acl->setChecked(idxJunta == 1);
+    ui->rdbJunta2Acl->setChecked(idxJunta == 2);
+    ui->rdbJunta3Acl->setChecked(idxJunta == 3);
+    ui->rdbJunta4Acl->setChecked(idxJunta == 4);
+    ui->rdbGarraAcl->setChecked(idxJunta == 5);
+
+    ui->spnAclGrausPorSegQuad->setSingleStep(incAclGrausPorSegQuad[idxJunta]);
 
     if(ui->edtComando->text().contains("ACL"))
         on_btAcl_clicked();
+}
+
+void MontagemDeComandosDialog::on_rdbJunta0Acl_clicked()
+{
+    onRdbJuntaAclClicked(0);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta1Acl_clicked()
 {
-    ui->rdbJunta0Acl->setChecked(false);
-    ui->rdbJunta1Acl->setChecked(true);
-    ui->rdbJunta2Acl->setChecked(false);
-    ui->rdbJunta3Acl->setChecked(false);
-    ui->rdbJunta4Acl->setChecked(false);
-    ui->rdbGarraAcl->setChecked(false);
-
-    if(ui->edtComando->text().contains("ACL"))
-        on_btAcl_clicked();
+    onRdbJuntaAclClicked(1);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta2Acl_clicked()
 {
-    ui->rdbJunta0Acl->setChecked(false);
-    ui->rdbJunta1Acl->setChecked(false);
-    ui->rdbJunta2Acl->setChecked(true);
-    ui->rdbJunta3Acl->setChecked(false);
-    ui->rdbJunta4Acl->setChecked(false);
-    ui->rdbGarraAcl->setChecked(false);
-
-    if(ui->edtComando->text().contains("ACL"))
-        on_btAcl_clicked();
+    onRdbJuntaAclClicked(2);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta3Acl_clicked()
 {
-    ui->rdbJunta0Acl->setChecked(false);
-    ui->rdbJunta1Acl->setChecked(false);
-    ui->rdbJunta2Acl->setChecked(false);
-    ui->rdbJunta3Acl->setChecked(true);
-    ui->rdbJunta4Acl->setChecked(false);
-    ui->rdbGarraAcl->setChecked(false);
-
-    if(ui->edtComando->text().contains("ACL"))
-        on_btAcl_clicked();
+    onRdbJuntaAclClicked(3);
 }
 
 void MontagemDeComandosDialog::on_rdbJunta4Acl_clicked()
 {
-    ui->rdbJunta0Acl->setChecked(false);
-    ui->rdbJunta1Acl->setChecked(false);
-    ui->rdbJunta2Acl->setChecked(false);
-    ui->rdbJunta3Acl->setChecked(false);
-    ui->rdbJunta4Acl->setChecked(true);
-    ui->rdbGarraAcl->setChecked(false);
-
-    if(ui->edtComando->text().contains("ACL"))
-        on_btAcl_clicked();
+    onRdbJuntaAclClicked(4);
 }
 
 void MontagemDeComandosDialog::on_rdbGarraAcl_clicked()
 {
-    ui->rdbJunta0Acl->setChecked(false);
-    ui->rdbJunta1Acl->setChecked(false);
-    ui->rdbJunta2Acl->setChecked(false);
-    ui->rdbJunta3Acl->setChecked(false);
-    ui->rdbJunta4Acl->setChecked(false);
-    ui->rdbGarraAcl->setChecked(true);
-
-    if(ui->edtComando->text().contains("ACL"))
-        on_btAcl_clicked();
+    onRdbJuntaAclClicked(5);
 }
 
-
-void MontagemDeComandosDialog::on_spnAcl_valueChanged(int arg1)
+int MontagemDeComandosDialog::pegaJuntaMarcadaAcl()
 {
-    if(ui->edtComando->text().contains("ACL"))
-        on_btAcl_clicked();
-    // TODO: Montagem de comandos: Conversão para graus/s^2
+    int idxJunta = -1;
+
+    for(int i = 0; i < QTD_SERVOS && idxJunta == -1; i++)
+    {
+        if(lstRdbJuntaACL[i]->isChecked())
+        {
+            idxJunta = i;
+        }
+    }
+
+    if(idxJunta == -1)
+    {
+        idxJunta = 0;
+        lstRdbJuntaACL[idxJunta]->setChecked(true);
+        onRdbJuntaAclClicked(idxJunta);
+    }
+
+    return idxJunta;
 }
 
-void MontagemDeComandosDialog::on_spnAclGrausPorSegQuad_valueChanged(double arg1)
+void MontagemDeComandosDialog::on_spnAcl_valueChanged(int aclTmpPulso)
 {
+    int idxJunta = pegaJuntaMarcadaAcl();
+
+    double aceleracaoAngular = mainWindow->converteAclTmpPulsoParaGrausPorSegQuad(idxJunta, aclTmpPulso);
+    double aceleracaoAngularAtual = ui->spnAclGrausPorSegQuad->value();
+
+    if(aceleracaoAngular != aceleracaoAngularAtual)
+    {
+        ui->spnAclGrausPorSegQuad->setValue(aceleracaoAngular);
+    }
+
     if(ui->edtComando->text().contains("ACL"))
-        on_btAcl_clicked();
-    // TODO: Montagem de comandos: conversão para 0,25ms/10ms/80ms
+        on_btAcl_clicked();    
+}
+
+void MontagemDeComandosDialog::on_spnAclGrausPorSegQuad_valueChanged(double aclGrausPorSegQuad)
+{
+    int idxJunta = pegaJuntaMarcadaAcl();
+
+    int aclTmpPulso = mainWindow->converteAclGrausPorSegQuadParaTmpPulso(idxJunta, aclGrausPorSegQuad);
+    int aclTmpPulsoAtual = ui->spnAcl->value();
+
+    if(aclTmpPulso != aclTmpPulsoAtual)
+    {
+        ui->spnAcl->setValue(aclTmpPulso);
+    }
 }
 
 
@@ -842,6 +866,10 @@ void MontagemDeComandosDialog::on_btDLY_clicked()
 
 void MontagemDeComandosDialog::on_spnTempoMs_valueChanged(int arg1)
 {
+    Q_UNUSED(arg1)
+
     if(ui->edtComando->text().contains("DLY"))
         on_btDLY_clicked();
 }
+
+

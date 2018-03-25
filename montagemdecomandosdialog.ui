@@ -47,7 +47,7 @@
     <number>1</number>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="pgComandosSemParametros">
     <property name="geometry">
@@ -208,6 +208,12 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> μs</string>
           </property>
@@ -221,11 +227,20 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> º</string>
           </property>
           <property name="decimals">
            <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>-9999.000000000000000</double>
           </property>
           <property name="maximum">
            <double>9999.000000000000000</double>
@@ -248,6 +263,12 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> μs</string>
           </property>
@@ -261,11 +282,20 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> º</string>
           </property>
           <property name="decimals">
            <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>-9999.000000000000000</double>
           </property>
           <property name="maximum">
            <double>9999.000000000000000</double>
@@ -288,6 +318,12 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> μs</string>
           </property>
@@ -301,11 +337,20 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> º</string>
           </property>
           <property name="decimals">
            <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>-9999.000000000000000</double>
           </property>
           <property name="maximum">
            <double>9999.000000000000000</double>
@@ -328,6 +373,12 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> μs</string>
           </property>
@@ -341,11 +392,20 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> º</string>
           </property>
           <property name="decimals">
            <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>-9999.000000000000000</double>
           </property>
           <property name="maximum">
            <double>9999.000000000000000</double>
@@ -368,6 +428,12 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> μs</string>
           </property>
@@ -381,11 +447,20 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> º</string>
           </property>
           <property name="decimals">
            <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>-9999.000000000000000</double>
           </property>
           <property name="maximum">
            <double>9999.000000000000000</double>
@@ -408,6 +483,12 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> μs</string>
           </property>
@@ -421,11 +502,20 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="accelerated">
+           <bool>true</bool>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string> º</string>
           </property>
           <property name="decimals">
            <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>-9999.000000000000000</double>
           </property>
           <property name="maximum">
            <double>9999.000000000000000</double>
