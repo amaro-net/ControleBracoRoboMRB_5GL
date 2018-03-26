@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tabComandos">
      <attribute name="title">
@@ -3536,6 +3536,22 @@ alterada.</string>
        <string>lblStatusSeqComandos</string>
       </property>
      </widget>
+     <widget class="QCheckBox" name="chkBtPararEnviaJST">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>274</y>
+        <width>241</width>
+        <height>62</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Parada total. 
+Botão Parar envia comando JST com posição
+atual para parar completamente o movimento
+do braço robô (experimental).</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tabConfiguracoes">
      <attribute name="title">
@@ -4169,6 +4185,9 @@ Inversa</string>
       </property>
       <property name="text">
        <string>Eco local dos comandos enviados</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>

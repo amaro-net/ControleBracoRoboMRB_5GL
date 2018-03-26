@@ -268,6 +268,7 @@ class MainWindow : public QMainWindow
 
         void recebeCaracteresDeResposta(QByteArray data);
         void setaPosicaoPontoVerde(int idxJunta, int posicao);
+        void montaJSTParaPararMov1Junta();
         void decodificaResposta();
 
         void setarValorPosLimiteResposta(QString resposta);
@@ -352,10 +353,13 @@ class MainWindow : public QMainWindow
         QQueue<QString> filaComandosMovimentacaoAbaComandos;
         QQueue<QString> filaComandosMoverComVelAcl;
         QQueue<QString> filaConfigPosLimites;
+        QQueue<QString> filaComandosParaPararMov;
 
         bool seqEmExecucao = false;
         bool emLoop = false;
         bool itemClicado = false;
+        bool paradaDeSequenciaSolicitada = false;
+        int velocidadesAnterioresAAParada[QTD_SERVOS];
 
         QTimer *timer;
         int tentativaConfig = 0;
@@ -368,6 +372,8 @@ class MainWindow : public QMainWindow
 
         QTimer *timerEnvioImediato;
         QString comandoEnvioImediato;
+
+        QString comandoJSTParaPararMov;
 
 
         /**** Variáveis para conversão entre ângulos em graus e posições em microssegundos ****/

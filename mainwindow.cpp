@@ -467,6 +467,7 @@ void MainWindow::habilitarComponentes(bool estadoHab)
     ui->btPararSeqComandos->setEnabled(estadoHab);
     ui->btComandoUp->setEnabled(estadoHab);
     ui->btComandoDown->setEnabled(estadoHab);
+    ui->chkBtPararEnviaJST->setEnabled(estadoHab);
 }
 
 void MainWindow::habilitarComponentesReadyForPIC(bool estadoHab)
@@ -879,6 +880,17 @@ void MainWindow::setaPosicaoPontoVerde(int idxJunta, int posicao)
     lstPontoVerdeSliderPosAtual[idxJunta]->setGeometry(geometry);
 }
 
+void MainWindow::montaJSTParaPararMov1Junta()
+{
+    comandoJSTParaPararMov = "[JST";
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        int posAtual = lstSpnAlvo[i]->value();
+        comandoJSTParaPararMov += QString("%1%2").arg(idJST[i]).arg(posAtual, 4, 10, QChar('0'));
+    }
+    comandoJSTParaPararMov += "]";
+}
+
 void MainWindow::decodificaResposta()
 {
     QString resposta = filaBufferEntrada.dequeue();
@@ -893,6 +905,10 @@ void MainWindow::decodificaResposta()
         QString strValor;
         int valor;
         double graus;
+
+        QString comandoRecebido = resposta.mid(1,3);
+        comandoJSTParaPararMov = QString(resposta);
+        comandoJSTParaPararMov.replace(comandoRecebido, "JST");
 
         for(int i = 0; i < QTD_SERVOS; i++)
         {
@@ -983,6 +999,8 @@ void MainWindow::decodificaResposta()
 
             lstEdtAtual[i]->setText(strValor.setNum(valor) + STR_UND_MICROSSEGUNDOS);
 
+            montaJSTParaPararMov1Junta();
+
             if(valor > 0)
             {
                 double graus = converteMicrossegundosParaGraus(i, valor);
@@ -1068,6 +1086,8 @@ void MainWindow::decodificaResposta()
         setaPosicaoPontoVerde(5, valor.toInt());
 
         ui->spnGRAlvo->setValue(valor.toInt());
+
+        montaJSTParaPararMov1Junta();
 
         if(!ui->spnGRAlvo->isEnabled())
         {
@@ -1176,6 +1196,30 @@ void MainWindow::decodificaResposta()
         }
         inicializando = false;
 
+        if(paradaDeSequenciaSolicitada && ui->chkBtPararEnviaJST->isChecked())
+        {
+            if(filaComandosParaPararMov.count() > 0)
+            {
+                parser(filaComandosParaPararMov.dequeue());
+            }
+            else
+            {
+                parser(comandoJSTParaPararMov);
+                paradaDeSequenciaSolicitada = false;
+                // TODO: Avaliar com o braço robô verdadeiro a parada total
+                int valorVelAnterior;
+                QString comandoVEL;
+                filaComandosMoverComVelAcl.clear();
+                for(int i = 0; i < QTD_SERVOS; i++)
+                {
+                    valorVelAnterior = velocidadesAnterioresAAParada[i];
+                    comandoVEL = QString("[VEL%1%2]").arg(junta[i]).arg(valorVelAnterior, 4, 10, QChar('0'));
+                    filaComandosMoverComVelAcl.enqueue(comandoVEL);
+                }
+                ui->chkBtPararEnviaJST->setEnabled(true);
+                ui->btPararSeqComandos->setEnabled(true);
+            }
+        }
         if(seqEmExecucao && ehRespostaFinal)
         {
             executaComandoDaSequencia();
@@ -1406,7 +1450,8 @@ void MainWindow::posicaoNeutraCTZ()
 }
 
 void MainWindow::desligaServos()
-{    
+{
+    filaComandosMovimentacaoAbaComandos.clear();
     filaComandosMovimentacaoAbaComandos.enqueue("[RPS]");
     filaComandosMovimentacaoAbaComandos.enqueue("[JSTA0000B0000C0000D0000E0000G0000]");
 
@@ -2576,12 +2621,30 @@ void MainWindow::on_btContinuarLoopSeqComandos_clicked()
     }
 }
 
+
 void MainWindow::on_btPararSeqComandos_clicked()
 {
-    // TODO: Avaliar se é possivel enviar a posição atual para parar completamente o braço robô ao clicar em parar.
-    seqEmExecucao = false;
-    emLoop = false;
-    emDLYSemParam = false;
+    if(seqEmExecucao)
+    {
+        seqEmExecucao = false;
+        emLoop = false;
+        emDLYSemParam = false;
+
+        if(ui->chkBtPararEnviaJST->isChecked())
+        {
+            ui->chkBtPararEnviaJST->setEnabled(false);
+            ui->btPararSeqComandos->setEnabled(false);
+            filaComandosParaPararMov.clear();
+            for(int i = 0; i < QTD_SERVOS; i++)
+            {
+                velocidadesAnterioresAAParada[i] = lstSpnVel[i]->value();
+                filaComandosParaPararMov.enqueue(QString("[VEL%1%2]").arg(junta[i]).arg(1, 4, 10, QChar('0')));
+            }
+            enviaComando(filaComandosParaPararMov.dequeue());
+            paradaDeSequenciaSolicitada = true;
+        }
+    }
+
     if(ui->listSequenciaComandos->count() == 0)
     {
         ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_PARADA_VAZIA);
