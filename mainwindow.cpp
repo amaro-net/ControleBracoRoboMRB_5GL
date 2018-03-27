@@ -882,6 +882,7 @@ void MainWindow::setaPosicaoPontoVerde(int idxJunta, int posicao)
 
 void MainWindow::montaJSTParaPararMov1Junta()
 {
+    // TODO: Verificar a causa da parada total não funcionar direito com o comando JST
     comandoJSTParaPararMov = "[JST";
     for(int i = 0; i < QTD_SERVOS; i++)
     {
@@ -2523,9 +2524,11 @@ void MainWindow::on_btExecutarSeqComandos_clicked()
         ui->listSequenciaComandos->setCurrentRow(0);
         ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_EM_EXECUCAO);
         if(ui->rdbReadyForPIC->isChecked())
-        {
-            // TODO: Aba sequência: permitir pular varias linhas de comentarios quando estes forem as primeiras linhas
-            parser(ui->listSequenciaComandos->currentItem()->text());
+        {            
+            if(!parser(ui->listSequenciaComandos->currentItem()->text()))
+            {
+                executaComandoDaSequencia();
+            }
         }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
@@ -2554,9 +2557,11 @@ void MainWindow::on_btContinuarSeqComandos_clicked()
                 ui->listSequenciaComandos->setCurrentRow(0);
             ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_CONTINUANDO_EXEC);
             if(ui->rdbReadyForPIC->isChecked())
-            {
-                // TODO: Aba sequência: permitir pular varias linhas de comentarios quando estes forem as primeiras linhas
-                parser(ui->listSequenciaComandos->currentItem()->text());
+            {                
+                if(!parser(ui->listSequenciaComandos->currentItem()->text()))
+                {
+                    executaComandoDaSequencia();
+                }
             }
             else if(ui->rdbMiniMaestro24->isChecked())
             {
@@ -2577,9 +2582,11 @@ void MainWindow::on_btExecutarLoopSeqComandos_clicked()
         ui->listSequenciaComandos->setCurrentRow(0);
         ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_EM_LOOP);
         if(ui->rdbReadyForPIC->isChecked())
-        {
-            // TODO: Aba sequência: permitir pular varias linhas de comentarios quando estes forem as primeiras linhas
-            parser(ui->listSequenciaComandos->currentItem()->text());
+        {            
+            if(!parser(ui->listSequenciaComandos->currentItem()->text()))
+            {
+                executaComandoDaSequencia();
+            }
         }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
@@ -2609,9 +2616,11 @@ void MainWindow::on_btContinuarLoopSeqComandos_clicked()
                 ui->listSequenciaComandos->setCurrentRow(0);
             ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_CONTINUANDO_LOOP);
             if(ui->rdbReadyForPIC->isChecked())
-            {
-                // TODO: Aba sequência: permitir pular varias linhas de comentarios quando estes forem as primeiras linhas
-                parser(ui->listSequenciaComandos->currentItem()->text());
+            {                
+                if(!parser(ui->listSequenciaComandos->currentItem()->text()))
+                {
+                    executaComandoDaSequencia();
+                }
             }
             else if(ui->rdbMiniMaestro24->isChecked())
             {
