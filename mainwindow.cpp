@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     console = new Console(ui->tabTerminal);
     console->setEnabled(false);
     console->setVisible(true);
+    console->setLocalEchoEnabled(ui->chkEcoLocal->isChecked());
 
     serial = new QSerialPort(this);
 
@@ -886,7 +887,7 @@ void MainWindow::montaJSTParaPararMov1Junta()
     comandoJSTParaPararMov = "[JST";
     for(int i = 0; i < QTD_SERVOS; i++)
     {
-        int posAtual = lstSpnAlvo[i]->value();
+        int posAtual = lstEdtAtual[i]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt();
         comandoJSTParaPararMov += QString("%1%2").arg(idJST[i]).arg(posAtual, 4, 10, QChar('0'));
     }
     comandoJSTParaPararMov += "]";
@@ -1203,11 +1204,15 @@ void MainWindow::decodificaResposta()
             {
                 parser(filaComandosParaPararMov.dequeue());
             }
-            else
+            else if(!foiEnviadoJSTParaPararMov)
             {
                 parser(comandoJSTParaPararMov);
-                paradaDeSequenciaSolicitada = false;
-                // TODO: Avaliar com o braço robô verdadeiro a parada total
+                //paradaDeSequenciaSolicitada = false;
+                foiEnviadoJSTParaPararMov = true;
+                comandoParaPararMovEnviado = comandoJSTParaPararMov;
+            }
+            else if (resposta.contains(comandoParaPararMovEnviado))
+            {
                 int valorVelAnterior;
                 QString comandoVEL;
                 filaComandosMoverComVelAcl.clear();
@@ -1217,11 +1222,56 @@ void MainWindow::decodificaResposta()
                     comandoVEL = QString("[VEL%1%2]").arg(junta[i]).arg(valorVelAnterior, 4, 10, QChar('0'));
                     filaComandosMoverComVelAcl.enqueue(comandoVEL);
                 }
+                parser(filaComandosMoverComVelAcl.dequeue());
+            }
+            else if(resposta.contains("JST"))
+            {
+                parser(resposta);
+                comandoParaPararMovEnviado = resposta;
+            }
+            else if(resposta.contains("RPS"))
+            {
+                parser("[RPS]");
+                comandoParaPararMovEnviado = "RPS";
+            }
+            else if(resposta.contains("CTZ"))
+            {
+                QString juntaCTZ = resposta.mid(4,2);
+                QString comandoCTZ = QString("[CTZ%1]").arg(juntaCTZ);
+                parser(comandoCTZ);
+                comandoParaPararMovEnviado = resposta;
+            }
+            else if (resposta.contains("GA"))
+            {
+                parser("[GA]");
+                comandoParaPararMovEnviado = "GA";
+            }
+            else if(resposta.contains("GF"))
+            {
+                parser("[GF]");
+                comandoParaPararMovEnviado = "GF";
+            }
+            else if(filaComandosMoverComVelAcl.count() > 0 && ehRespostaMoverComVelAcl)
+            {
+                QString comando = filaComandosMoverComVelAcl.dequeue();
+
+                if(filaComandosMoverComVelAcl.count() <= 0)
+                    ultimoVELcomVelocidadeAnterior = comando;
+
+                parser(comando);
+            }
+            else if(ultimoVELcomVelocidadeAnterior.size() > 0 &&
+                    resposta.contains(ultimoVELcomVelocidadeAnterior))
+            {
+                ultimoVELcomVelocidadeAnterior = "";
+                paradaDeSequenciaSolicitada = false;
+                // TODO: Avaliar com o braço robô verdadeiro a parada total
                 ui->chkBtPararEnviaJST->setEnabled(true);
                 ui->btPararSeqComandos->setEnabled(true);
+                foiEnviadoJSTParaPararMov = false;
             }
         }
-        if(seqEmExecucao && ehRespostaFinal)
+        else if(seqEmExecucao && ehRespostaFinal)
         {
             executaComandoDaSequencia();
         }
@@ -2651,6 +2701,7 @@ void MainWindow::on_btPararSeqComandos_clicked()
             }
             enviaComando(filaComandosParaPararMov.dequeue());
             paradaDeSequenciaSolicitada = true;
+            foiEnviadoJSTParaPararMov = false;
         }
     }
 

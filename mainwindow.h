@@ -360,6 +360,9 @@ class MainWindow : public QMainWindow
         bool itemClicado = false;
         bool paradaDeSequenciaSolicitada = false;
         int velocidadesAnterioresAAParada[QTD_SERVOS];
+        bool foiEnviadoJSTParaPararMov = false;
+        QString comandoParaPararMovEnviado;
+        QString ultimoVELcomVelocidadeAnterior = "";
 
         QTimer *timer;
         int tentativaConfig = 0;
