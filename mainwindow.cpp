@@ -1916,7 +1916,9 @@ void MainWindow::on_btCalcularXYZAlvo_clicked()
 }
 
 void MainWindow::on_btCalcularAngulosAlvo_clicked()
-{    
+{
+    calculoAngulosAlvoAcionado = true;
+
     double x = ui->spnPosXAlvo->value();
     double y = ui->spnPosYAlvo->value();
     double z = ui->spnPosZAlvo->value();
@@ -1937,6 +1939,17 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
     {
         lstSpnAlvoGraus[i]->setValue(round(angulosJuntas[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR);
     }
+
+    if(ui->rdbReadyForPIC->isChecked())
+    {
+        comandoJST();
+    }
+    else if (ui->rdbMiniMaestro24->isChecked())
+    {
+        // Aba Posições das juntas: comando JST para a placa Mini maestro 24, botão Calcular ângulos alvo
+    }
+
+    calculoAngulosAlvoAcionado = false;    
 }
 
 void MainWindow::habilitaCamposAbaPosicaoAlvo(int posicaoAba, bool estadoHab)
@@ -1992,7 +2005,7 @@ void MainWindow::habilitaCamposAbaPosicaoAlvoJunta(int posicaoAba, int idxJunta,
 
 void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrossegundos)
 {
-    if(ui->chkEnviaComandoImediato->isChecked())
+    if(ui->chkEnviaComandoImediato->isChecked() && !calculoAngulosAlvoAcionado)
     {
         //habilitaCamposAbaPosicaoAlvo(ui->tabUnidadePos->currentIndex(), false);
 

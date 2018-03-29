@@ -392,6 +392,7 @@ class MainWindow : public QMainWindow
 
         QString comandoJSTParaPararMov;
 
+        bool calculoAngulosAlvoAcionado = false;
 
         /**** Variáveis para conversão entre ângulos em graus e posições em microssegundos ****/
         double coeffAng[QTD_SERVOS];
