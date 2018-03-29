@@ -5,13 +5,19 @@
 
 #define QTD_SERVOS 6
 
-#define CASAS_DECIMAIS_POSICAO     3
-#define CASAS_DECIMAIS_VELOCIDADE  3
-#define CASAS_DECIMAIS_ACELERACAO  4
+#define CASAS_DECIMAIS_POSICAO_ANGULAR     3
+#define CASAS_DECIMAIS_VELOCIDADE_ANGULAR  3
+#define CASAS_DECIMAIS_ACELERACAO_ANGULAR  4
 
-#define DIV_CD_POSICAO             1000
-#define DIV_CD_VELOCIDADE          1000
-#define DIV_CD_ACELERACAO          10000
+#define DIV_CD_POSICAO_ANGULAR             1000
+#define DIV_CD_VELOCIDADE_ANGULAR          1000
+#define DIV_CD_ACELERACAO_ANGULAR          10000
+
+#define CASAS_DECIMAIS_POSICAO_XYZ    2
+#define CASAS_DECIMAIS_ROTACOES_XYZ   2
+
+#define DIV_CD_POSICAO_XYZ   100
+#define DIV_CD_ROTACOES_XYZ  100
 
 #define STATUS_SEQCOM_PARADA_VAZIA      "Sequência parada"
 #define STATUS_SEQCOM_PARADA_NAO_VAZIA  "Sequência parada. ENTER ou duplo clique para executar um comando."
@@ -28,6 +34,7 @@
 
 #define STR_UND_MICROSSEGUNDOS " μs"
 #define STR_UND_GRAUS " º"
+#define STR_UND_CM " cm"
 
 static QString junta[QTD_SERVOS] = {"J0", "J1", "J2", "J3", "J4", "GR"};
 static QString idJST[QTD_SERVOS] = {"A", "B", "C", "D", "E", "G"};

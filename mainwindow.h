@@ -19,7 +19,9 @@
 #include <QListWidgetItem>
 #include <qqueue.h>
 #include <QTimer>
-
+#include <QMatrix4x4>
+#include <QVector3D>
+#include <QVector4D>
 
 namespace Ui {
     class MainWindow;
@@ -316,6 +318,16 @@ class MainWindow : public QMainWindow
         bool parser(QString comando);
 
         void iniciaDLYSemParametro();
+
+
+        /* Funções para cinemática direta/inversa */
+        QMatrix4x4 cinematicaDireta(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
+        QMatrix4x4 matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
+        double *posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
+        double *preencheCamposXYZAtual(double *posicoesAtuaisGraus);
+        void preencheCamposXYZAlvo(double* posGarra);
+        double *angJuntas(double *x, double *y, double *z, double *gamaGraus, double *betaGraus, double *alfaGraus, double *angulosMaxGraus, double *angulosMinGraus);
+
 
         Ui::MainWindow *ui;
         MontagemDeComandosDialog *montagemDeComandosDialog;

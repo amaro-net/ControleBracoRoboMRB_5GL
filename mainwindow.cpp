@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QFileDialog>
 #include <math.h>
+#include <qmath.h>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "constantes.h"
@@ -262,10 +263,10 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         }
 
         double anguloNeutro = coeffAng[i] * tempoPulsoNeutro[i] + offsetAng[i];
-        anguloNeutro = round(anguloNeutro * DIV_CD_POSICAO) / DIV_CD_POSICAO;
+        anguloNeutro = round(anguloNeutro * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR;
         setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 2, QString("%1").arg(anguloNeutro));
         double anguloRepouso = coeffAng[i] * tempoPulsoRepouso[i] + offsetAng[i];
-        anguloRepouso = round(anguloRepouso * DIV_CD_POSICAO) / DIV_CD_POSICAO;
+        anguloRepouso = round(anguloRepouso * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR;
         setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 3, QString("%1").arg(anguloRepouso));
 
         // 1.0 serve para que o resultado seja float ou double
@@ -277,26 +278,26 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             qtdPosicoesTmpPulso[i] = (tempoPulsoMax[i] - tempoPulsoMin[i]);  // us
 
             incrementosAng[i] = (angMax[i] - angMin[i])/qtdPosicoesTmpPulso[i]; // Graus / us
-            if(round(incrementosAng[i] * DIV_CD_POSICAO) / DIV_CD_POSICAO > 0)
-                incrementosAng[i] = round(incrementosAng[i] * DIV_CD_POSICAO) / DIV_CD_POSICAO;
+            if(round(incrementosAng[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR > 0)
+                incrementosAng[i] = round(incrementosAng[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR;
             else
                 incrementosAng[i] = 0.001;
             incVelGrausPorSeg[i] = incrementosAng[i] / 0.25 * (10e-3);
-            if(round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE > 0)
-                incVelGrausPorSeg[i]  = round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+            if(round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR > 0)
+                incVelGrausPorSeg[i]  = round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR;
             else
                 incVelGrausPorSeg[i] = 0.001;
             incAclGrausPorSegQuad[i] = incrementosAng[i] / 0.25 * (10e-3) * (80e-3);
-            if(round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO > 0)
-                incAclGrausPorSegQuad[i] = round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+            if(round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR > 0)
+                incAclGrausPorSegQuad[i] = round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR;
             else
                 incAclGrausPorSegQuad[i] = 0.001;
 
-            lstSpnAlvoGraus[i]->setDecimals(CASAS_DECIMAIS_POSICAO);
+            lstSpnAlvoGraus[i]->setDecimals(CASAS_DECIMAIS_POSICAO_ANGULAR);
             lstSpnAlvoGraus[i]->setSingleStep(incrementosAng[i]);
-            lstSpnVelGrausPorSeg[i]->setDecimals(CASAS_DECIMAIS_VELOCIDADE);
+            lstSpnVelGrausPorSeg[i]->setDecimals(CASAS_DECIMAIS_VELOCIDADE_ANGULAR);
             lstSpnVelGrausPorSeg[i]->setSingleStep(incVelGrausPorSeg[i]);
-            lstSpnAclGrausPorSegQuad[i]->setDecimals(CASAS_DECIMAIS_ACELERACAO);
+            lstSpnAclGrausPorSegQuad[i]->setDecimals(CASAS_DECIMAIS_ACELERACAO_ANGULAR);
             lstSpnAclGrausPorSegQuad[i]->setSingleStep(incAclGrausPorSegQuad[i]);
 
             int velTmpPulso = lstSpnVel[i]->value();
@@ -307,30 +308,30 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             //     Graus /(10ms)
             // Graus / (10e-3 s) * 10e-3
             // Graus / s
-            velGrausPorSeg = round(velGrausPorSeg * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+            velGrausPorSeg = round(velGrausPorSeg * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR;
             lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg);
 
             int aclTmpPulso = lstSpnAcl[i]->value();
             double aclGrausPorSegQuad = aclTmpPulso * incrementosAng[i] / 0.25 * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
-            aclGrausPorSegQuad = round(aclGrausPorSegQuad * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+            aclGrausPorSegQuad = round(aclGrausPorSegQuad * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR;
             lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad);
         }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
             qtdPosicoesTmpPulso[i] = (tempoPulsoMax[i] - tempoPulsoMin[i]) * 4; // 0.25us
             incrementosAng[i] = (angMax[i] - angMin[i])/qtdPosicoesTmpPulso[i]; // Graus / 0.25us
-            if(round(incrementosAng[i] * DIV_CD_POSICAO) / DIV_CD_POSICAO > 0)
-                incrementosAng[i] = round(incrementosAng[i] * DIV_CD_POSICAO) / DIV_CD_POSICAO;
+            if(round(incrementosAng[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR > 0)
+                incrementosAng[i] = round(incrementosAng[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR;
             else
                 incrementosAng[i] = 0.001;
             incVelGrausPorSeg[i] = incrementosAng[i] * (10e-3);
-            if(round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE > 0)
-                incVelGrausPorSeg[i]  = round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+            if(round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR > 0)
+                incVelGrausPorSeg[i]  = round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR;
             else
                 incVelGrausPorSeg[i] = 0.001;
             incAclGrausPorSegQuad[i] = incrementosAng[i] * (10e-3) * (80e-3);
-            if(round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO > 0)
-                incAclGrausPorSegQuad[i] = round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+            if(round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR > 0)
+                incAclGrausPorSegQuad[i] = round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR;
             else
                 incAclGrausPorSegQuad[i] = 0.001;
 
@@ -344,7 +345,7 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             //      1 / (10ms) * Graus          * 10 * 10e-3
             //       Graus / ((10e-3) * s) * (10e-3)
             //       Graus / s
-            velGrausPorSeg = round(velGrausPorSeg * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+            velGrausPorSeg = round(velGrausPorSeg * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR;
             lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg);
 
 
@@ -356,7 +357,7 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             // Graus/((10ms)*(80ms))
             // Graus / (10e-3 * s  * 80e-3 * s) * 10e-3 * 80e-3
             // Graus / s^2
-            aclGrausPorSegQuad = round(aclGrausPorSegQuad * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+            aclGrausPorSegQuad = round(aclGrausPorSegQuad * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR;
             lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad);
         }
     }
@@ -665,7 +666,7 @@ double MainWindow::converteMicrossegundosParaGraus(int idxJunta, int posicaoMicr
 
     y = a * x + b;
 
-    return round(y*DIV_CD_POSICAO)/DIV_CD_POSICAO;
+    return round(y*DIV_CD_POSICAO_ANGULAR)/DIV_CD_POSICAO_ANGULAR;
 }
 
 int MainWindow::converteGrausParaMicrossegundos(int idxJunta, double posicaoGraus)
@@ -690,7 +691,7 @@ double MainWindow::converteVelTmpPulsoParaGrausPorSeg(int idxJunta, int velTmpPu
     else
         velGrausPorSeg = velTmpPulso * incrementosAng[idxJunta] * 10e-3;
 
-    return round(velGrausPorSeg * DIV_CD_VELOCIDADE) / DIV_CD_VELOCIDADE;
+    return round(velGrausPorSeg * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR;
 
 }
 
@@ -715,7 +716,7 @@ double MainWindow::converteAclTmpPulsoParaGrausPorSegQuad(int idxJunta, int aclT
     else
         aclGrausPorSegQuad = aclTmpPulso * incrementosAng[idxJunta] * 10e-3 * 80e-3;
 
-    return round(aclGrausPorSegQuad * DIV_CD_ACELERACAO) / DIV_CD_ACELERACAO;
+    return round(aclGrausPorSegQuad * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR;
 }
 
 int MainWindow::converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad)
@@ -746,7 +747,7 @@ void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
 
         // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
         if(angulo != anguloAtual)
-            lstSpnAlvoGraus[idxJunta]->setValue(angulo);
+            lstSpnAlvoGraus[idxJunta]->setValue(angulo);        
     }
     else
     {
@@ -882,8 +883,7 @@ void MainWindow::setaPosicaoPontoVerde(int idxJunta, int posicao)
 }
 
 void MainWindow::montaJSTParaPararMov1Junta()
-{
-    // TODO: Verificar a causa da parada total não funcionar direito com o comando JST
+{    
     comandoJSTParaPararMov = "[JST";
     for(int i = 0; i < QTD_SERVOS; i++)
     {
@@ -901,12 +901,15 @@ void MainWindow::decodificaResposta()
     bool ehRespostaConfigPosLimite = false;
     bool ehRespostaMovAbaComandos = false;
     bool ehRespostaMoverComVelAcl = false;
+    double posicoesAtuaisGraus[6];
 
     if(tamanhoResposta == 35 && (resposta.contains("MOV") || resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN2")) )
     {
         QString strValor;
         int valor;
         double graus;
+        bool todasPosicoesMaioresQueZero = true;
+        double *posGarra;
 
         QString comandoRecebido = resposta.mid(1,3);
         comandoJSTParaPararMov = QString(resposta);
@@ -915,21 +918,30 @@ void MainWindow::decodificaResposta()
         for(int i = 0; i < QTD_SERVOS; i++)
         {
             strValor = resposta.mid(5*(i+1), 4);
-            valor = strValor.toInt();
+            valor = strValor.toInt();            
 
             lstEdtAtual[i]->setText(strValor.setNum(valor) + STR_UND_MICROSSEGUNDOS);
 
             if(valor > 0)
             {
-                graus = converteMicrossegundosParaGraus(i, valor);
-                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO) + STR_UND_GRAUS);
+                graus = converteMicrossegundosParaGraus(i, valor);                
+                posicoesAtuaisGraus[i] = graus;
+                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO_ANGULAR) + STR_UND_GRAUS);
                 lstPontoVerdeSliderPosAtual[i]->setVisible(true);
-                setaPosicaoPontoVerde(i, valor);
+                setaPosicaoPontoVerde(i, valor);                
             }
             else
             {
-                lstPontoVerdeSliderPosAtual[i]->setVisible(false);
+                lstPontoVerdeSliderPosAtual[i]->setVisible(false);                
+                posicoesAtuaisGraus[i] = -9999;
+                if(i < 5)
+                    todasPosicoesMaioresQueZero = false;
             }
+        }
+
+        if(todasPosicoesMaioresQueZero)
+        {
+            posGarra = preencheCamposXYZAtual(posicoesAtuaisGraus);
         }
 
         //if(resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN2"))
@@ -970,10 +982,15 @@ void MainWindow::decodificaResposta()
                     lstChkHab[i]->setChecked(false);
                     lstSpnAlvo[i]->setEnabled(false);
                     lstSpnAlvoGraus[i]->setEnabled(false);
-                }
-
-                // TODO: Cinemática direta
+                }                                
             }
+
+            if(todasPosicoesMaioresQueZero)
+            {
+                preencheCamposXYZAlvo(posGarra);
+                delete(posGarra);
+            }
+
             HabilitarComponentesComServosLigados();
 
             ehRespostaFinal = true;
@@ -981,11 +998,17 @@ void MainWindow::decodificaResposta()
             ehRespostaMovAbaComandos = resposta.contains("[JSTA0000B0000C0000D0000E0000G0000]") ||
                                        resposta.contains("RPS");
         }
+        else
+        {
+            delete(posGarra);
+        }
     }
     else if(tamanhoResposta == 11)
     {
         if(resposta.contains("MOV") || resposta.contains("CTZ") || resposta.contains("IN1"))
         {
+            bool todasPosicoesMaioresQueZero = true;
+            double *posGarra;
             QString junta = resposta.mid(4,2);
             QString strValor = resposta.mid(6,4);
 
@@ -1006,13 +1029,25 @@ void MainWindow::decodificaResposta()
             if(valor > 0)
             {
                 double graus = converteMicrossegundosParaGraus(i, valor);
-                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO) + STR_UND_GRAUS);
+                lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO_ANGULAR) + STR_UND_GRAUS);
                 lstPontoVerdeSliderPosAtual[i]->setVisible(true);
-                setaPosicaoPontoVerde(i, valor);
+                setaPosicaoPontoVerde(i, valor);                
             }
             else
             {
-                lstPontoVerdeSliderPosAtual[i]->setVisible(false);
+                lstPontoVerdeSliderPosAtual[i]->setVisible(false);                
+            }
+
+            for(int k = 0; k < QTD_SERVOS && todasPosicoesMaioresQueZero; k++)
+            {
+                posicoesAtuaisGraus[k] = lstEdtAtualGraus[k]->text().replace(STR_UND_GRAUS, "").toDouble();
+                if(k < 5 && lstEdtAtual[k]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt() == 0)
+                    todasPosicoesMaioresQueZero = false;
+            }
+
+            if(todasPosicoesMaioresQueZero)
+            {
+                posGarra = preencheCamposXYZAtual(posicoesAtuaisGraus);
             }
 
             //if(resposta.contains("CTZ") || resposta.contains("IN1"))
@@ -1051,9 +1086,19 @@ void MainWindow::decodificaResposta()
                     lstSpnAlvoGraus[i]->setEnabled(false);
                 }
 
+                if(todasPosicoesMaioresQueZero)
+                {
+                    preencheCamposXYZAlvo(posGarra);
+                    delete(posGarra);
+                }
+
                 HabilitarComponentesComServosLigados();
                 ehRespostaFinal = true;
                 ehRespostaMovAbaComandos = resposta.contains("CTZ");
+            }
+            else
+            {
+                delete(posGarra);
             }
 
         }
@@ -1082,7 +1127,7 @@ void MainWindow::decodificaResposta()
 
         ui->edtGRAtual->setText(valor);
         double graus = converteMicrossegundosParaGraus(5, valor.toInt());
-        ui->edtGRAtualGraus->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO));
+        ui->edtGRAtualGraus->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO_ANGULAR));
 
         lstPontoVerdeSliderPosAtual[5]->setVisible(true);
         setaPosicaoPontoVerde(5, valor.toInt());
@@ -1858,11 +1903,41 @@ void MainWindow::on_btMoverComVelEAcl_clicked()
 void MainWindow::on_btCalcularXYZAlvo_clicked()
 {
     // TODO: Aba Posições das Juntas: Botão de cinemática direta
+    double teta1 = lstSpnAlvo[0]->value();
+    double teta2 = lstSpnAlvo[1]->value();
+    double teta3 = lstSpnAlvo[2]->value();
+    double teta4 = lstSpnAlvo[3]->value();
+    double teta5 = lstSpnAlvo[4]->value();
+
+    double *posGarra = posicaoGarra(teta1, teta2, teta3, teta4, teta5);
+
+    preencheCamposXYZAlvo(posGarra);
+    delete(posGarra);
 }
 
 void MainWindow::on_btCalcularAngulosAlvo_clicked()
 {
     // TODO: Aba Posições das Juntas: Botão de cinemática inversa
+    double x = ui->spnPosXAlvo->value();
+    double y = ui->spnPosYAlvo->value();
+    double z = ui->spnPosZAlvo->value();
+    double Rx = ui->spnRxAlvo->value();
+    double Ry = ui->spnRyAlvo->value();
+    double Rz = ui->spnRzAlvo->value();
+
+    double *angulosJuntas = angJuntas(&x, &y, &z, &Rx, &Ry, &Rz, angMax, angMin);
+
+    ui->spnPosXAlvo->setValue(x);
+    ui->spnPosYAlvo->setValue(y);
+    ui->spnPosZAlvo->setValue(z);
+    ui->spnRxAlvo->setValue(Rx);
+    ui->spnRyAlvo->setValue(Ry);
+    ui->spnRzAlvo->setValue(Rz);
+
+    for(int i = 0; i < 5; i++)
+    {
+        lstSpnAlvoGraus[i]->setValue(round(angulosJuntas[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR);
+    }
 }
 
 void MainWindow::habilitaCamposAbaPosicaoAlvo(int posicaoAba, bool estadoHab)
@@ -3082,4 +3157,384 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
 {
     console->setLocalEchoEnabled(checked);
 }
+
+
+
+/* NOTE: ***** Funções para Cinemática direta/inversa ***** */
+
+/**
+ * @brief MainWindow::cinematicaDireta
+ * Função que retorna uma matriz 4 x 4 que faz a transformação
+ * de coordenadas do referencial do pulso da garra para um referencial
+ * que coincide com o cruzamento dos eixos da junta 1 e da junta 0.
+ * as 3 primeiras linhas e 3 primeiras colunas contém uma matriz de
+ * rotação do referencial do pulso da garra, enquanto as 3 primeiras
+ * linhas da quarta coluna possui as translações em x, y e z do referencial
+ * do pulso da garra.
+ * @param teta1graus ângulo em graus da junta 0
+ * @param teta2graus ângulo em graus da junta 1
+ * @param teta3graus ângulo em graus da junta 2
+ * @param teta4graus ângulo em graus da junta 3
+ * @param teta5graus ângulo em graus da junta 4 (pulso da garra)
+ * @return a matriz da cinemática direta, composta pela matriz de rotação e pela translação do referencial do pulso da garra.
+ */
+QMatrix4x4 MainWindow::cinematicaDireta(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus)
+{    
+    double teta1 = teta1graus * M_PI / 180;
+    double teta2 = teta2graus * M_PI / 180;
+    double teta3 = teta3graus * M_PI / 180;
+    double teta4 = teta4graus * M_PI / 180;
+    double teta5 = teta5graus * M_PI / 180;
+
+    double s1 = sin(teta1);
+    double s2 = sin(teta2);
+    double s3 = sin(teta3);
+    double s4 = sin(teta4);
+    double s5 = sin(teta5);
+
+    double c1 = cos(teta1);
+    double c2 = cos(teta2);
+    double c3 = cos(teta3);
+    double c4 = cos(teta4);
+    double c5 = cos(teta5);
+
+    double s23 = c2*s3 + c3*s2;
+    double c23 = c2*c3 - s2*s3;
+    double c234 = c23*c4 - s23*s4;
+    double s234 = s23*c4 + c23*s4;
+
+    double r11 = c1*c234*c5 + s1*s5;
+    double r21 = s1*c234*c5 - c1*s5;
+    double r31 = s234*c5;
+    double r12 =  s1*c5 - c1*c234*s5;
+    double r22 = -c1*c5 - s1*c234*s5;
+    double r32 = -s234*s5;
+    double r13 = c1*s234;
+    double r23 = s1*s234;
+    double r33 = -c234;
+
+    double f = 11.675f*c2 + 5.825f*c23 + 0.45f*c234 + 8.633297f*s234;
+
+    double px = 2.327067f*s1 + c1*f;
+    double py = 2.327067f*c1 + s1*f;
+    double pz = 11.675f*s2 + 5.825f*s23 + 0.45f*s234 - 8.633297f*c234;
+
+    return QMatrix4x4(r11, r12, r13, px,
+                      r21, r22, r23, py,
+                      r31, r32, r33, pz,
+                        0,   0,   0,  1);
+}
+
+/**
+ * @brief MainWindow::matrizPosGarra
+ * Matriz de posicionamento da garra. Esta matriz faz a translação
+ * do referencial da garra para o pulso, do pulso para o cruzamento
+ * entre os eixos das juntas 1 e 0 (com a função de cinemática direta),
+ * e do cruzamento de J1 e J0 para a base do braço robô.
+ *
+ * @param teta1graus ângulo em graus da junta 0
+ * @param teta2graus ângulo em graus da junta 1
+ * @param teta3graus ângulo em graus da junta 2
+ * @param teta4graus ângulo em graus da junta 3
+ * @param teta5graus ângulo em graus da junta 4 (pulso da garra)
+ * @return Matriz de posicionamento da garra
+ */
+QMatrix4x4 MainWindow::matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus)
+{    
+    QMatrix4x4 matrizJ0ParaBase(1, 0, 0, 0,
+                                0, 1, 0, 0,
+                                0, 0, 1, 17.41098f,
+                                0, 0, 0, 1);
+
+    QMatrix4x4 matrizGarraParaPulso(1, 0, 0, 0,
+                                    0, 1, 0, 0,
+                                    0, 0, 1, 7.5f,
+                                    0, 0, 0, 1);
+
+    return matrizJ0ParaBase *
+            cinematicaDireta(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus) *
+            matrizGarraParaPulso;
+}
+
+/**
+ * @brief MainWindow::posicaoGarra
+ * Função que retorna as coordenadas x, y, z, Rx, Ry e Rz da garra em relação à base do braço robô,
+ * sendo Rx, Ry e Rz as rotações, em graus, em torno dos eixos X, Y e Z da base da garra.
+ * Lembrar de desalocar o ponteiro que receber o resultado desta função quando não for mais usado.
+ * @param teta1graus ângulo em graus da junta 0
+ * @param teta2graus ângulo em graus da junta 1
+ * @param teta3graus ângulo em graus da junta 2
+ * @param teta4graus ângulo em graus da junta 3
+ * @param teta5graus ângulo em graus da junta 4 (pulso da garra)
+ * @return vetor que contém nos 3 primeiros elementos as coordenadas X, Y e Z da garra em cm, e no restante os ângulos Rx, Ry e Rz em graus.
+ */
+double *MainWindow::posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus)
+{    
+    QMatrix4x4 MGarra = matrizPosGarra(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus);
+
+    double R[3][3];
+
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            R[i][j] = round(MGarra(i,j) * 1000) / 1000;
+
+    double x = round(MGarra(0, 3) * DIV_CD_POSICAO_XYZ) / DIV_CD_POSICAO_XYZ;
+    double y = round(MGarra(1, 3) * DIV_CD_POSICAO_XYZ) / DIV_CD_POSICAO_XYZ;
+    double z = round(MGarra(2, 3) * DIV_CD_POSICAO_XYZ) / DIV_CD_POSICAO_XYZ;
+
+    double beta = atan2(-R[2][0], sqrt(pow(R[0][0], 2) + pow(R[0][1], 2))) * 180 / M_PI;
+
+    double alfa, gama;
+
+    if(beta == 90)
+    {
+        alfa = 0;
+        gama = atan2(R[0][1], R[1][1]) * 180 / M_PI;
+    }
+    else if(beta == -90)
+    {
+        alfa = 0;
+        gama = -atan2(R[0][1], R[1][1]) * 180 / M_PI;
+    }
+    else
+    {
+        double cbeta = cos(beta * M_PI / 180);
+        alfa = atan2(R[1][0]/cbeta, R[0][0]/cbeta) * 180 / M_PI;
+        gama = atan2(R[2][1]/cbeta, R[2][2]/cbeta) * 180 / M_PI;
+    }
+
+    gama = round(gama * DIV_CD_ROTACOES_XYZ) / DIV_CD_ROTACOES_XYZ;
+    beta = round(beta * DIV_CD_ROTACOES_XYZ) / DIV_CD_ROTACOES_XYZ;
+    alfa = round(alfa * DIV_CD_ROTACOES_XYZ) / DIV_CD_ROTACOES_XYZ;
+
+    return new double[6]{x, y, z, gama, beta, alfa};
+}
+
+double *MainWindow::preencheCamposXYZAtual(double *posicoesAtuaisGraus)
+{
+    double *posGarra = posicaoGarra(posicoesAtuaisGraus[0], posicoesAtuaisGraus[1], posicoesAtuaisGraus[2],
+                                    posicoesAtuaisGraus[3], posicoesAtuaisGraus[4]);
+
+    ui->edtPosXAtual->setText(QString("%L1%2").arg(posGarra[0], 0, 'f', CASAS_DECIMAIS_POSICAO_XYZ).arg(STR_UND_CM));
+    ui->edtPosYAtual->setText(QString("%L1%2").arg(posGarra[1], 0, 'f', CASAS_DECIMAIS_POSICAO_XYZ).arg(STR_UND_CM));
+    ui->edtPosZAtual->setText(QString("%L1%2").arg(posGarra[2], 0, 'f', CASAS_DECIMAIS_POSICAO_XYZ).arg(STR_UND_CM));
+    ui->edtRxAtual->setText(QString("%L1%2").arg(posGarra[3], 0, 'f', CASAS_DECIMAIS_POSICAO_ANGULAR).arg(STR_UND_GRAUS));
+    ui->edtRyAtual->setText(QString("%L1%2").arg(posGarra[4], 0, 'f', CASAS_DECIMAIS_POSICAO_ANGULAR).arg(STR_UND_GRAUS));
+    ui->edtRzAtual->setText(QString("%L1%2").arg(posGarra[5], 0, 'f', CASAS_DECIMAIS_POSICAO_ANGULAR).arg(STR_UND_GRAUS));
+
+    return posGarra;
+}
+
+void MainWindow::preencheCamposXYZAlvo(double *posGarra)
+{
+    ui->spnPosXAlvo->setValue(posGarra[0]);
+    ui->spnPosYAlvo->setValue(posGarra[1]);
+    ui->spnPosZAlvo->setValue(posGarra[2]);
+    ui->spnRxAlvo->setValue(posGarra[3]);
+    ui->spnRyAlvo->setValue(posGarra[4]);
+    ui->spnRzAlvo->setValue(posGarra[5]);
+}
+
+/**
+ * @brief MainWindow::angJuntas
+ * Cinemática inversa
+ *
+ * @param x coordenada x da garra em relação à base da garra. Esta coordenada poderá ser recalculada, caso ela não seja atingível.
+ * @param y coordenada y da garra em relação à base da garra. Esta coordenada poderá ser recalculada, caso ela não seja atingível.
+ * @param z coordenada z da garra em relação à base da garra. Esta coordenada poderá ser recalculada, caso ela não seja atingível.
+ * @param gamaGraus
+ * @param betaGraus
+ * @param alfaGraus
+ * @param angulosMaxGraus vetor contendo os ângulos máximo das juntas.
+ * @param angulosMinGraus vetor contendo os ângulos mínimo das juntas.
+ * @return ângulos das juntas em graus, se a posição de alguma forma for atingível.
+ */
+double *MainWindow::angJuntas(double *x, double *y, double *z, double *gamaGraus, double *betaGraus, double *alfaGraus, double *angulosMaxGraus, double *angulosMinGraus)
+{
+    // TODO: Cinemática inversa: rever os cálculos para considerar as translações da Garra para o pulso e do cruzamento entre os eixos de  J0 e J1 para a base.
+    double gama = *gamaGraus * M_PI /180;
+    double beta = *betaGraus * M_PI /180;
+    double alfa = *alfaGraus * M_PI /180;
+
+    double sgama = sin(gama);
+    double sbeta = sin(beta);
+    double salfa = sin(alfa);
+
+    double cgama = cos(gama);
+    double cbeta = cos(beta);
+    double calfa = cos(alfa);
+
+    double r11;
+    double r21;
+    double r31;
+    double r12 = calfa * sbeta * sgama - salfa * cgama;
+    double r22 = salfa * sbeta * sgama + calfa * cgama;
+    double r32 = cbeta * sgama;
+    double r13 = calfa * sbeta * cgama + salfa * sgama;
+    double r23 = salfa * sbeta * cgama - calfa * sgama;
+    double r33 = cbeta * sgama;
+
+    double px = *x - 7.5 * r13;
+    double py = *y - 7.5 * r23;
+    double pz = *z - 7.5 * r33 - 17.41098;
+
+    double px2py2 = pow(px,2) + pow(py,2);
+    double sqrtpx2py2 = sqrt(px2py2);
+
+    // Projetando o ponto desejado no plano do braço. Esta projeção será a que a
+    // garra poderá realmente assumir (ver cap. 4 do craig - The Yasukawa
+    // Motoman L-3 página 121)
+
+    QVector3D M = (1/sqrtpx2py2 * QVector3D(-py, px, 0));
+    QVector3D Zt(r13, r23, r33);
+    QVector3D Yt(r12, r22, r32);
+
+    QVector3D K = QVector3D::crossProduct(M, Zt);
+
+    QVector3D Ztl = QVector3D::crossProduct(K, M);
+
+    double cteta = QVector3D::dotProduct(Zt, Ztl);
+    double steta = QVector3D::dotProduct(QVector3D::crossProduct(Zt, Ztl), K);
+
+    QVector3D Ytl = cteta * Yt
+                 + steta * QVector3D::crossProduct(K, Yt)
+                 + ((1 - cteta) * QVector3D::dotProduct(K, Yt)) * K;
+
+    QVector3D Xtl = QVector3D::crossProduct(Ytl, Ztl);
+
+    r11 = Xtl[0];
+    r21 = Xtl[1];
+    r31 = Xtl[2];
+
+    r12 = Ytl[0];
+    r22 = Ytl[1];
+    r32 = Ytl[2];
+
+    r13 = Ztl[0];
+    r23 = Ztl[1];
+    r33 = Ztl[2];
+
+    // Recalculando x, y e z da garra
+    *x = px + 7.5f * r13;
+    *y = py + 7.5f * r23;
+    *z = pz + 7.5f * r33 + 17.41098f;
+
+    //recalculando gama, beta e alfa
+    *betaGraus = atan2(-r31, sqrt(pow(r11,2)+pow(r21,2))) * 180 / M_PI;
+    if(*betaGraus == 90)
+    {
+        *alfaGraus = 0;
+        *gamaGraus = atan2(r12, r22) * 180 / M_PI;
+    }
+    else if (*betaGraus == -90)
+    {
+        *alfaGraus = 0;
+        *gamaGraus = -atan2(r12,r22) * 180 / M_PI;
+    }
+    else
+    {
+        double cbeta = cos(*betaGraus * M_PI / 180);
+        *alfaGraus = atan2(r21/cbeta, r11/cbeta)* 180 / M_PI;
+        *gamaGraus = atan2(r32/cbeta, r33/cbeta)* 180 / M_PI;
+    }
+
+    double atan2pypx = atan2(py, -px);
+    double atan2sqrt = atan2(sqrt(px2py2 - 5.415240822489f),-2.327067f);
+
+    double teta1_1 = atan2pypx + atan2sqrt;
+    double teta1_2 = atan2pypx - atan2sqrt;
+    double teta1min = angulosMinGraus[0] * M_PI / 180;
+    double teta1max = angulosMaxGraus[0] * M_PI / 180;
+
+    double teta1;
+
+    if ((teta1_1 >= teta1min) && (teta1_1 <= teta1max))
+        teta1 = teta1_1;
+    else if((teta1_2 >= teta1min) && (teta1_2 <= teta1max))
+        teta1 = teta1_2;
+    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+    else if (teta1_1 < teta1min || teta1_2 < teta1min)
+        teta1 = teta1min;
+    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+    else if (teta1_1 > teta1max || teta1_2 > teta1max)
+        teta1 = teta1max;
+
+    double c1 = cos(teta1);
+    double s1 = sin(teta1);
+    teta1 = teta1 * 180 / M_PI;
+
+    double teta5 = atan2(s1*r11 - c1*r21, s1*r12 - c1*r22);
+
+    double teta5min = angulosMinGraus[4] * M_PI / 180;
+    double teta5max = angulosMaxGraus[4] * M_PI / 180;
+
+    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+    if (teta5 < teta5min)
+        teta5 = teta5min;
+    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+    else if (teta5 > teta5max)
+        teta5 = teta5max;
+
+    teta5 = teta5 * 180 / M_PI;
+
+    double teta234 = atan2(c1*r13+s1*r23, -r33) * 180 / M_PI;
+
+    double c3 = (px2py2 + pow(pz,2) - 170.23625f) / 9249.87009453125f;
+
+    double s3 = sqrt(1 - pow(c3,2));
+
+    double teta3_1 = atan2(s3, c3);
+    double teta3_2 = atan2(-s3, c3);
+    double teta3min = angulosMinGraus[2] * M_PI / 180;
+    double teta3max = angulosMaxGraus[2] * M_PI / 180;
+    double teta3;
+
+    if ((teta3_1 >= teta3min) && (teta3_1 <= teta3max))
+        teta3 = teta3_1;
+    else if ((teta3_2 >= teta3min) && (teta3_2 <= teta3max))
+        teta3 = teta3_2;
+    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+    else if (teta3_1 < teta3min || teta3_2 < teta3min)
+        teta3 = teta3min;
+    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+    else if (teta3_1 > teta3max || teta3_2 > teta3max)
+        teta3 = teta3max;
+
+
+    //c3 = cos(teta3);
+    //s3 = sin(teta3);
+
+    teta3 = teta3 * 180 / M_PI;
+
+    double teta2 = (-atan2(pz, sqrtpx2py2) - atan2(5.825f * s3, 11.675f + 5.825f * c3));
+
+    double teta2min = angulosMinGraus[1] * M_PI / 180;
+    double teta2max = angulosMaxGraus[1] * M_PI / 180;
+
+    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+    if (teta2 < teta2min)
+        teta2 = teta2min;
+    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+    else if (teta2 > teta2max)
+        teta2 = teta2max;
+
+
+    teta2 = teta2 * 180 / M_PI;
+
+    double teta4 = teta234 - teta2 - teta3;
+
+    double teta4min = angulosMinGraus[3];
+    double teta4max = angulosMaxGraus[3];
+
+    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+    if (teta4 < teta4min)
+        teta4 = teta4min;
+    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+    else if (teta4 > teta4max)
+        teta4 = teta4max;
+
+    return new double[5]{teta1, teta2, teta3, teta4, teta5};
+}
+
+
 

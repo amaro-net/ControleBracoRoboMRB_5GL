@@ -262,7 +262,7 @@ void MontagemDeComandosDialog::setIncrementosAng(double incrementosAng[])
 {
     for(int i = 0; i < QTD_SERVOS; i++)
     {
-        lstSpnPosAlvoGraus[i]->setDecimals(CASAS_DECIMAIS_POSICAO);
+        lstSpnPosAlvoGraus[i]->setDecimals(CASAS_DECIMAIS_POSICAO_ANGULAR);
         lstSpnPosAlvoGraus[i]->setSingleStep(incrementosAng[i]);
     }
 }
@@ -273,7 +273,7 @@ void MontagemDeComandosDialog::setIncVelGrausPorSeg(double incVelGrausPorSeg[])
     {
         this->incVelGrausPorSeg[i] = incVelGrausPorSeg[i];
     }
-    ui->spnVelGrausPorSeg->setDecimals(CASAS_DECIMAIS_VELOCIDADE);
+    ui->spnVelGrausPorSeg->setDecimals(CASAS_DECIMAIS_VELOCIDADE_ANGULAR);
 }
 
 void MontagemDeComandosDialog::setIncAclGrausPorSegQuad(double incAclGrausPorSegQuad[])
@@ -282,7 +282,7 @@ void MontagemDeComandosDialog::setIncAclGrausPorSegQuad(double incAclGrausPorSeg
     {
         this->incAclGrausPorSegQuad[i] = incAclGrausPorSegQuad[i];
     }
-    ui->spnAclGrausPorSegQuad->setDecimals(CASAS_DECIMAIS_ACELERACAO);
+    ui->spnAclGrausPorSegQuad->setDecimals(CASAS_DECIMAIS_ACELERACAO_ANGULAR);
 }
 
 void MontagemDeComandosDialog::setVelocidades(QList<QSpinBox *> lstSpnVel)
