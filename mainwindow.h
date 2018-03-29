@@ -249,6 +249,8 @@ class MainWindow : public QMainWindow
 
         void on_sliderGR_valueChanged(int value);
 
+        void on_tabUnidadePos_currentChanged(int index);
+
     private:
         void preencheCombosPortaSerial();
         void showStatusMessage(const QString &message);

@@ -1035,7 +1035,7 @@ void MainWindow::decodificaResposta()
             }
             else
             {
-                lstPontoVerdeSliderPosAtual[i]->setVisible(false);                
+                lstPontoVerdeSliderPosAtual[i]->setVisible(false);
             }
 
             for(int k = 0; k < QTD_SERVOS && todasPosicoesMaioresQueZero; k++)
@@ -1903,11 +1903,11 @@ void MainWindow::on_btMoverComVelEAcl_clicked()
 void MainWindow::on_btCalcularXYZAlvo_clicked()
 {
     // TODO: Aba Posições das Juntas: Botão de cinemática direta
-    double teta1 = lstSpnAlvo[0]->value();
-    double teta2 = lstSpnAlvo[1]->value();
-    double teta3 = lstSpnAlvo[2]->value();
-    double teta4 = lstSpnAlvo[3]->value();
-    double teta5 = lstSpnAlvo[4]->value();
+    double teta1 = lstSpnAlvoGraus[0]->value();
+    double teta2 = lstSpnAlvoGraus[1]->value();
+    double teta3 = lstSpnAlvoGraus[2]->value();
+    double teta4 = lstSpnAlvoGraus[3]->value();
+    double teta5 = lstSpnAlvoGraus[4]->value();
 
     double *posGarra = posicaoGarra(teta1, teta2, teta3, teta4, teta5);
 
@@ -1916,8 +1916,7 @@ void MainWindow::on_btCalcularXYZAlvo_clicked()
 }
 
 void MainWindow::on_btCalcularAngulosAlvo_clicked()
-{
-    // TODO: Aba Posições das Juntas: Botão de cinemática inversa
+{    
     double x = ui->spnPosXAlvo->value();
     double y = ui->spnPosYAlvo->value();
     double z = ui->spnPosZAlvo->value();
@@ -2396,6 +2395,10 @@ void MainWindow::on_sliderGR_valueChanged(int value)
     sliderValueChanged(5, value);
 }
 
+void MainWindow::on_tabUnidadePos_currentChanged(int index)
+{
+    // TODO: Aba posicções das juntas: Fazer os sliders e os pontos verdes respeitarem a proporção inversa ao visualizar as posições em graus.
+}
 
 /* NOTE: ***** Aba Sequência de Comandos ***** */
 

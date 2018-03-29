@@ -3058,7 +3058,7 @@ comandos</string>
        <property name="text">
         <string>Calcular 
 XYZ 
-Alvo</string>
+alvo</string>
        </property>
       </widget>
       <widget class="QPushButton" name="btCalcularAngulosAlvo">
@@ -3106,9 +3106,9 @@ alvo</string>
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Mover Com 
-Velocidade e 
-Aceleração</string>
+          <string>Mover com 
+velocidade e 
+aceleração</string>
          </property>
         </widget>
        </item>
