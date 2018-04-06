@@ -328,7 +328,10 @@ class MainWindow : public QMainWindow
         double *posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
         double *preencheCamposXYZAtual(double *posicoesAtuaisGraus);
         void preencheCamposXYZAlvo(double* posGarra);
-        double *angJuntas(double *x, double *y, double *z, double *gamaGraus, double *betaGraus, double *alfaGraus, double *angulosMaxGraus, double *angulosMinGraus);
+        double *angJuntas(double *x, double *y, double *z,
+                          double *gamaGraus, double *betaGraus, double *alfaGraus,
+                          double *angulosMaxGraus, double *angulosMinGraus,
+                          bool *posicaoProjetada = NULL, bool *posicaoAtingivel = NULL);
 
 
         Ui::MainWindow *ui;

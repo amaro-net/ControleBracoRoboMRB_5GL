@@ -1917,6 +1917,11 @@ void MainWindow::on_btCalcularXYZAlvo_clicked()
 
 void MainWindow::on_btCalcularAngulosAlvo_clicked()
 {
+    bool posicaoProjetada;
+    bool posicaoAtingivel;
+    int respostaPosInatingivel = QMessageBox::No;
+    int respostaPosProjetada = QMessageBox::No;
+
     calculoAngulosAlvoAcionado = true;
 
     double x = ui->spnPosXAlvo->value();
@@ -1926,27 +1931,77 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
     double Ry = ui->spnRyAlvo->value();
     double Rz = ui->spnRzAlvo->value();
 
-    double *angulosJuntas = angJuntas(&x, &y, &z, &Rx, &Ry, &Rz, angMax, angMin);
+    double *angulosJuntas = angJuntas(&x, &y, &z, &Rx, &Ry, &Rz, angMax, angMin, &posicaoProjetada, &posicaoAtingivel);
 
-    ui->spnPosXAlvo->setValue(x);
-    ui->spnPosYAlvo->setValue(y);
-    ui->spnPosZAlvo->setValue(z);
-    ui->spnRxAlvo->setValue(Rx);
-    ui->spnRyAlvo->setValue(Ry);
-    ui->spnRzAlvo->setValue(Rz);
-
-    for(int i = 0; i < 5; i++)
+    if(posicaoProjetada && posicaoAtingivel)
     {
-        lstSpnAlvoGraus[i]->setValue(round(angulosJuntas[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR);
+        respostaPosProjetada = QMessageBox::question(this,
+                                                       tr("Posição projetada"),
+                                                       tr("Posição XYZ foi projetada no plano que corta verticalmente\n"
+                                                          "o braço robô.\n"
+                                                          "Deseja atualizar a posição XYZ alvo com os valores projetados?\n"
+                                                          "Se clicar em não, os ângulos alvo não serão alterados."),
+                                                       QMessageBox::Yes,
+                                                       QMessageBox::No | QMessageBox::Default | QMessageBox::Escape,
+                                                       QMessageBox::NoButton);
+
+        respostaPosInatingivel = respostaPosProjetada;
+    }
+    else if(!posicaoAtingivel)
+    {
+        QString strCompl("");
+        QString strCompl2("");
+        if(posicaoProjetada)
+        {
+            strCompl = ",\nmesmo com a posição projetada no plano que corta verticalmente o braço robô";
+            strCompl2 = "as posições XYZ e";
+        }
+        QString mensagem = "Posição XYZ não possui ângulos de junta correspondente\n"
+                           "que respeite os limites máximos e mínimos das juntas"+strCompl+".\n"+
+                           "Deseja adequar o resultado aos máximos e mínimos dos ângulos das juntas?\n"+
+                           "Se clicar em não, "+strCompl2+" os ângulos alvo não serão alterados.";
+
+        respostaPosInatingivel = QMessageBox::question(this,
+                                         tr("Posição inatingível"),
+                                         mensagem,
+                                         QMessageBox::Yes,
+                                         QMessageBox::No | QMessageBox::Default | QMessageBox::Escape,
+                                         QMessageBox::NoButton);
+
+        respostaPosProjetada = respostaPosInatingivel;
     }
 
-    if(ui->rdbReadyForPIC->isChecked())
+
+    if(respostaPosProjetada == QMessageBox::Yes)
     {
-        comandoJST();
+        ui->spnPosXAlvo->setValue(x);
+        ui->spnPosYAlvo->setValue(y);
+        ui->spnPosZAlvo->setValue(z);
+        ui->spnRxAlvo->setValue(Rx);
+        ui->spnRyAlvo->setValue(Ry);
+        ui->spnRzAlvo->setValue(Rz);
     }
-    else if (ui->rdbMiniMaestro24->isChecked())
+
+
+    if((!posicaoProjetada && posicaoAtingivel) ||
+       (posicaoProjetada && posicaoAtingivel && respostaPosProjetada == QMessageBox::Yes) ||
+       (posicaoProjetada && !posicaoAtingivel && respostaPosInatingivel == QMessageBox::Yes))
     {
-        // Aba Posições das juntas: comando JST para a placa Mini maestro 24, botão Calcular ângulos alvo
+        for(int i = 0; i < 5; i++)
+        {
+            lstSpnAlvoGraus[i]->setValue(round(angulosJuntas[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR);
+        }
+        if(ui->chkEnviaComandoImediato->isChecked())
+        {
+            if(ui->rdbReadyForPIC->isChecked())
+            {
+                comandoJST();
+            }
+            else if (ui->rdbMiniMaestro24->isChecked())
+            {
+                // Aba Posições das juntas: comando JST para a placa Mini maestro 24, botão Calcular ângulos alvo
+            }
+        }
     }
 
     calculoAngulosAlvoAcionado = false;    
@@ -3187,6 +3242,9 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
  * rotação do referencial do pulso da garra, enquanto as 3 primeiras
  * linhas da quarta coluna possui as translações em x, y e z do referencial
  * do pulso da garra.
+ * Em outras palavras, a cinemática direta se refere à localização do
+ * pulso da garra em relação ao cruzamento entre J1 e J0.
+ *
  * @param teta1graus ângulo em graus da junta 0
  * @param teta2graus ângulo em graus da junta 1
  * @param teta3graus ângulo em graus da junta 2
@@ -3267,6 +3325,25 @@ QMatrix4x4 MainWindow::matrizPosGarra(double teta1graus, double teta2graus, doub
                                     0, 0, 1, 7.5f,
                                     0, 0, 0, 1);
 
+    /*
+    mJ0B * cinDir = ! r11 r12 r13   px             ! = MJ0BCD
+                    ! r21 r22 r23   py             !
+                    ! r31 r32 r33   pz + 17.41098f !
+                    !   0   0   0   1              !
+
+    mJ0BCD * mGP = ! r11 r12 r13   r13 * 7.5f + px             !
+                   ! r21 r22 r23   r23 * 7.5f + py             !
+                   ! r31 r32 r33   r33 * 7.5f + pz + 17.41098f !
+                   !   0   0   0   1                           !
+
+                   x = px + 7.5f * r13
+                   y = py + 7.5f * r23
+                   z = pz + 7.5f * r33 + 17.41098f
+
+                   px = x - 7.5f * r13
+                   py = y - 7.5f * r23
+                   pz = z - 7.5f * r33 - 17.41098f
+    */
     return matrizJ0ParaBase *
             cinematicaDireta(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus) *
             matrizGarraParaPulso;
@@ -3298,7 +3375,7 @@ double *MainWindow::posicaoGarra(double teta1graus, double teta2graus, double te
     double y = round(MGarra(1, 3) * DIV_CD_POSICAO_XYZ) / DIV_CD_POSICAO_XYZ;
     double z = round(MGarra(2, 3) * DIV_CD_POSICAO_XYZ) / DIV_CD_POSICAO_XYZ;
 
-    double beta = atan2(-R[2][0], sqrt(pow(R[0][0], 2) + pow(R[0][1], 2))) * 180 / M_PI;
+    double beta = atan2(-R[2][0], sqrt(pow(R[0][0], 2) + pow(R[1][0], 2))) * 180 / M_PI;
 
     double alfa, gama;
 
@@ -3353,6 +3430,7 @@ void MainWindow::preencheCamposXYZAlvo(double *posGarra)
 
 /**
  * @brief MainWindow::angJuntas
+ *
  * Cinemática inversa
  *
  * @param x coordenada x da garra em relação à base da garra. Esta coordenada poderá ser recalculada, caso ela não seja atingível.
@@ -3363,10 +3441,18 @@ void MainWindow::preencheCamposXYZAlvo(double *posGarra)
  * @param alfaGraus
  * @param angulosMaxGraus vetor contendo os ângulos máximo das juntas.
  * @param angulosMinGraus vetor contendo os ângulos mínimo das juntas.
+ * @param posicaoProjetada true se a posição desejada foi projetada no plano vertical do braço robô, e qualquer das coordenadas (XYZ ou rotações) foi alterada. false caso contrário.
+ * @param posicaoAtingivel true se a posição (projetada ou não) for atingível. false se qualquer das juntas assumir um ângulo impossível.
  * @return ângulos das juntas em graus, se a posição de alguma forma for atingível.
  */
-double *MainWindow::angJuntas(double *x, double *y, double *z, double *gamaGraus, double *betaGraus, double *alfaGraus, double *angulosMaxGraus, double *angulosMinGraus)
+double *MainWindow::angJuntas(double *x, double *y, double *z,
+                              double *gamaGraus, double *betaGraus, double *alfaGraus,
+                              double *angulosMaxGraus, double *angulosMinGraus,
+                              bool *posicaoProjetada, bool *posicaoAtingivel)
 {
+    if(posicaoAtingivel != NULL)
+        *posicaoAtingivel = true;
+
     // TODO: Cinemática inversa: rever os cálculos para considerar as translações da Garra para o pulso e do cruzamento entre os eixos de  J0 e J1 para a base.
     double gama = *gamaGraus * M_PI /180;
     double beta = *betaGraus * M_PI /180;
@@ -3390,6 +3476,7 @@ double *MainWindow::angJuntas(double *x, double *y, double *z, double *gamaGraus
     double r23 = salfa * sbeta * cgama - calfa * sgama;
     double r33 = cbeta * sgama;
 
+    // TODO: Checar se esta relação está certa e condiz com o posicionamento do pulso da garra
     double px = *x - 7.5 * r13;
     double py = *y - 7.5 * r23;
     double pz = *z - 7.5 * r33 - 17.41098;
@@ -3430,30 +3517,61 @@ double *MainWindow::angJuntas(double *x, double *y, double *z, double *gamaGraus
     r23 = Ztl[1];
     r33 = Ztl[2];
 
+    /*
+     Suspeita-se que o problema desta cinemática inversa é que a garra (mais
+     precisamente o pulso dela) jamais conseguirá se localizar no plano
+     que corta verticalmente o braço robô. Assumindo que a junta 0 esteja
+     a 0º, esse plano coincide com o plano X-Z, sendo X e Z os eixos
+     cujas origens se encontram na base do braço robô. Os pontos que se
+     encontram no pulso da garra e na própria garra estão distantes
+     2,33 cm desse plano, do lado positivo do eixo Y, assumindo que
+     a junta 0 esteja a 0º.
+    */
+
     // Recalculando x, y e z da garra
-    *x = px + 7.5f * r13;
-    *y = py + 7.5f * r23;
-    *z = pz + 7.5f * r33 + 17.41098f;
+    // TODO: Checar se esta relação está certa e condiz com o posicionamento da garra
+    double xProj = px + 7.5f * r13;
+    double yProj = py + 7.5f * r23;
+    double zProj = pz + 7.5f * r33 + 17.41098f;
 
     //recalculando gama, beta e alfa
-    *betaGraus = atan2(-r31, sqrt(pow(r11,2)+pow(r21,2))) * 180 / M_PI;
-    if(*betaGraus == 90)
+    double betaGrausProj = atan2(-r31, sqrt(pow(r11,2)+pow(r21,2))) * 180 / M_PI;
+    double alfaGrausProj, gamaGrausProj;
+
+    if(betaGrausProj == 90)
     {
-        *alfaGraus = 0;
-        *gamaGraus = atan2(r12, r22) * 180 / M_PI;
+        alfaGrausProj = 0;
+        gamaGrausProj = atan2(r12, r22) * 180 / M_PI;
     }
-    else if (*betaGraus == -90)
+    else if (betaGrausProj == -90)
     {
-        *alfaGraus = 0;
-        *gamaGraus = -atan2(r12,r22) * 180 / M_PI;
+        alfaGrausProj = 0;
+        gamaGrausProj = -atan2(r12,r22) * 180 / M_PI;
     }
     else
     {
-        double cbeta = cos(*betaGraus * M_PI / 180);
-        *alfaGraus = atan2(r21/cbeta, r11/cbeta)* 180 / M_PI;
-        *gamaGraus = atan2(r32/cbeta, r33/cbeta)* 180 / M_PI;
+        double cbeta = cos(betaGrausProj * M_PI / 180);
+        alfaGrausProj = atan2(r21/cbeta, r11/cbeta)* 180 / M_PI;
+        gamaGrausProj = atan2(r32/cbeta, r33/cbeta)* 180 / M_PI;
     }
 
+
+    if(posicaoProjetada != NULL)
+    {
+        *posicaoProjetada = xProj != *x || yProj != *y || zProj != *z ||
+                            alfaGrausProj != *alfaGraus ||
+                            betaGrausProj != *betaGraus ||
+                            gamaGrausProj != *gamaGraus;
+    }
+
+    *x = xProj;
+    *y = yProj;
+    *z = zProj;
+    *gamaGraus = gamaGrausProj;
+    *betaGraus = betaGrausProj;
+    *alfaGraus = alfaGrausProj;
+
+    // Início da cinemática inversa propriamente dita
     double atan2pypx = atan2(py, -px);
     double atan2sqrt = atan2(sqrt(px2py2 - 5.415240822489f),-2.327067f);
 
@@ -3467,13 +3585,19 @@ double *MainWindow::angJuntas(double *x, double *y, double *z, double *gamaGraus
     if ((teta1_1 >= teta1min) && (teta1_1 <= teta1max))
         teta1 = teta1_1;
     else if((teta1_2 >= teta1min) && (teta1_2 <= teta1max))
-        teta1 = teta1_2;
-    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+        teta1 = teta1_2;    
     else if (teta1_1 < teta1min || teta1_2 < teta1min)
+    {
         teta1 = teta1min;
-    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+        if(posicaoAtingivel != NULL)
+            *posicaoAtingivel = false;
+    }    
     else if (teta1_1 > teta1max || teta1_2 > teta1max)
+    {
         teta1 = teta1max;
+        if(posicaoAtingivel != NULL)
+            *posicaoAtingivel = false;
+    }
 
     double c1 = cos(teta1);
     double s1 = sin(teta1);
@@ -3484,12 +3608,18 @@ double *MainWindow::angJuntas(double *x, double *y, double *z, double *gamaGraus
     double teta5min = angulosMinGraus[4] * M_PI / 180;
     double teta5max = angulosMaxGraus[4] * M_PI / 180;
 
-    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
     if (teta5 < teta5min)
+    {
         teta5 = teta5min;
-    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+        if(posicaoAtingivel != NULL)
+            *posicaoAtingivel = false;
+    }
     else if (teta5 > teta5max)
+    {
         teta5 = teta5max;
+        if(posicaoAtingivel != NULL)
+            *posicaoAtingivel = false;
+    }
 
     teta5 = teta5 * 180 / M_PI;
 
@@ -3508,31 +3638,50 @@ double *MainWindow::angJuntas(double *x, double *y, double *z, double *gamaGraus
     if ((teta3_1 >= teta3min) && (teta3_1 <= teta3max))
         teta3 = teta3_1;
     else if ((teta3_2 >= teta3min) && (teta3_2 <= teta3max))
+    {
         teta3 = teta3_2;
-    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+        s3 = -s3;
+    }
     else if (teta3_1 < teta3min || teta3_2 < teta3min)
+    {
         teta3 = teta3min;
-    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+        if(posicaoAtingivel != NULL)
+            *posicaoAtingivel = false;
+
+        c3 = cos(teta3);
+        s3 = sin(teta3);
+    }
     else if (teta3_1 > teta3max || teta3_2 > teta3max)
+    {
         teta3 = teta3max;
+        if(posicaoAtingivel != NULL)
+            *posicaoAtingivel = false;
 
-
-    //c3 = cos(teta3);
-    //s3 = sin(teta3);
+        c3 = cos(teta3);
+        s3 = sin(teta3);
+    }
 
     teta3 = teta3 * 180 / M_PI;
 
-    double teta2 = (-atan2(pz, sqrtpx2py2) - atan2(5.825f * s3, 11.675f + 5.825f * c3));
+    double teta2 = -atan2(pz, sqrtpx2py2) - atan2(5.825f * s3, 11.675f + 5.825f * c3);
 
     double teta2min = angulosMinGraus[1] * M_PI / 180;
     double teta2max = angulosMaxGraus[1] * M_PI / 180;
 
-    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
     if (teta2 < teta2min)
+    {
         teta2 = teta2min;
-    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+
+        if(posicaoAtingivel != NULL)
+            *posicaoAtingivel = false;
+    }
     else if (teta2 > teta2max)
+    {
         teta2 = teta2max;
+
+        if(posicaoAtingivel != NULL)
+            *posicaoAtingivel = false;
+    }
 
 
     teta2 = teta2 * 180 / M_PI;
@@ -3542,12 +3691,20 @@ double *MainWindow::angJuntas(double *x, double *y, double *z, double *gamaGraus
     double teta4min = angulosMinGraus[3];
     double teta4max = angulosMaxGraus[3];
 
-    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
     if (teta4 < teta4min)
+    {
         teta4 = teta4min;
-    // TODO: Cinemática inversa: corrigir para que, neste caso, indique que não é possível posicionar a garra
+
+        if(posicaoAtingivel != NULL)
+            *posicaoAtingivel = false;
+    }
     else if (teta4 > teta4max)
+    {
         teta4 = teta4max;
+
+        if(posicaoAtingivel != NULL)
+            *posicaoAtingivel = false;
+    }
 
     return new double[5]{teta1, teta2, teta3, teta4, teta5};
 }
