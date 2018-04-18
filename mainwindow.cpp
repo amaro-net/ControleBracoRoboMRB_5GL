@@ -255,23 +255,33 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         {
             coeffAng[i] = (angMin[i] - angMax[i])/(tempoPulsoMax[i] - tempoPulsoMin[i]);
             offsetAng[i] = angMin[i] - tempoPulsoMax[i] * coeffAng[i];
+
+            // 1.0 serve para que o resultado seja float ou double
+            coeffPontoVerdePropDir[i] = (1.0 * (LBL_POS_ATUAL_X_MAX - LBL_POS_ATUAL_X_MIN))/(tempoPulsoMax[i] - tempoPulsoMin[i]);
+            offsetPontoVerdePropDir[i] = LBL_POS_ATUAL_X_MAX - tempoPulsoMax[i] * coeffPontoVerdePropDir[i];
+
+            coeffPontoVerdePropInv[i] = (1.0 * (LBL_POS_ATUAL_X_MIN - LBL_POS_ATUAL_X_MAX))/(tempoPulsoMax[i] - tempoPulsoMin[i]);
+            offsetPontoVerdePropInv[i] = LBL_POS_ATUAL_X_MIN - tempoPulsoMax[i] * coeffPontoVerdePropInv[i];
         }
         else
         {
             coeffAng[i] = (angMax[i] - angMin[i]) / (tempoPulsoMax[i] - tempoPulsoMin[i]);
             offsetAng[i] = angMax[i] - tempoPulsoMax[i] * coeffAng[i];
-        }
+
+            // 1.0 serve para que o resultado seja float ou double
+            coeffPontoVerdePropDir[i] = (1.0 * (LBL_POS_ATUAL_X_MAX - LBL_POS_ATUAL_X_MIN))/(tempoPulsoMax[i] - tempoPulsoMin[i]);
+            offsetPontoVerdePropDir[i] = LBL_POS_ATUAL_X_MAX - tempoPulsoMax[i] * coeffPontoVerdePropDir[i];
+
+            coeffPontoVerdePropInv[i] = coeffPontoVerdePropDir[i];
+            offsetPontoVerdePropInv[i] = offsetPontoVerdePropDir[i];
+        }        
 
         double anguloNeutro = coeffAng[i] * tempoPulsoNeutro[i] + offsetAng[i];
         anguloNeutro = round(anguloNeutro * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR;
         setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 2, QString("%1").arg(anguloNeutro));
         double anguloRepouso = coeffAng[i] * tempoPulsoRepouso[i] + offsetAng[i];
         anguloRepouso = round(anguloRepouso * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR;
-        setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 3, QString("%1").arg(anguloRepouso));
-
-        // 1.0 serve para que o resultado seja float ou double
-        coeffPontoVerde[i] = (1.0 * (LBL_POS_ATUAL_X_MAX - LBL_POS_ATUAL_X_MIN))/(tempoPulsoMax[i] - tempoPulsoMin[i]);
-        offsetPontoVerde[i] = LBL_POS_ATUAL_X_MAX - tempoPulsoMax[i] * coeffPontoVerde[i];
+        setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 3, QString("%1").arg(anguloRepouso));        
 
         if(ui->rdbReadyForPIC->isChecked())
         {
@@ -361,6 +371,8 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad);
         }
     }
+
+    on_tabUnidadePos_currentChanged(ui->tabUnidadePos->currentIndex());
 }
 
 void MainWindow::timeoutConfig()
@@ -2464,8 +2476,36 @@ void MainWindow::on_sliderGR_valueChanged(int value)
 }
 
 void MainWindow::on_tabUnidadePos_currentChanged(int index)
-{
-    // TODO: Aba posicções das juntas: Fazer os sliders e os pontos verdes respeitarem a proporção inversa ao visualizar as posições em graus.
+{    
+    if(index == 1)
+    {
+        coeffPontoVerde = coeffPontoVerdePropInv;
+        offsetPontoVerde = offsetPontoVerdePropInv;
+    }
+    else
+    {
+        coeffPontoVerde = coeffPontoVerdePropDir;
+        offsetPontoVerde = offsetPontoVerdePropDir;
+    }
+
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        int valor = lstEdtAtual[i]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt();
+
+        if(valor > 0)
+        {
+            setaPosicaoPontoVerde(i, valor);
+            lstPontoVerdeSliderPosAtual[i]->setVisible(true);
+        }
+        else
+        {
+            lstPontoVerdeSliderPosAtual[i]->setVisible(false);
+        }
+
+        bool propInv = (ui->tabelaPosLimitesGraus->item(i,4)->checkState() == Qt::CheckState::Checked);
+
+        lstSlider[i]->setInvertedAppearance(index == 1 && propInv);
+    }
 }
 
 /* NOTE: ***** Aba Sequência de Comandos ***** */
@@ -3453,7 +3493,7 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
     if(posicaoAtingivel != NULL)
         *posicaoAtingivel = true;
 
-    // TODO: Cinemática inversa: rever os cálculos para considerar as translações da Garra para o pulso e do cruzamento entre os eixos de  J0 e J1 para a base.
+    // TODO: Cinemática inversa: rever os cálculos para considerar as translações da Garra para o pulso e do cruzamento entre os eixos de J0 e J1 para a base.
     double gama = *gamaGraus * M_PI /180;
     double beta = *betaGraus * M_PI /180;
     double alfa = *alfaGraus * M_PI /180;

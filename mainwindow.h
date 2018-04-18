@@ -409,8 +409,12 @@ class MainWindow : public QMainWindow
         double incVelGrausPorSeg[QTD_SERVOS];
         double incAclGrausPorSegQuad[QTD_SERVOS];
 
-        double coeffPontoVerde[QTD_SERVOS];
-        double offsetPontoVerde[QTD_SERVOS];
+        double *coeffPontoVerde;
+        double *offsetPontoVerde;
+        double coeffPontoVerdePropInv[QTD_SERVOS];
+        double offsetPontoVerdePropInv[QTD_SERVOS];
+        double coeffPontoVerdePropDir[QTD_SERVOS];
+        double offsetPontoVerdePropDir[QTD_SERVOS];
 };
 
 #endif // MAINWINDOW_H
