@@ -372,6 +372,8 @@ class MainWindow : public QMainWindow
         QQueue<QString> filaConfigPosLimites;
         QQueue<QString> filaComandosParaPararMov;
 
+        int qtdComandosInicializacao;
+
         bool seqEmExecucao = false;
         bool emLoop = false;
         bool itemClicado = false;

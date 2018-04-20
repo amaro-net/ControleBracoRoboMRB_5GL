@@ -194,6 +194,8 @@ void MainWindow::alimentarFilaDeComandosDeInicializacao()
     filaComandosInicializacao.enqueue("[ACLJ3]");
     filaComandosInicializacao.enqueue("[ACLJ4]");
     filaComandosInicializacao.enqueue("[ACLGR]");
+
+    qtdComandosInicializacao = filaComandosInicializacao.count();
 }
 
 
@@ -204,7 +206,7 @@ void MainWindow::configuracoesIniciais()
     //connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
     tentativaConfig = 0;
     enviaComando("[ECH0]");
-    timer->start(2000);
+    timer->start(2000);    
 }
 
 void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefault)
@@ -1245,6 +1247,11 @@ void MainWindow::decodificaResposta()
         if(resposta.contains("TRPGR"))
             configurarConversaoEntreMicrossegundosEAngulos();
 
+        double porcentagem = round((100.0 * (qtdComandosInicializacao - filaComandosInicializacao.count())) / qtdComandosInicializacao);
+
+        QString strPorcentagem = QString("%L1%").arg(porcentagem);
+
+        showStatusMessage("Configurando placa de controle ("+strPorcentagem+")");
         enviaComando(filaComandosInicializacao.dequeue());
     }
     else if(!(resposta.contains("ECH") || resposta.contains("PRONTO")))
@@ -1252,6 +1259,7 @@ void MainWindow::decodificaResposta()
         if (inicializando && serial->isOpen())
         {
             habilitarComponentesConn(true);
+            showStatusMessage("Conectado à porta " + ui->cmbPortaSerial->currentData().toString());
         }
         inicializando = false;
 
