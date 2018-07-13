@@ -196,6 +196,8 @@ void MainWindow::alimentarFilaDeComandosDeInicializacao()
     filaComandosInicializacao.enqueue("[ACLJ30004]");
     filaComandosInicializacao.enqueue("[ACLJ4]");
     filaComandosInicializacao.enqueue("[ACLGR0100]");
+
+    qtdComandosInicializacao = filaComandosInicializacao.count();
 }
 
 
@@ -253,12 +255,26 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         {
             coeffAng[i] = (angMin[i] - angMax[i])/(tempoPulsoMax[i] - tempoPulsoMin[i]);
             offsetAng[i] = angMin[i] - tempoPulsoMax[i] * coeffAng[i];
+
+            // 1.0 serve para que o resultado seja float ou double
+            coeffPontoVerdePropDir[i] = (1.0 * (LBL_POS_ATUAL_X_MAX - LBL_POS_ATUAL_X_MIN))/(tempoPulsoMax[i] - tempoPulsoMin[i]);
+            offsetPontoVerdePropDir[i] = LBL_POS_ATUAL_X_MAX - tempoPulsoMax[i] * coeffPontoVerdePropDir[i];
+
+            coeffPontoVerdePropInv[i] = (1.0 * (LBL_POS_ATUAL_X_MIN - LBL_POS_ATUAL_X_MAX))/(tempoPulsoMax[i] - tempoPulsoMin[i]);
+            offsetPontoVerdePropInv[i] = LBL_POS_ATUAL_X_MIN - tempoPulsoMax[i] * coeffPontoVerdePropInv[i];
         }
         else
         {
             coeffAng[i] = (angMax[i] - angMin[i]) / (tempoPulsoMax[i] - tempoPulsoMin[i]);
             offsetAng[i] = angMax[i] - tempoPulsoMax[i] * coeffAng[i];
-        }
+
+            // 1.0 serve para que o resultado seja float ou double
+            coeffPontoVerdePropDir[i] = (1.0 * (LBL_POS_ATUAL_X_MAX - LBL_POS_ATUAL_X_MIN))/(tempoPulsoMax[i] - tempoPulsoMin[i]);
+            offsetPontoVerdePropDir[i] = LBL_POS_ATUAL_X_MAX - tempoPulsoMax[i] * coeffPontoVerdePropDir[i];
+
+            coeffPontoVerdePropInv[i] = coeffPontoVerdePropDir[i];
+            offsetPontoVerdePropInv[i] = offsetPontoVerdePropDir[i];
+        }        
 
         double anguloNeutro = coeffAng[i] * tempoPulsoNeutro[i] + offsetAng[i];
         anguloNeutro = arredondaPara(anguloNeutro, CASAS_DECIMAIS_POSICAO_ANGULAR);
@@ -266,10 +282,6 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         double anguloRepouso = coeffAng[i] * tempoPulsoRepouso[i] + offsetAng[i];
         anguloRepouso = arredondaPara(anguloRepouso, CASAS_DECIMAIS_POSICAO_ANGULAR);
         setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 3, QString("%1").arg(anguloRepouso));
-
-        // 1.0 serve para que o resultado seja float ou double
-        coeffPontoVerde[i] = (1.0 * (LBL_POS_ATUAL_X_MAX - LBL_POS_ATUAL_X_MIN))/(tempoPulsoMax[i] - tempoPulsoMin[i]);
-        offsetPontoVerde[i] = LBL_POS_ATUAL_X_MAX - tempoPulsoMax[i] * coeffPontoVerde[i];
 
         QSlider* slider = lstSlider[i];
         slider->setValue(tempoPulsoRepouso[i]);
@@ -365,6 +377,8 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad);
         }
     }
+
+    on_tabUnidadePos_currentChanged(ui->tabUnidadePos->currentIndex());
 }
 
 void MainWindow::timeoutConfig()
@@ -1110,7 +1124,7 @@ void MainWindow::decodificaResposta()
                 ehRespostaMovAbaComandos = resposta.contains("CTZ");
             }
             else
-            {                
+            {
                 if(todasPosicoesMaioresQueZero)
                     delete(posGarra);
             }
@@ -1161,7 +1175,7 @@ void MainWindow::decodificaResposta()
     }
     else if(resposta.contains("[PRONTO]"))
     {
-        inicializando = true;        
+        inicializando = true;
         enviaComando("[ECH]");
     }
     else if(resposta.contains("ECH"))
@@ -1247,6 +1261,11 @@ void MainWindow::decodificaResposta()
         if(resposta.contains("TRPGR"))
             configurarConversaoEntreMicrossegundosEAngulos();
 
+        double porcentagem = round((100.0 * (qtdComandosInicializacao - filaComandosInicializacao.count())) / qtdComandosInicializacao);
+
+        QString strPorcentagem = QString("%L1%").arg(porcentagem);
+
+        showStatusMessage("Configurando placa de controle ("+strPorcentagem+")");
         enviaComando(filaComandosInicializacao.dequeue());
     }
     else if(!(resposta.contains("ECH") || resposta.contains("PRONTO")))
@@ -1254,6 +1273,7 @@ void MainWindow::decodificaResposta()
         if (inicializando && serial->isOpen())
         {
             habilitarComponentesConn(true);
+            showStatusMessage("Conectado à porta " + ui->cmbPortaSerial->currentData().toString());
         }
         inicializando = false;
 
@@ -1915,7 +1935,7 @@ void MainWindow::on_btMoverComVelEAcl_clicked()
 }
 
 void MainWindow::on_btCalcularXYZAlvo_clicked()
-{    
+{
     double teta1 = lstSpnAlvoGraus[0]->value();
     double teta2 = lstSpnAlvoGraus[1]->value();
     double teta3 = lstSpnAlvoGraus[2]->value();
@@ -2484,8 +2504,36 @@ void MainWindow::on_sliderGR_valueChanged(int value)
 }
 
 void MainWindow::on_tabUnidadePos_currentChanged(int index)
-{
-    // TODO: Aba posições das juntas: Fazer os sliders e os pontos verdes respeitarem a proporção inversa ao visualizar as posições em graus.
+{    
+    if(index == 1)
+    {
+        coeffPontoVerde = coeffPontoVerdePropInv;
+        offsetPontoVerde = offsetPontoVerdePropInv;
+    }
+    else
+    {
+        coeffPontoVerde = coeffPontoVerdePropDir;
+        offsetPontoVerde = offsetPontoVerdePropDir;
+    }
+
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        int valor = lstEdtAtual[i]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt();
+
+        if(valor > 0)
+        {
+            setaPosicaoPontoVerde(i, valor);
+            lstPontoVerdeSliderPosAtual[i]->setVisible(true);
+        }
+        else
+        {
+            lstPontoVerdeSliderPosAtual[i]->setVisible(false);
+        }
+
+        bool propInv = (ui->tabelaPosLimitesGraus->item(i,4)->checkState() == Qt::CheckState::Checked);
+
+        lstSlider[i]->setInvertedAppearance(index == 1 && propInv);
+    }
 }
 
 /* NOTE: ***** Aba Sequência de Comandos ***** */
