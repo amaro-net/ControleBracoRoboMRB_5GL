@@ -16,8 +16,12 @@
 #define CASAS_DECIMAIS_POSICAO_XYZ    2
 #define CASAS_DECIMAIS_ROTACOES_XYZ   2
 
+#define CASAS_DECIMAIS_SENOS_COSSENOS 3
+
 #define DIV_CD_POSICAO_XYZ   100
 #define DIV_CD_ROTACOES_XYZ  100
+
+#define DIV_CD_SENOS_COSSENOS 1000
 
 #define STATUS_SEQCOM_PARADA_VAZIA      "Sequência parada"
 #define STATUS_SEQCOM_PARADA_NAO_VAZIA  "Sequência parada. ENTER ou duplo clique para executar um comando."
@@ -27,7 +31,7 @@
 #define STATUS_SEQCOM_CONTINUANDO_LOOP  "Continuando loop"
 #define STATUS_SEQCOM_EM_DLY_SEM_PAR    "Em espera. Pressione ENTER, duplo clique na sequência, Continuar ou Continuar loop."
 
-#define TEMPO_TIMER_ENVIO_IMEDIATO_US   200
+#define TEMPO_TIMER_ENVIO_IMEDIATO_MS   500
 
 #define LBL_POS_ATUAL_X_MIN 50
 #define LBL_POS_ATUAL_X_MAX 218
@@ -59,6 +63,30 @@ static const int aclTmpPulsoDefault[QTD_SERVOS] = {8, 4, 8, 8, 32, 0};
 
 static const int velocidadesMax[QTD_SERVOS] = {128, 128, 128, 92, 128, 100};
 static const int aceleracoesMax[QTD_SERVOS] = {128, 128, 128, 92, 128, 100};
+
+
+/****** PARÂMETROS DE DENAVIT-HATENBERG (PARÂMETROS DH) ******/
+
+// ângulos alfa(i-1) em graus
+const double alfa0 = 0.0;
+const double alfa1 = 90.0;
+const double alfa2 = 0.0;
+const double alfa3 = 0.0;
+const double alfa4 = 90.0;
+
+// distâncias a(i-1) em centímetros
+const double a0 = 0.0;
+const double a1 = 0.025;
+const double a2 = 11.65;
+const double a3 = 5.825;
+const double a4 = 0.45;
+
+// distâncias d(i) em centímetros
+const double d1 = 17.547644;
+const double d2 = 4.293516;
+const double d3 = -3.438032;
+const double d4 = -2.174584;
+const double d5 = 8.633297;
 
 
 #endif // CONSTANTES_H

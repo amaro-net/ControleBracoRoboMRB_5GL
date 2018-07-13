@@ -48,6 +48,8 @@ class MainWindow : public QMainWindow
         double converteAclTmpPulsoParaGrausPorSegQuad(int idxJunta, int aclTmpPulso);
         int converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad);
 
+        double arredondaPara(double num, int casasDecimais);
+
     private slots:
 
         void abrirPortaSerial();
@@ -330,6 +332,7 @@ class MainWindow : public QMainWindow
         void preencheCamposXYZAlvo(double* posGarra);
         double *angJuntas(double *x, double *y, double *z,
                           double *gamaGraus, double *betaGraus, double *alfaGraus,
+                          double *angulosCorrentesJuntas,
                           double *angulosMaxGraus, double *angulosMinGraus,
                           bool *posicaoProjetada = NULL, bool *posicaoAtingivel = NULL);
 

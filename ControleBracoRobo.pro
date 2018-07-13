@@ -27,13 +27,17 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     console.cpp \
-    montagemdecomandosdialog.cpp
+    montagemdecomandosdialog.cpp \
+    solucaocinematicainversa.cpp \
+    subsolucaocinematicainversa.cpp
 
 HEADERS += \
         mainwindow.h \
     console.h \
     montagemdecomandosdialog.h \
-    constantes.h
+    constantes.h \
+    solucaocinematicainversa.h \
+    subsolucaocinematicainversa.h
 
 FORMS += \
         mainwindow.ui \

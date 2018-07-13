@@ -50,8 +50,8 @@
         <rect>
          <x>7</x>
          <y>16</y>
-         <width>160</width>
-         <height>42</height>
+         <width>168</width>
+         <height>46</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="layoutLeds">
@@ -152,7 +152,7 @@
         <rect>
          <x>170</x>
          <y>11</y>
-         <width>80</width>
+         <width>82</width>
          <height>48</height>
         </rect>
        </property>
@@ -2325,6 +2325,9 @@ comandos</string>
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="maximum">
+          <number>9999</number>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -2344,6 +2347,9 @@ comandos</string>
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="maximum">
+          <number>9999</number>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -2359,6 +2365,9 @@ comandos</string>
         <widget class="QSlider" name="sliderJ2">
          <property name="enabled">
           <bool>false</bool>
+         </property>
+         <property name="maximum">
+          <number>9999</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -2396,6 +2405,9 @@ comandos</string>
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="maximum">
+          <number>9999</number>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -2429,6 +2441,9 @@ comandos</string>
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="maximum">
+          <number>9999</number>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -2461,6 +2476,9 @@ comandos</string>
         <widget class="QSlider" name="sliderGR">
          <property name="enabled">
           <bool>false</bool>
+         </property>
+         <property name="maximum">
+          <number>9999</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -2531,7 +2549,7 @@ comandos</string>
          <x>5</x>
          <y>16</y>
          <width>191</width>
-         <height>171</height>
+         <height>183</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="layoutPosXYZ">
@@ -3085,7 +3103,7 @@ alvo</string>
        <rect>
         <x>321</x>
         <y>237</y>
-        <width>114</width>
+        <width>116</width>
         <height>179</height>
        </rect>
       </property>
@@ -3608,8 +3626,8 @@ do braço robô (experimental).</string>
         <rect>
          <x>7</x>
          <y>14</y>
-         <width>168</width>
-         <height>65</height>
+         <width>170</width>
+         <height>71</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="layoutFeedbackJuntas">
@@ -4215,8 +4233,8 @@ Inversa</string>
      <rect>
       <x>5</x>
       <y>6</y>
-      <width>338</width>
-      <height>41</height>
+      <width>347</width>
+      <height>43</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="layoutParamSerial">

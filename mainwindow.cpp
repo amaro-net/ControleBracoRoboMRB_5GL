@@ -5,9 +5,11 @@
 #include <QFileDialog>
 #include <math.h>
 #include <qmath.h>
+#include <QThread>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "constantes.h"
+#include "solucaocinematicainversa.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -181,19 +183,19 @@ void MainWindow::alimentarFilaDeComandosDeInicializacao()
 
     filaComandosInicializacao.enqueue("[JST]");
 
-    filaComandosInicializacao.enqueue("[VELJ00016]");
-    filaComandosInicializacao.enqueue("[VELJ10008]");
-    filaComandosInicializacao.enqueue("[VELJ20008]");
-    filaComandosInicializacao.enqueue("[VELJ30008]");
+    filaComandosInicializacao.enqueue("[VELJ0]");
+    filaComandosInicializacao.enqueue("[VELJ1]");
+    filaComandosInicializacao.enqueue("[VELJ2]");
+    filaComandosInicializacao.enqueue("[VELJ3]");
     filaComandosInicializacao.enqueue("[VELJ4]");
     filaComandosInicializacao.enqueue("[VELGR]");
 
-    filaComandosInicializacao.enqueue("[ACLJ0]");
-    filaComandosInicializacao.enqueue("[ACLJ1]");
-    filaComandosInicializacao.enqueue("[ACLJ2]");
-    filaComandosInicializacao.enqueue("[ACLJ3]");
+    filaComandosInicializacao.enqueue("[ACLJ00004]");
+    filaComandosInicializacao.enqueue("[ACLJ10004]");
+    filaComandosInicializacao.enqueue("[ACLJ20004]");
+    filaComandosInicializacao.enqueue("[ACLJ30004]");
     filaComandosInicializacao.enqueue("[ACLJ4]");
-    filaComandosInicializacao.enqueue("[ACLGR]");
+    filaComandosInicializacao.enqueue("[ACLGR0100]");
 }
 
 
@@ -240,10 +242,6 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         tempoPulsoNeutro[i] = ui->tabelaPosLimites->item(i,2)->text().toInt();
         tempoPulsoRepouso[i] = ui->tabelaPosLimites->item(i,3)->text().toInt();
 
-        lstSlider[i]->setMaximum(tempoPulsoMax[i]);
-        lstSlider[i]->setMinimum(tempoPulsoMin[i]);
-        lstSlider[i]->setTickInterval((tempoPulsoMax[i] - tempoPulsoMin[i]) / 4);
-
         angMax[i] = ui->tabelaPosLimitesGraus->item(i,0)->text().toInt();
         angMin[i] = ui->tabelaPosLimitesGraus->item(i,1)->text().toInt();
         propInv[i] = (ui->tabelaPosLimitesGraus->item(i,4)->checkState() == Qt::CheckState::Checked);
@@ -263,33 +261,39 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         }
 
         double anguloNeutro = coeffAng[i] * tempoPulsoNeutro[i] + offsetAng[i];
-        anguloNeutro = round(anguloNeutro * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR;
+        anguloNeutro = arredondaPara(anguloNeutro, CASAS_DECIMAIS_POSICAO_ANGULAR);
         setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 2, QString("%1").arg(anguloNeutro));
         double anguloRepouso = coeffAng[i] * tempoPulsoRepouso[i] + offsetAng[i];
-        anguloRepouso = round(anguloRepouso * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR;
+        anguloRepouso = arredondaPara(anguloRepouso, CASAS_DECIMAIS_POSICAO_ANGULAR);
         setaValorItemTabela(ui->tabelaPosLimitesGraus, i, 3, QString("%1").arg(anguloRepouso));
 
         // 1.0 serve para que o resultado seja float ou double
         coeffPontoVerde[i] = (1.0 * (LBL_POS_ATUAL_X_MAX - LBL_POS_ATUAL_X_MIN))/(tempoPulsoMax[i] - tempoPulsoMin[i]);
         offsetPontoVerde[i] = LBL_POS_ATUAL_X_MAX - tempoPulsoMax[i] * coeffPontoVerde[i];
 
+        QSlider* slider = lstSlider[i];
+        slider->setValue(tempoPulsoRepouso[i]);
+        slider->setMaximum(tempoPulsoMax[i]);
+        slider->setMinimum(tempoPulsoMin[i]);
+        slider->setTickInterval((tempoPulsoMax[i] - tempoPulsoMin[i]) / 4);
+
         if(ui->rdbReadyForPIC->isChecked())
         {
             qtdPosicoesTmpPulso[i] = (tempoPulsoMax[i] - tempoPulsoMin[i]);  // us
 
             incrementosAng[i] = (angMax[i] - angMin[i])/qtdPosicoesTmpPulso[i]; // Graus / us
-            if(round(incrementosAng[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR > 0)
-                incrementosAng[i] = round(incrementosAng[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR;
+            if(arredondaPara(incrementosAng[i], CASAS_DECIMAIS_POSICAO_ANGULAR) > 0)
+                incrementosAng[i] = arredondaPara(incrementosAng[i], CASAS_DECIMAIS_POSICAO_ANGULAR);
             else
                 incrementosAng[i] = 0.001;
             incVelGrausPorSeg[i] = incrementosAng[i] / 0.25 * (10e-3);
-            if(round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR > 0)
-                incVelGrausPorSeg[i]  = round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR;
+            if(arredondaPara(incVelGrausPorSeg[i], CASAS_DECIMAIS_VELOCIDADE_ANGULAR) > 0)
+                incVelGrausPorSeg[i]  = arredondaPara(incVelGrausPorSeg[i], CASAS_DECIMAIS_VELOCIDADE_ANGULAR);
             else
                 incVelGrausPorSeg[i] = 0.001;
             incAclGrausPorSegQuad[i] = incrementosAng[i] / 0.25 * (10e-3) * (80e-3);
-            if(round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR > 0)
-                incAclGrausPorSegQuad[i] = round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR;
+            if(arredondaPara(incAclGrausPorSegQuad[i], CASAS_DECIMAIS_ACELERACAO_ANGULAR) > 0)
+                incAclGrausPorSegQuad[i] = arredondaPara(incAclGrausPorSegQuad[i], CASAS_DECIMAIS_ACELERACAO_ANGULAR);
             else
                 incAclGrausPorSegQuad[i] = 0.001;
 
@@ -308,30 +312,30 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             //     Graus /(10ms)
             // Graus / (10e-3 s) * 10e-3
             // Graus / s
-            velGrausPorSeg = round(velGrausPorSeg * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR;
+            velGrausPorSeg = arredondaPara(velGrausPorSeg, CASAS_DECIMAIS_VELOCIDADE_ANGULAR);
             lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg);
 
             int aclTmpPulso = lstSpnAcl[i]->value();
             double aclGrausPorSegQuad = aclTmpPulso * incrementosAng[i] / 0.25 * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
-            aclGrausPorSegQuad = round(aclGrausPorSegQuad * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR;
+            aclGrausPorSegQuad = arredondaPara(aclGrausPorSegQuad,CASAS_DECIMAIS_ACELERACAO_ANGULAR);
             lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad);
         }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
             qtdPosicoesTmpPulso[i] = (tempoPulsoMax[i] - tempoPulsoMin[i]) * 4; // 0.25us
             incrementosAng[i] = (angMax[i] - angMin[i])/qtdPosicoesTmpPulso[i]; // Graus / 0.25us
-            if(round(incrementosAng[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR > 0)
-                incrementosAng[i] = round(incrementosAng[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR;
+            if(arredondaPara(incrementosAng[i], CASAS_DECIMAIS_POSICAO_ANGULAR) > 0)
+                incrementosAng[i] = arredondaPara(incrementosAng[i], CASAS_DECIMAIS_POSICAO_ANGULAR);
             else
                 incrementosAng[i] = 0.001;
             incVelGrausPorSeg[i] = incrementosAng[i] * (10e-3);
-            if(round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR > 0)
-                incVelGrausPorSeg[i]  = round(incVelGrausPorSeg[i] * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR;
+            if(arredondaPara(incVelGrausPorSeg[i], CASAS_DECIMAIS_VELOCIDADE_ANGULAR) > 0)
+                incVelGrausPorSeg[i]  = arredondaPara(incVelGrausPorSeg[i], CASAS_DECIMAIS_VELOCIDADE_ANGULAR);
             else
                 incVelGrausPorSeg[i] = 0.001;
             incAclGrausPorSegQuad[i] = incrementosAng[i] * (10e-3) * (80e-3);
-            if(round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR > 0)
-                incAclGrausPorSegQuad[i] = round(incAclGrausPorSegQuad[i] * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR;
+            if(arredondaPara(incAclGrausPorSegQuad[i], CASAS_DECIMAIS_ACELERACAO_ANGULAR) > 0)
+                incAclGrausPorSegQuad[i] = arredondaPara(incAclGrausPorSegQuad[i], CASAS_DECIMAIS_ACELERACAO_ANGULAR);
             else
                 incAclGrausPorSegQuad[i] = 0.001;
 
@@ -345,7 +349,7 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             //      1 / (10ms) * Graus          * 10 * 10e-3
             //       Graus / ((10e-3) * s) * (10e-3)
             //       Graus / s
-            velGrausPorSeg = round(velGrausPorSeg * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR;
+            velGrausPorSeg = arredondaPara(velGrausPorSeg, CASAS_DECIMAIS_VELOCIDADE_ANGULAR);
             lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg);
 
 
@@ -357,7 +361,7 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             // Graus/((10ms)*(80ms))
             // Graus / (10e-3 * s  * 80e-3 * s) * 10e-3 * 80e-3
             // Graus / s^2
-            aclGrausPorSegQuad = round(aclGrausPorSegQuad * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR;
+            aclGrausPorSegQuad = arredondaPara(aclGrausPorSegQuad, CASAS_DECIMAIS_ACELERACAO_ANGULAR);
             lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad);
         }
     }
@@ -666,7 +670,7 @@ double MainWindow::converteMicrossegundosParaGraus(int idxJunta, int posicaoMicr
 
     y = a * x + b;
 
-    return round(y*DIV_CD_POSICAO_ANGULAR)/DIV_CD_POSICAO_ANGULAR;
+    return arredondaPara(y, CASAS_DECIMAIS_POSICAO_ANGULAR);
 }
 
 int MainWindow::converteGrausParaMicrossegundos(int idxJunta, double posicaoGraus)
@@ -691,7 +695,7 @@ double MainWindow::converteVelTmpPulsoParaGrausPorSeg(int idxJunta, int velTmpPu
     else
         velGrausPorSeg = velTmpPulso * incrementosAng[idxJunta] * 10e-3;
 
-    return round(velGrausPorSeg * DIV_CD_VELOCIDADE_ANGULAR) / DIV_CD_VELOCIDADE_ANGULAR;
+    return arredondaPara(velGrausPorSeg, CASAS_DECIMAIS_VELOCIDADE_ANGULAR);
 
 }
 
@@ -716,7 +720,7 @@ double MainWindow::converteAclTmpPulsoParaGrausPorSegQuad(int idxJunta, int aclT
     else
         aclGrausPorSegQuad = aclTmpPulso * incrementosAng[idxJunta] * 10e-3 * 80e-3;
 
-    return round(aclGrausPorSegQuad * DIV_CD_ACELERACAO_ANGULAR) / DIV_CD_ACELERACAO_ANGULAR;
+    return arredondaPara(aclGrausPorSegQuad, CASAS_DECIMAIS_ACELERACAO_ANGULAR);
 }
 
 int MainWindow::converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad)
@@ -807,6 +811,15 @@ void MainWindow::converteSpnAclGrausPorSegQuadParaTmpPulso(int idxJunta, double 
         lstSpnAcl[idxJunta]->setValue(aceleracaoTmpPulso);
 }
 
+double MainWindow::arredondaPara(double num, int casasDecimais)
+{
+    char charArrayNumArred[50];
+
+    sprintf(charArrayNumArred, "%.*f\n", casasDecimais, num);
+    QString strNumArred(charArrayNumArred);
+    double numArred = strNumArred.toDouble();
+    return numArred;
+}
 
 
 /* NOTE: ***** Resposta dos comandos ***** */
@@ -1097,8 +1110,9 @@ void MainWindow::decodificaResposta()
                 ehRespostaMovAbaComandos = resposta.contains("CTZ");
             }
             else
-            {
-                delete(posGarra);
+            {                
+                if(todasPosicoesMaioresQueZero)
+                    delete(posGarra);
             }
 
         }
@@ -1147,7 +1161,7 @@ void MainWindow::decodificaResposta()
     }
     else if(resposta.contains("[PRONTO]"))
     {
-        inicializando = true;
+        inicializando = true;        
         enviaComando("[ECH]");
     }
     else if(resposta.contains("ECH"))
@@ -1227,7 +1241,7 @@ void MainWindow::decodificaResposta()
         ehRespostaFinal = true;
     }
 
-
+    /* Envio de comandos das filas após a decodificação da resposta */
     if(filaComandosInicializacao.count() > 0)
     {
         if(resposta.contains("TRPGR"))
@@ -1901,8 +1915,7 @@ void MainWindow::on_btMoverComVelEAcl_clicked()
 }
 
 void MainWindow::on_btCalcularXYZAlvo_clicked()
-{
-    // TODO: Aba Posições das Juntas: Botão de cinemática direta
+{    
     double teta1 = lstSpnAlvoGraus[0]->value();
     double teta2 = lstSpnAlvoGraus[1]->value();
     double teta3 = lstSpnAlvoGraus[2]->value();
@@ -1931,7 +1944,14 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
     double Ry = ui->spnRyAlvo->value();
     double Rz = ui->spnRzAlvo->value();
 
-    double *angulosJuntas = angJuntas(&x, &y, &z, &Rx, &Ry, &Rz, angMax, angMin, &posicaoProjetada, &posicaoAtingivel);
+    double angulosCorrentes[QTD_SERVOS - 1];
+
+    for(int i = 0; i < QTD_SERVOS - 1; i++)
+    {
+        angulosCorrentes[i] = lstEdtAtualGraus[i]->text().replace(STR_UND_GRAUS, "").toDouble();
+    }
+
+    double *angulosJuntas = angJuntas(&x, &y, &z, &Rx, &Ry, &Rz, angulosCorrentes, angMax, angMin, &posicaoProjetada, &posicaoAtingivel);
 
     if(posicaoProjetada && posicaoAtingivel)
     {
@@ -1989,7 +2009,7 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
     {
         for(int i = 0; i < 5; i++)
         {
-            lstSpnAlvoGraus[i]->setValue(round(angulosJuntas[i] * DIV_CD_POSICAO_ANGULAR) / DIV_CD_POSICAO_ANGULAR);
+            lstSpnAlvoGraus[i]->setValue(arredondaPara(angulosJuntas[i], CASAS_DECIMAIS_POSICAO_ANGULAR));
         }
         if(ui->chkEnviaComandoImediato->isChecked())
         {
@@ -2078,7 +2098,7 @@ void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrosse
 
             if(!timerEnvioImediato->isActive())
             {
-                timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_US);
+                timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_MS);
             }
 
         }
@@ -2106,7 +2126,7 @@ void MainWindow::enviaVelocidadeAssimQueMudar(int idxJunta, int velocidadeMicros
 
                 if(!timerEnvioImediato->isActive())
                 {
-                    timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_US);
+                    timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_MS);
                 }
             }
             else
@@ -2138,7 +2158,7 @@ void MainWindow::enviaAceleracaoAssimQueMudar(int idxJunta, int aceleracaoMicros
 
                 if(!timerEnvioImediato->isActive())
                 {
-                    timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_US);
+                    timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_MS);
                 }
             }
             else
@@ -2465,7 +2485,7 @@ void MainWindow::on_sliderGR_valueChanged(int value)
 
 void MainWindow::on_tabUnidadePos_currentChanged(int index)
 {
-    // TODO: Aba posicções das juntas: Fazer os sliders e os pontos verdes respeitarem a proporção inversa ao visualizar as posições em graus.
+    // TODO: Aba posições das juntas: Fazer os sliders e os pontos verdes respeitarem a proporção inversa ao visualizar as posições em graus.
 }
 
 /* NOTE: ***** Aba Sequência de Comandos ***** */
@@ -3237,13 +3257,12 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
  * @brief MainWindow::cinematicaDireta
  * Função que retorna uma matriz 4 x 4 que faz a transformação
  * de coordenadas do referencial do pulso da garra para um referencial
- * que coincide com o cruzamento dos eixos da junta 1 e da junta 0.
- * as 3 primeiras linhas e 3 primeiras colunas contém uma matriz de
+ * que coincide com um ponto na superfície da base do braço robô, que
+ * cruza com uma linha vertical que passa rente ao eixo da junta 0.
+ * As 3 primeiras linhas e 3 primeiras colunas contém uma matriz de
  * rotação do referencial do pulso da garra, enquanto as 3 primeiras
  * linhas da quarta coluna possui as translações em x, y e z do referencial
  * do pulso da garra.
- * Em outras palavras, a cinemática direta se refere à localização do
- * pulso da garra em relação ao cruzamento entre J1 e J0.
  *
  * @param teta1graus ângulo em graus da junta 0
  * @param teta2graus ângulo em graus da junta 1
@@ -3253,7 +3272,7 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
  * @return a matriz da cinemática direta, composta pela matriz de rotação e pela translação do referencial do pulso da garra.
  */
 QMatrix4x4 MainWindow::cinematicaDireta(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus)
-{    
+{
     double teta1 = teta1graus * M_PI / 180;
     double teta2 = teta2graus * M_PI / 180;
     double teta3 = teta3graus * M_PI / 180;
@@ -3287,11 +3306,12 @@ QMatrix4x4 MainWindow::cinematicaDireta(double teta1graus, double teta2graus, do
     double r23 = s1*s234;
     double r33 = -c234;
 
-    double f = 11.675f*c2 + 5.825f*c23 + 0.45f*c234 + 8.633297f*s234;
+    double f = a1 + a2*c2 + a3*c23 + a4*c234 + d5*s234;
+    const double d234 = d2 + d3 + d4;
 
-    double px = 2.327067f*s1 + c1*f;
-    double py = 2.327067f*c1 + s1*f;
-    double pz = 11.675f*s2 + 5.825f*s23 + 0.45f*s234 - 8.633297f*c234;
+    double px = s1 * d234 + c1 * f;
+    double py = s1 * f - c1 * d234;
+    double pz = d1 + a2*s2 + a3*s23 + a4*s234 - d5*c234;
 
     return QMatrix4x4(r11, r12, r13, px,
                       r21, r22, r23, py,
@@ -3314,39 +3334,33 @@ QMatrix4x4 MainWindow::cinematicaDireta(double teta1graus, double teta2graus, do
  * @return Matriz de posicionamento da garra
  */
 QMatrix4x4 MainWindow::matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus)
-{    
-    QMatrix4x4 matrizJ0ParaBase(1, 0, 0, 0,
-                                0, 1, 0, 0,
-                                0, 0, 1, 17.41098f,
-                                0, 0, 0, 1);
-
+{
     QMatrix4x4 matrizGarraParaPulso(1, 0, 0, 0,
                                     0, 1, 0, 0,
                                     0, 0, 1, 7.5f,
                                     0, 0, 0, 1);
 
     /*
-    mJ0B * cinDir = ! r11 r12 r13   px             ! = MJ0BCD
-                    ! r21 r22 r23   py             !
-                    ! r31 r32 r33   pz + 17.41098f !
-                    !   0   0   0   1              !
+    cinDir = ! r11 r12 r13   px !
+             ! r21 r22 r23   py !
+             ! r31 r32 r33   pz !
+             !   0   0   0   1  !
 
-    mJ0BCD * mGP = ! r11 r12 r13   r13 * 7.5f + px             !
-                   ! r21 r22 r23   r23 * 7.5f + py             !
-                   ! r31 r32 r33   r33 * 7.5f + pz + 17.41098f !
-                   !   0   0   0   1                           !
+    cinDir * mGP = ! r11 r12 r13   r13 * 7.5f + px !
+                   ! r21 r22 r23   r23 * 7.5f + py !
+                   ! r31 r32 r33   r33 * 7.5f + pz !
+                   !   0   0   0          1        !
 
                    x = px + 7.5f * r13
                    y = py + 7.5f * r23
-                   z = pz + 7.5f * r33 + 17.41098f
+                   z = pz + 7.5f * r33
 
                    px = x - 7.5f * r13
                    py = y - 7.5f * r23
-                   pz = z - 7.5f * r33 - 17.41098f
+                   pz = z - 7.5f * r33
     */
-    return matrizJ0ParaBase *
-            cinematicaDireta(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus) *
-            matrizGarraParaPulso;
+    return cinematicaDireta(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus)
+           * matrizGarraParaPulso;
 }
 
 /**
@@ -3369,11 +3383,11 @@ double *MainWindow::posicaoGarra(double teta1graus, double teta2graus, double te
 
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
-            R[i][j] = round(MGarra(i,j) * 1000) / 1000;
+            R[i][j] = arredondaPara(MGarra(i,j), 3);
 
-    double x = round(MGarra(0, 3) * DIV_CD_POSICAO_XYZ) / DIV_CD_POSICAO_XYZ;
-    double y = round(MGarra(1, 3) * DIV_CD_POSICAO_XYZ) / DIV_CD_POSICAO_XYZ;
-    double z = round(MGarra(2, 3) * DIV_CD_POSICAO_XYZ) / DIV_CD_POSICAO_XYZ;
+    double x = arredondaPara(MGarra(0, 3), CASAS_DECIMAIS_POSICAO_XYZ);
+    double y = arredondaPara(MGarra(1, 3), CASAS_DECIMAIS_POSICAO_XYZ);
+    double z = arredondaPara(MGarra(2, 3), CASAS_DECIMAIS_POSICAO_XYZ);
 
     double beta = atan2(-R[2][0], sqrt(pow(R[0][0], 2) + pow(R[1][0], 2))) * 180 / M_PI;
 
@@ -3396,9 +3410,9 @@ double *MainWindow::posicaoGarra(double teta1graus, double teta2graus, double te
         gama = atan2(R[2][1]/cbeta, R[2][2]/cbeta) * 180 / M_PI;
     }
 
-    gama = round(gama * DIV_CD_ROTACOES_XYZ) / DIV_CD_ROTACOES_XYZ;
-    beta = round(beta * DIV_CD_ROTACOES_XYZ) / DIV_CD_ROTACOES_XYZ;
-    alfa = round(alfa * DIV_CD_ROTACOES_XYZ) / DIV_CD_ROTACOES_XYZ;
+    gama = arredondaPara(gama, CASAS_DECIMAIS_ROTACOES_XYZ);
+    beta = arredondaPara(beta, CASAS_DECIMAIS_ROTACOES_XYZ);
+    alfa = arredondaPara(alfa, CASAS_DECIMAIS_ROTACOES_XYZ);
 
     return new double[6]{x, y, z, gama, beta, alfa};
 }
@@ -3447,24 +3461,24 @@ void MainWindow::preencheCamposXYZAlvo(double *posGarra)
  */
 double *MainWindow::angJuntas(double *x, double *y, double *z,
                               double *gamaGraus, double *betaGraus, double *alfaGraus,
+                              double *angulosCorrentesJuntas,
                               double *angulosMaxGraus, double *angulosMinGraus,
                               bool *posicaoProjetada, bool *posicaoAtingivel)
 {
     if(posicaoAtingivel != NULL)
         *posicaoAtingivel = true;
 
-    // TODO: Cinemática inversa: rever os cálculos para considerar as translações da Garra para o pulso e do cruzamento entre os eixos de  J0 e J1 para a base.
     double gama = *gamaGraus * M_PI /180;
     double beta = *betaGraus * M_PI /180;
     double alfa = *alfaGraus * M_PI /180;
 
-    double sgama = sin(gama);
-    double sbeta = sin(beta);
-    double salfa = sin(alfa);
+    double sgama = arredondaPara(sin(gama), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double sbeta = arredondaPara(sin(beta), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double salfa = arredondaPara(sin(alfa), CASAS_DECIMAIS_SENOS_COSSENOS);
 
-    double cgama = cos(gama);
-    double cbeta = cos(beta);
-    double calfa = cos(alfa);
+    double cgama = arredondaPara(cos(gama), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double cbeta = arredondaPara(cos(beta), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double calfa = arredondaPara(cos(alfa), CASAS_DECIMAIS_SENOS_COSSENOS);
 
     double r11;
     double r21;
@@ -3474,12 +3488,15 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
     double r32 = cbeta * sgama;
     double r13 = calfa * sbeta * cgama + salfa * sgama;
     double r23 = salfa * sbeta * cgama - calfa * sgama;
-    double r33 = cbeta * sgama;
+    double r33 = cbeta * cgama;
 
-    // TODO: Checar se esta relação está certa e condiz com o posicionamento do pulso da garra
     double px = *x - 7.5 * r13;
     double py = *y - 7.5 * r23;
-    double pz = *z - 7.5 * r33 - 17.41098;
+    double pz = *z - 7.5 * r33;
+
+    px = arredondaPara(px, CASAS_DECIMAIS_POSICAO_XYZ);
+    py = arredondaPara(py, CASAS_DECIMAIS_POSICAO_XYZ);
+    pz = arredondaPara(pz, CASAS_DECIMAIS_POSICAO_XYZ);
 
     double px2py2 = pow(px,2) + pow(py,2);
     double sqrtpx2py2 = sqrt(px2py2);
@@ -3488,6 +3505,8 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
     // garra poderá realmente assumir (ver cap. 4 do craig - The Yasukawa
     // Motoman L-3 página 121)
 
+    // TODO: Cinemática Inversa: Verificar se de fato este vetor M é a normal do plano que passa pela posição da garra.
+    // Notar que o ponto da garra não está rente com a origem do referencial da junta 0.
     QVector3D M = (1/sqrtpx2py2 * QVector3D(-py, px, 0));
     QVector3D Zt(r13, r23, r33);
     QVector3D Yt(r12, r22, r32);
@@ -3495,9 +3514,12 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
     QVector3D K = QVector3D::crossProduct(M, Zt);
 
     QVector3D Ztl = QVector3D::crossProduct(K, M);
-
+    // TODO: Cinemática Inversa: Verificar porquê em posições como a de repouso, o Zt é diferente de Ztl, quando na verdade deveria ser igual
     double cteta = QVector3D::dotProduct(Zt, Ztl);
     double steta = QVector3D::dotProduct(QVector3D::crossProduct(Zt, Ztl), K);
+
+    steta = arredondaPara(steta, CASAS_DECIMAIS_SENOS_COSSENOS);
+    cteta = arredondaPara(cteta, CASAS_DECIMAIS_SENOS_COSSENOS);
 
     QVector3D Ytl = cteta * Yt
                  + steta * QVector3D::crossProduct(K, Yt)
@@ -3517,44 +3539,44 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
     r23 = Ztl[1];
     r33 = Ztl[2];
 
-    /*
-     Suspeita-se que o problema desta cinemática inversa é que a garra (mais
-     precisamente o pulso dela) jamais conseguirá se localizar no plano
-     que corta verticalmente o braço robô. Assumindo que a junta 0 esteja
-     a 0º, esse plano coincide com o plano X-Z, sendo X e Z os eixos
-     cujas origens se encontram na base do braço robô. Os pontos que se
-     encontram no pulso da garra e na própria garra estão distantes
-     2,33 cm desse plano, do lado positivo do eixo Y, assumindo que
-     a junta 0 esteja a 0º.
-    */
-
-    // Recalculando x, y e z da garra
-    // TODO: Checar se esta relação está certa e condiz com o posicionamento da garra
+    // Recalculando x, y e z da garra    
     double xProj = px + 7.5f * r13;
     double yProj = py + 7.5f * r23;
-    double zProj = pz + 7.5f * r33 + 17.41098f;
+    double zProj = pz + 7.5f * r33;
 
     //recalculando gama, beta e alfa
-    double betaGrausProj = atan2(-r31, sqrt(pow(r11,2)+pow(r21,2))) * 180 / M_PI;
-    double alfaGrausProj, gamaGrausProj;
+    double betaProj = atan2(-r31, sqrt(pow(r11,2)+pow(r21,2)));
+    double alfaProj, gamaProj;
 
-    if(betaGrausProj == 90)
+    if(betaProj == M_PI_2)
     {
-        alfaGrausProj = 0;
-        gamaGrausProj = atan2(r12, r22) * 180 / M_PI;
+        alfaProj = 0;
+        gamaProj = atan2(r12, r22);
     }
-    else if (betaGrausProj == -90)
+    else if (betaProj == -M_PI_2)
     {
-        alfaGrausProj = 0;
-        gamaGrausProj = -atan2(r12,r22) * 180 / M_PI;
+        alfaProj = 0;
+        gamaProj = -atan2(r12, r22);
     }
     else
     {
-        double cbeta = cos(betaGrausProj * M_PI / 180);
-        alfaGrausProj = atan2(r21/cbeta, r11/cbeta)* 180 / M_PI;
-        gamaGrausProj = atan2(r32/cbeta, r33/cbeta)* 180 / M_PI;
+        double cbeta = cos(betaProj);
+        cbeta = arredondaPara(cbeta, CASAS_DECIMAIS_SENOS_COSSENOS);
+        alfaProj = atan2(r21/cbeta, r11/cbeta);
+        gamaProj = atan2(r32/cbeta, r33/cbeta);
     }
 
+    xProj = arredondaPara(xProj, CASAS_DECIMAIS_POSICAO_XYZ);
+    yProj = arredondaPara(yProj, CASAS_DECIMAIS_POSICAO_XYZ);
+    zProj = arredondaPara(zProj, CASAS_DECIMAIS_POSICAO_XYZ);
+
+    double alfaGrausProj = alfaProj * 180 / M_PI;
+    double betaGrausProj = betaProj * 180 / M_PI;
+    double gamaGrausProj = gamaProj * 180 / M_PI;
+
+    alfaGrausProj = arredondaPara(alfaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
+    betaGrausProj = arredondaPara(betaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
+    gamaGrausProj = arredondaPara(gamaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
 
     if(posicaoProjetada != NULL)
     {
@@ -3572,142 +3594,643 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
     *alfaGraus = alfaGrausProj;
 
     // Início da cinemática inversa propriamente dita
-    double atan2pypx = atan2(py, -px);
-    double atan2sqrt = atan2(sqrt(px2py2 - 5.415240822489f),-2.327067f);
+    SolucaoCinematicaInversa *solucao;
+    QList<SolucaoCinematicaInversa *> solucoes;
+    QList<double> solucaoTeta1;
+
+    px2py2 = pow(px,2) + pow(py,2);
+    sqrtpx2py2 = sqrt(px2py2);
+
+    const double d234 = d2 + d3 + d4;
+    const double d234quad = d234 * d234;
+
+    double atan2pypx = atan2(-px, py);
+    double atan2sqrt = atan2(sqrt(px2py2 - d234quad),-d234);
 
     double teta1_1 = atan2pypx + atan2sqrt;
     double teta1_2 = atan2pypx - atan2sqrt;
+    double teta1_3 = atan2(r23, r13);
+    double teta1_4 = atan2(r23, r13);
+
     double teta1min = angulosMinGraus[0] * M_PI / 180;
     double teta1max = angulosMaxGraus[0] * M_PI / 180;
-
-    double teta1;
-
-    if ((teta1_1 >= teta1min) && (teta1_1 <= teta1max))
-        teta1 = teta1_1;
-    else if((teta1_2 >= teta1min) && (teta1_2 <= teta1max))
-        teta1 = teta1_2;    
-    else if (teta1_1 < teta1min || teta1_2 < teta1min)
-    {
-        teta1 = teta1min;
-        if(posicaoAtingivel != NULL)
-            *posicaoAtingivel = false;
-    }    
-    else if (teta1_1 > teta1max || teta1_2 > teta1max)
-    {
-        teta1 = teta1max;
-        if(posicaoAtingivel != NULL)
-            *posicaoAtingivel = false;
-    }
-
-    double c1 = cos(teta1);
-    double s1 = sin(teta1);
-    teta1 = teta1 * 180 / M_PI;
-
-    double teta5 = atan2(s1*r11 - c1*r21, s1*r12 - c1*r22);
-
-    double teta5min = angulosMinGraus[4] * M_PI / 180;
-    double teta5max = angulosMaxGraus[4] * M_PI / 180;
-
-    if (teta5 < teta5min)
-    {
-        teta5 = teta5min;
-        if(posicaoAtingivel != NULL)
-            *posicaoAtingivel = false;
-    }
-    else if (teta5 > teta5max)
-    {
-        teta5 = teta5max;
-        if(posicaoAtingivel != NULL)
-            *posicaoAtingivel = false;
-    }
-
-    teta5 = teta5 * 180 / M_PI;
-
-    double teta234 = atan2(c1*r13+s1*r23, -r33) * 180 / M_PI;
-
-    double c3 = (px2py2 + pow(pz,2) - 170.23625f) / 9249.87009453125f;
-
-    double s3 = sqrt(1 - pow(c3,2));
-
-    double teta3_1 = atan2(s3, c3);
-    double teta3_2 = atan2(-s3, c3);
-    double teta3min = angulosMinGraus[2] * M_PI / 180;
-    double teta3max = angulosMaxGraus[2] * M_PI / 180;
-    double teta3;
-
-    if ((teta3_1 >= teta3min) && (teta3_1 <= teta3max))
-        teta3 = teta3_1;
-    else if ((teta3_2 >= teta3min) && (teta3_2 <= teta3max))
-    {
-        teta3 = teta3_2;
-        s3 = -s3;
-    }
-    else if (teta3_1 < teta3min || teta3_2 < teta3min)
-    {
-        teta3 = teta3min;
-        if(posicaoAtingivel != NULL)
-            *posicaoAtingivel = false;
-
-        c3 = cos(teta3);
-        s3 = sin(teta3);
-    }
-    else if (teta3_1 > teta3max || teta3_2 > teta3max)
-    {
-        teta3 = teta3max;
-        if(posicaoAtingivel != NULL)
-            *posicaoAtingivel = false;
-
-        c3 = cos(teta3);
-        s3 = sin(teta3);
-    }
-
-    teta3 = teta3 * 180 / M_PI;
-
-    double teta2 = -atan2(pz, sqrtpx2py2) - atan2(5.825f * s3, 11.675f + 5.825f * c3);
 
     double teta2min = angulosMinGraus[1] * M_PI / 180;
     double teta2max = angulosMaxGraus[1] * M_PI / 180;
 
-    if (teta2 < teta2min)
+    double teta3min = angulosMinGraus[2] * M_PI / 180;
+    double teta3max = angulosMaxGraus[2] * M_PI / 180;
+
+    double teta4min = angulosMinGraus[3] * M_PI / 180;
+    double teta4max = angulosMaxGraus[3] * M_PI / 180;
+
+    double teta5min = angulosMinGraus[4] * M_PI / 180;
+    double teta5max = angulosMaxGraus[4] * M_PI / 180;
+
+
+    double teta1, teta2, teta3, teta4, teta5;
+
+    if((teta1_1 >= teta1min) && (teta1_1 <= teta1max))
+        solucaoTeta1.append(teta1_1);
+
+    if((teta1_2 >= teta1min) && (teta1_2 <= teta1max))
     {
-        teta2 = teta2min;
+        if(!solucaoTeta1.contains(teta1_2))
+            solucaoTeta1.append(teta1_2);
+    }
+
+    if((teta1_3 >= teta1min) && (teta1_3 <= teta1max))
+    {
+        if(!solucaoTeta1.contains(teta1_3))
+            solucaoTeta1.append(teta1_3);
+    }
+
+    if((teta1_4 >= teta1min) && (teta1_4 <= teta1max))
+    {
+        if(!solucaoTeta1.contains(teta1_3))
+            solucaoTeta1.append(teta1_4);
+    }
+
+    if(solucaoTeta1.isEmpty())
+    {
+        if (teta1_1 < teta1min || teta1_2 < teta1min || teta1_3 < teta1min || teta1_4 < teta1min)
+        {
+            teta1 = teta1min;
+
+        }
+        else if (teta1_1 > teta1max || teta1_2 > teta1max || teta1_3 > teta1max || teta1_4 > teta1max)
+        {
+            teta1 = teta1max;            
+        }        
 
         if(posicaoAtingivel != NULL)
             *posicaoAtingivel = false;
+
+        solucao = new SolucaoCinematicaInversa;
+
+        solucao->teta1 = teta1;
+        // TODO: Cinemática inversa: Arredondar todos os senos e cossenos calculados
+        solucao->s1 = sin(teta1);
+        solucao->c1 = cos(teta1);
+        solucao->possivel = false;
+        solucao->teta1possivel = false;
+
+        solucoes.append(solucao);
     }
-    else if (teta2 > teta2max)
+    else
     {
-        teta2 = teta2max;
+        for(int i = 0; i < solucaoTeta1.count(); i++)
+        {
+            solucao = new SolucaoCinematicaInversa;
+
+            teta1 = solucaoTeta1.at(i);
+
+            solucao->teta1 = teta1;
+            solucao->s1 = sin(teta1);
+            solucao->c1 = cos(teta1);
+            solucao->possivel = true;
+            solucao->teta1possivel = true;
+
+            solucoes.append(solucao);
+        }
+    }
+
+    for(int i = 0; i < solucoes.count(); i++)
+    {
+        solucao = solucoes.at(i);
+
+        teta1 = solucoes.at(i)->teta1;
+        double s1 = solucoes.at(i)->s1;
+        double c1 = solucoes.at(i)->c1;
+
+        double s5 = s1 * r11 - c1 * r21;
+        double c5 = s1 * r12 - c1 * r22;
+
+        teta5 = atan2(s5, c5);
+
+        if(teta5 >= teta5min && teta5 <= teta5max)
+        {
+            solucao->teta5 = teta5;
+            solucao->s5 = s5;
+            solucao->c5 = c5;
+            solucao->teta5possivel = true;
+        }
+        else
+        {
+            if(teta5 < teta5min)
+                teta5 = teta5min;
+            else if(teta5 > teta5max)
+                teta5 = teta5max;
+
+            s5 = sin(teta5);
+            c5 = cos(teta5);
+
+            solucao->teta5 = teta5;
+            solucao->s5 = s5;
+            solucao->c5 = c5;
+            solucao->possivel = false;
+            solucao->teta5possivel = false;
+        }
+
+        double c234, s234, teta234;
+
+        s234 = c1 * r13 + s1 * r23;
+        c234 = -r33;
+
+        teta234 = atan2(s234, c234);
+
+        double a = r13 - c1 * s234;
+        double b = r33 + c234;
+
+        teta2 = atan2(a, -b);
+        double teta2_2 = atan2(-a, b);
+
+        if(teta2 >= teta2min && teta2 <= teta2max)
+        {
+            solucao->teta2 = teta2;
+            solucao->s2 = sin(teta2);
+            solucao->c2 = cos(teta2);
+            solucao->teta2possivel = true;
+
+            if(teta2_2 >= teta2min && teta2_2 <= teta2max)
+            {
+                solucao->subSolucao = new SubSolucaoCinematicaInversa;
+
+                solucao->subSolucao->teta2 = teta2_2;
+                solucao->subSolucao->s2 = sin(teta2_2);
+                solucao->subSolucao->c2 = cos(teta2_2);
+                solucao->subSolucao->possivel = true;
+                solucao->subSolucao->teta2possivel = true;
+            }
+        }
+        else if(teta2_2 >= teta2min && teta2_2 <= teta2max)
+        {
+            solucao->teta2 = teta2_2;
+            solucao->s2 = sin(teta2_2);
+            solucao->c2 = cos(teta2_2);
+            solucao->teta2possivel = true;
+
+            teta2 = teta2_2;
+        }
+        else
+        {
+            if(teta2 < teta2min)
+                teta2 = teta2min;
+            else if(teta2 > teta2max)
+                teta2 = teta2max;
+
+            solucao->teta2 = teta2;
+            solucao->s2 = sin(teta2);
+            solucao->c2 = cos(teta2);
+            solucao->possivel = false;
+            solucao->teta2possivel = false;
+        }
+
+        double s2 = solucao->s2;
+        double c2 = solucao->c2;
+
+
+        double teta34 = teta234 - teta2;
+        double s34 = sin(teta34);
+        double c34 = cos(teta34);
+
+        double c1pxs1pya1 = c1 * px + s1 * py - a1;
+        double pzd1 = pz - d1;
+        // TODO: Cinemática inversa: Verificar porquê c3 e s3 dão valores maiores que 1 quando os ângulos das juntas estão todos em zero.
+        double c3 = (c2 * c1pxs1pya1 + s2 * pzd1 - a4 * c34 - d5 * s34 - a2) / a3;
+        double s3 = (-s2 * c1pxs1pya1 + c2 * pzd1 - a4 * s34 + d5 * c34) / a3;
+
+        teta3 = atan2(s3, c3);
+        double teta3_2;
+
+        if(teta3 >= teta3min && teta3 <= teta3max)
+        {
+            solucao->teta3 = teta3;
+            solucao->s3 = s3;
+            solucao->c3 = c3;
+            solucao->teta3possivel = true;
+
+            if(solucao->subSolucao != NULL)
+            {
+                teta2_2 = solucao->subSolucao->teta2;
+                s2 = solucao->subSolucao->s2;
+                c2 = solucao->subSolucao->c2;
+
+                teta34 = teta234 - teta2_2;
+                s34 = sin(teta34);
+                c34 = cos(teta34);
+
+                c3 = (c2 * c1pxs1pya1 + s2 * pzd1 - a4 * c34 - d5 * s34 - a2) / a3;
+                s3 = (-s2 * c1pxs1pya1 + c2 * pzd1 - a4 * s34 + d5 * c34) / a3;
+
+                teta3_2 = atan2(s3, c3);
+
+                if(teta3_2 >= teta3min && teta3_2 <= teta3max)
+                {
+                    solucao->subSolucao->teta3 = teta3_2;
+                    solucao->subSolucao->s3 = s3;
+                    solucao->subSolucao->c3 = c3;
+                    solucao->subSolucao->teta3possivel = true;
+                }
+                else
+                {
+                    delete solucao->subSolucao;
+                }
+            }
+
+        }
+        else
+        {
+            if(solucao->subSolucao != NULL && solucao->subSolucao->possivel)
+            {
+                solucao->teta2 = solucao->subSolucao->teta2;
+                solucao->s2 = solucao->subSolucao->s2;
+                solucao->c2 = solucao->subSolucao->c2;
+                solucao->teta2possivel = solucao->subSolucao->teta2possivel;
+
+                delete solucao->subSolucao;
+
+                teta2 = solucao->teta2;
+                s2 = solucao->s2;
+                c2 = solucao->c2;
+
+                teta34 = teta234 - teta2;
+                s34 = sin(teta34);
+                c34 = cos(teta34);
+
+                c3 = (c2 * c1pxs1pya1 + s2 * pzd1 - a4 * c34 - d5 * s34 - a2) / a3;
+                s3 = (-s2 * c1pxs1pya1 + c2 * pzd1 - a4 * s34 + d5 * c34) / a3;
+
+                teta3 = atan2(s3, c3);
+
+                if(teta3 >= teta3min && teta3 <= teta3max)
+                {
+                    solucao->teta3 = teta3;
+                    solucao->s3 = s3;
+                    solucao->c3 = c3;
+                    solucao->teta3possivel = true;
+                }
+                else
+                {
+                    if(teta3 < teta3min)
+                        teta3 = teta3min;
+                    else if(teta3 > teta3max)
+                        teta3 = teta3max;
+
+                    c3 = cos(teta3);
+                    s3 = sin(teta3);
+
+                    solucao->teta3 = teta3;
+                    solucao->s3 = s3;
+                    solucao->c3 = c3;
+                    solucao->possivel = false;
+                    solucao->teta3possivel = false;
+                }
+            }
+            else
+            {
+                if(teta3 < teta3min)
+                    teta3 = teta3min;
+                else if(teta3 > teta3max)
+                    teta3 = teta3max;
+
+                s3 = sin(teta3);
+                c3 = cos(teta3);
+
+                solucao->teta3 = teta3;
+                solucao->s3 = s3;
+                solucao->c3 = c3;
+                solucao->possivel = false;
+                solucao->teta3possivel = false;
+            }
+        }
+
+        teta4 = teta34 - teta3;
+        double teta4_2, s4, c4;
+
+        if(teta4 >= teta4min && teta4 <= teta4max)
+        {
+            s4 = sin(teta4);
+            c4 = cos(teta4);
+
+            solucao->teta4 = teta4;
+            solucao->s4 = s4;
+            solucao->c4 = c4;
+            solucao->teta4possivel = true;
+
+            if(solucao->subSolucao != NULL)
+            {
+                teta2_2 = solucao->subSolucao->teta2;
+                teta3_2 = solucao->subSolucao->teta3;
+                teta34 = teta234 - teta2_2;
+                teta4_2 = teta34 - teta3_2;
+
+                if(teta4_2 >= teta4min && teta4_2 <= teta4max)
+                {
+                    solucao->subSolucao->teta4 = teta4_2;
+                    solucao->subSolucao->s4 = sin(teta4_2);
+                    solucao->subSolucao->c4 = cos(teta4_2);
+                    solucao->subSolucao->teta4possivel = true;
+                }
+                else
+                {
+                    delete solucao->subSolucao;
+                }
+            }
+        }
+        else
+        {
+            if(solucao->subSolucao != NULL && solucao->subSolucao->possivel)
+            {
+                solucao->teta2 = solucao->subSolucao->teta2;
+                solucao->s2 = solucao->subSolucao->s2;
+                solucao->c2 = solucao->subSolucao->c2;
+                solucao->teta2possivel = solucao->subSolucao->teta2possivel;
+
+                solucao->teta3 = solucao->subSolucao->teta3;
+                solucao->s3 = solucao->subSolucao->s3;
+                solucao->c3 = solucao->subSolucao->c3;
+                solucao->teta3possivel = solucao->subSolucao->teta3possivel;
+
+                delete solucao->subSolucao;
+
+                teta2 = solucao->teta2;
+                teta3 = solucao->teta3;
+
+                teta34 = teta234 - teta2;
+
+                teta4 = teta34 - teta3;
+
+                if(teta4 >= teta4min && teta4 <= teta4max)
+                {
+                    s4 = sin(teta4);
+                    c4 = cos(teta4);
+
+                    solucao->teta4 = teta4;
+                    solucao->s4 = s4;
+                    solucao->c4 = c4;
+                    solucao->teta4possivel = true;
+                }
+                else
+                {
+                    if(teta4 < teta4min)
+                        teta4 = teta4min;
+                    else if(teta4 > teta4max)
+                        teta4 = teta4max;
+
+                    s4 = sin(teta4);
+                    c4 = cos(teta4);
+
+                    solucao->teta4 = teta4;
+                    solucao->s4 = s4;
+                    solucao->c4 = c4;
+                    solucao->possivel = false;
+                    solucao->teta4possivel = false;
+                }
+            }
+            else
+            {
+                if(teta4 < teta4min)
+                    teta4 = teta4min;
+                else if(teta4 > teta4max)
+                    teta4 = teta4max;
+
+                s4 = sin(teta4);
+                c4 = cos(teta4);
+
+                solucao->teta4 = teta4;
+                solucao->s4 = s4;
+                solucao->c4 = c4;
+                solucao->possivel = false;
+                solucao->teta4possivel = false;
+            }
+        }
+
+    }
+
+    // Avaliação final das soluções
+    if(solucoes.count() == 1)
+    {
+        solucao = solucoes[0];
 
         if(posicaoAtingivel != NULL)
-            *posicaoAtingivel = false;
+        {
+            *posicaoAtingivel = solucao->possivel;
+        }        
+
+        if(solucao->subSolucao != NULL)
+        {
+            // Unificação da solução com a subsolução
+            SubSolucaoCinematicaInversa *subSolucao = solucao->subSolucao;
+
+            if(!(solucao->possivel
+                 || (subSolucao->teta2possivel
+                     && subSolucao->teta3possivel
+                     && subSolucao->teta4possivel))
+               )
+            {
+                // Substitui os ângulos da solução pelos que constam na subsolução
+                // quando a solução em si não é possível. Esta é uma forma de
+                // fazer a solução ficar mais próxima do possível
+                solucao->teta2 = subSolucao->teta2;
+                solucao->teta3 = subSolucao->teta3;
+                solucao->teta4 = subSolucao->teta4;
+            }
+            else
+            {
+                // Pega a subsolução de maior peso.
+                double difTeta2 = abs(angulosCorrentesJuntas[1] - subSolucao->teta2);
+                double difTeta3 = abs(angulosCorrentesJuntas[2] - subSolucao->teta3);
+                double difTeta4 = abs(angulosCorrentesJuntas[3] - subSolucao->teta4);
+
+                subSolucao->peso = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
+
+                difTeta2 = abs(angulosCorrentesJuntas[1] - solucao->teta2);
+                difTeta3 = abs(angulosCorrentesJuntas[2] - solucao->teta3);
+                difTeta4 = abs(angulosCorrentesJuntas[3] - solucao->teta4);
+
+                double pesoSolucao = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
+
+                if(subSolucao->peso >= pesoSolucao)
+                {
+                    solucao->teta2 = subSolucao->teta2;
+                    solucao->teta3 = subSolucao->teta3;
+                    solucao->teta4 = subSolucao->teta4;
+                }
+            }
+
+            delete subSolucao;
+        }        
+    }
+    else
+    {        
+        // Ver no livro do Craig páginas 104 e 105 sobre pesos das juntas e solução de menor peso.
+        QList<SolucaoCinematicaInversa *> solucoesValidas;
+
+        for(int i = 0; i < solucoes.count(); i++)
+        {
+            solucao = solucoes.at(i);
+
+            if(solucao->subSolucao != NULL)
+            {
+                // Unifica a subsolução com base nos pesos
+                SubSolucaoCinematicaInversa *subSolucao = solucao->subSolucao;
+
+                double difTeta2 = abs(angulosCorrentesJuntas[1] - subSolucao->teta2);
+                double difTeta3 = abs(angulosCorrentesJuntas[2] - subSolucao->teta3);
+                double difTeta4 = abs(angulosCorrentesJuntas[3] - subSolucao->teta4);
+
+                subSolucao->peso = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
+
+                difTeta2 = abs(angulosCorrentesJuntas[1] - solucao->teta2);
+                difTeta3 = abs(angulosCorrentesJuntas[2] - solucao->teta3);
+                difTeta4 = abs(angulosCorrentesJuntas[3] - solucao->teta4);
+
+                double pesoSolucao = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
+
+                if(subSolucao->peso >= pesoSolucao)
+                {
+                    solucao->teta2 = subSolucao->teta2;
+                    solucao->teta3 = subSolucao->teta3;
+                    solucao->teta4 = subSolucao->teta4;
+                }
+
+                delete subSolucao;
+            }
+
+            // Inclui a solução na lista de soluções válidas
+            if(solucao->possivel)
+            {
+                solucoesValidas.append(solucao);
+            }
+        }
+
+        // Se não existir solução válida
+        if(solucoesValidas.isEmpty())
+        {
+            int maiorQtdPosicoesPossiveis = 0;
+            int idxSolMaiorQtdAngPossivel = 0;
+
+            // Pega a solução inválida com maior quantidade de ângulos válidos
+            for(int i = 0; i < solucoes.count(); i++)
+            {
+                int qtd = 0;
+
+                if(solucoes.at(i)->teta1possivel)
+                    qtd++;
+
+                if(solucoes.at(i)->teta2possivel)
+                    qtd++;
+
+                if(solucoes.at(i)->teta3possivel)
+                    qtd++;
+
+                if(solucoes.at(i)->teta4possivel)
+                    qtd++;
+
+                if(solucoes.at(i)->teta5possivel)
+                    qtd++;
+
+                if(qtd > maiorQtdPosicoesPossiveis)
+                {
+                    maiorQtdPosicoesPossiveis = qtd;
+                    idxSolMaiorQtdAngPossivel = i;
+                }
+            }
+
+            solucao = solucoes.at(idxSolMaiorQtdAngPossivel);
+        }
+        else if(solucoesValidas.count() == 1)
+        {
+            solucao = solucoesValidas.at(0);
+
+            if(posicaoAtingivel != NULL)
+            {
+                *posicaoAtingivel = solucao->possivel;
+            }
+        }
+        else
+        {
+            // Obtém a solução válida de maior peso, ou a primeira, em caso de pesos iguais
+            double difTeta[QTD_SERVOS - 1];
+            double angTeta[QTD_SERVOS - 1];
+            double pesosTeta[QTD_SERVOS - 1];
+
+            pesosTeta[0] = pesoTeta1;
+            pesosTeta[1] = pesoTeta2;
+            pesosTeta[2] = pesoTeta3;
+            pesosTeta[3] = pesoTeta4;
+            pesosTeta[4] = pesoTeta5;
+
+            for(int i = 0; i < solucoes.count(); i++)
+            {
+                solucao = solucoes.at(i);
+
+                angTeta[0] = solucao->teta1;
+                angTeta[1] = solucao->teta2;
+                angTeta[2] = solucao->teta3;
+                angTeta[3] = solucao->teta4;
+                angTeta[4] = solucao->teta5;
+
+                for(int j = 0; j < QTD_SERVOS - 1; j++)
+                    difTeta[j] = abs(angulosCorrentesJuntas[j] - angTeta[j]);
+
+                double somatorio = 0, somaPesos = 0;
+
+                for(int j = 0; j < QTD_SERVOS - 1; j++)
+                {
+                    somatorio += pesosTeta[j] * difTeta[j];
+                    somaPesos = pesosTeta[j];
+                }
+
+                solucao->peso = somatorio/somaPesos;
+            }
+
+            int idxSolucaoPesoMaior = 0;
+            double maiorPeso = solucoes.at(0)->peso;
+
+            for(int i = 1; i < solucoes.count(); i++)
+            {
+                if(solucoes.at(i)->peso > maiorPeso)
+                {
+                    maiorPeso = solucoes.at(i)->peso;
+                    idxSolucaoPesoMaior = i;
+                }
+            }
+
+            solucao = solucoes.at(idxSolucaoPesoMaior);
+
+            if(posicaoAtingivel != NULL)
+            {
+                *posicaoAtingivel = solucao->possivel;
+            }
+        }
     }
 
+    teta1 = solucao->teta1;
+    teta2 = solucao->teta2;
+    teta3 = solucao->teta3;
+    teta4 = solucao->teta4;
+    teta5 = solucao->teta5;
 
+    while(!solucoes.isEmpty())
+    {
+        delete solucoes.takeFirst();
+    }
+
+    teta1 = teta1 * 180 / M_PI;
     teta2 = teta2 * 180 / M_PI;
+    teta3 = teta3 * 180 / M_PI;
+    teta4 = teta4 * 180 / M_PI;
+    teta5 = teta5 * 180 / M_PI;
 
-    double teta4 = teta234 - teta2 - teta3;
-
-    double teta4min = angulosMinGraus[3];
-    double teta4max = angulosMaxGraus[3];
-
-    if (teta4 < teta4min)
-    {
-        teta4 = teta4min;
-
-        if(posicaoAtingivel != NULL)
-            *posicaoAtingivel = false;
-    }
-    else if (teta4 > teta4max)
-    {
-        teta4 = teta4max;
-
-        if(posicaoAtingivel != NULL)
-            *posicaoAtingivel = false;
-    }
+    teta1 = arredondaPara(teta1, CASAS_DECIMAIS_POSICAO_ANGULAR);
+    teta2 = arredondaPara(teta2, CASAS_DECIMAIS_POSICAO_ANGULAR);
+    teta3 = arredondaPara(teta3, CASAS_DECIMAIS_POSICAO_ANGULAR);
+    teta4 = arredondaPara(teta4, CASAS_DECIMAIS_POSICAO_ANGULAR);
+    teta5 = arredondaPara(teta5, CASAS_DECIMAIS_POSICAO_ANGULAR);
 
     return new double[5]{teta1, teta2, teta3, teta4, teta5};
 }
-
 
 
