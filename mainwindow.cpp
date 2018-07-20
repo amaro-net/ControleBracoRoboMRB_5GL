@@ -70,7 +70,7 @@ MainWindow::MainWindow(QWidget *parent) :
         lstPontoVerdeSliderPosAtual[i]->setVisible(false);
     }
 
-    //configurarConversaoEntreMicrossegundosEAngulos(true);
+    configurarConversaoEntreMicrossegundosEAngulos(true);
 }
 
 void MainWindow::conectarComponentes()
@@ -226,10 +226,7 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             if(tabelaPosLimitesGrausDefault[i][4] == 1)
                 ui->tabelaPosLimitesGraus->item(i,4)->setCheckState(Qt::CheckState::Checked);
             else
-                ui->tabelaPosLimitesGraus->item(i,4)->setCheckState(Qt::CheckState::Unchecked);
-
-            lstSpnVel[i]->setValue(velTmpPulsoDefault[i]);
-            lstSpnAcl[i]->setValue(aclTmpPulsoDefault[i]);
+                ui->tabelaPosLimitesGraus->item(i,4)->setCheckState(Qt::CheckState::Unchecked);            
         }
     }
 
@@ -316,7 +313,13 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             lstSpnAclGrausPorSegQuad[i]->setDecimals(CASAS_DECIMAIS_ACELERACAO_ANGULAR);
             lstSpnAclGrausPorSegQuad[i]->setSingleStep(incAclGrausPorSegQuad[i]);
 
-            int velTmpPulso = lstSpnVel[i]->value();
+            int velTmpPulso;
+
+            if(valoresDefault)
+                velTmpPulso = velTmpPulsoDefault[i];
+            else
+                velTmpPulso = lstSpnVel[i]->value();
+
             double velGrausPorSeg = velTmpPulso * incrementosAng[i] / 0.25 * (10e-3);  // (0.25us)/(10ms)
             // (0.25us)/(10ms) * Graus/(us) / 0.25
             // (0.25us)/(10ms) * Graus/(0.25us)
@@ -327,7 +330,13 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             velGrausPorSeg = arredondaPara(velGrausPorSeg, CASAS_DECIMAIS_VELOCIDADE_ANGULAR);
             lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg);
 
-            int aclTmpPulso = lstSpnAcl[i]->value();
+            int aclTmpPulso;
+
+            if(valoresDefault)
+                aclTmpPulso = aclTmpPulsoDefault[i];
+            else
+                aclTmpPulso = lstSpnAcl[i]->value();
+
             double aclGrausPorSegQuad = aclTmpPulso * incrementosAng[i] / 0.25 * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
             aclGrausPorSegQuad = arredondaPara(aclGrausPorSegQuad,CASAS_DECIMAIS_ACELERACAO_ANGULAR);
             lstSpnAclGrausPorSegQuad[i]->setValue(aclGrausPorSegQuad);
@@ -355,7 +364,13 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             lstSpnVelGrausPorSeg[i]->setSingleStep(incVelGrausPorSeg[i]);
             lstSpnAclGrausPorSegQuad[i]->setSingleStep(incAclGrausPorSegQuad[i]);
 
-            int velTmpPulso = lstSpnVel[i]->value();
+            int velTmpPulso;
+
+            if(valoresDefault)
+                velTmpPulso = velTmpPulsoDefault[i];
+            else
+                velTmpPulso = lstSpnVel[i]->value();
+
             double velGrausPorSeg = velTmpPulso * incrementosAng[i] * (10e-3);  // (0.25us)/(10ms)
             // (0.25us)/(10ms) * Graus/(0.25us) * 10 * 10e-3
             //      1 / (10ms) * Graus          * 10 * 10e-3
@@ -365,7 +380,13 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
             lstSpnVelGrausPorSeg[i]->setValue(velGrausPorSeg);
 
 
-            int aclTmpPulso = lstSpnAcl[i]->value();
+            int aclTmpPulso;
+
+            if(valoresDefault)
+                aclTmpPulso = aclTmpPulsoDefault[i];
+            else
+                aclTmpPulso = lstSpnAcl[i]->value();
+
             double aclGrausPorSegQuad = aclTmpPulso * incrementosAng[i] * (10e-3) * (80e-3); // (0.25us)/(10ms)/(80ms)
             // (0.25us)/(10ms)/(80ms) * Graus/(0.25us)
             // 1/(10ms)/(80ms) * Graus/1
@@ -896,17 +917,20 @@ void MainWindow::setaPosicaoPontoVerde(int idxJunta, int posicao)
     int x, y, width, height;
     float xf;
 
-    QRect geometry = lstPontoVerdeSliderPosAtual[idxJunta]->geometry();
+    if(coeffPontoVerde != NULL && offsetPontoVerde != NULL)
+    {
+        QRect geometry = lstPontoVerdeSliderPosAtual[idxJunta]->geometry();
 
-    geometry.getRect(&x, &y, &width, &height);
+        geometry.getRect(&x, &y, &width, &height);
 
-    xf = coeffPontoVerde[idxJunta] * posicao + offsetPontoVerde[idxJunta];
+        xf = coeffPontoVerde[idxJunta] * posicao + offsetPontoVerde[idxJunta];
 
-    x = qRound(xf);
+        x = qRound(xf);
 
-    geometry.setRect(x, y, width, height);
+        geometry.setRect(x, y, width, height);
 
-    lstPontoVerdeSliderPosAtual[idxJunta]->setGeometry(geometry);
+        lstPontoVerdeSliderPosAtual[idxJunta]->setGeometry(geometry);
+    }
 }
 
 void MainWindow::montaJSTParaPararMov1Junta()

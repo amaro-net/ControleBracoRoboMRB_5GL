@@ -31,7 +31,7 @@
 #define STATUS_SEQCOM_CONTINUANDO_LOOP  "Continuando loop"
 #define STATUS_SEQCOM_EM_DLY_SEM_PAR    "Em espera. Pressione ENTER, duplo clique na sequência, Continuar ou Continuar loop."
 
-#define TEMPO_TIMER_ENVIO_IMEDIATO_MS   500
+#define TEMPO_TIMER_ENVIO_IMEDIATO_MS   256
 
 #define LBL_POS_ATUAL_X_MIN 50
 #define LBL_POS_ATUAL_X_MAX 218
