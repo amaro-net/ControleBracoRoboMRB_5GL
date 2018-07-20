@@ -1,0 +1,17 @@
+Pesos do braço Robô
+
+Segmentos
+L1  53g
+L2  17g
+L3  37g
+Garra (estimado com servo)     156g
+Garra (com servo) + Servo J4   202g
+
+Servos (com seus respectivos cabos)
+J1  70g
+J2  62g
+J3  46g
+J4 (estimado) 45g
+
+Cabos de extensão dos servos  27g
+Parafuso rosca máquina (com aruela e porca) 2g
