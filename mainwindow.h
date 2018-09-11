@@ -48,6 +48,7 @@ class MainWindow : public QMainWindow
         double converteAclTmpPulsoParaGrausPorSegQuad(int idxJunta, int aclTmpPulso);
         int converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad);
 
+        float arredondaPara(float num, int casasDecimais);
         double arredondaPara(double num, int casasDecimais);
 
     private slots:

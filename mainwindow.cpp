@@ -78,14 +78,14 @@ void MainWindow::conectarComponentes()
     connect(ui->btAbrirPortaSerial, &QPushButton::clicked, this, &MainWindow::abrirPortaSerial);
     connect(ui->btFecharPortaSerial, &QPushButton::clicked, this, &MainWindow::fecharPortaSerial);
 
-    connect(ui->chkLEDP0, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP1, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP2, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP3, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP4, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP5, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP6, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP7, &QCheckBox::clicked, this, MainWindow::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP0, &QCheckBox::clicked, this, &MainWindow::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP1, &QCheckBox::clicked, this, &MainWindow::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP2, &QCheckBox::clicked, this, &MainWindow::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP3, &QCheckBox::clicked, this, &MainWindow::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP4, &QCheckBox::clicked, this, &MainWindow::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP5, &QCheckBox::clicked, this, &MainWindow::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP6, &QCheckBox::clicked, this, &MainWindow::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP7, &QCheckBox::clicked, this, &MainWindow::on_chkLEDPi_clicked);
 }
 
 void MainWindow::alimentarListasDeComponentes()
@@ -223,7 +223,7 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
                 setaValorItemTabela(ui->tabelaPosLimitesGraus, i, j, QString("%1").arg(tabelaPosLimitesGrausDefault[i][j]));
             }
 
-            if(tabelaPosLimitesGrausDefault[i][4] == 1)
+            if(tabelaPosLimitesGrausDefault[i][4] == 1.0)
                 ui->tabelaPosLimitesGraus->item(i,4)->setCheckState(Qt::CheckState::Checked);
             else
                 ui->tabelaPosLimitesGraus->item(i,4)->setCheckState(Qt::CheckState::Unchecked);            
@@ -785,7 +785,7 @@ void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
         double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();
 
         // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-        if(angulo != anguloAtual)
+        if(!qFuzzyCompare(angulo, anguloAtual))
             lstSpnAlvoGraus[idxJunta]->setValue(angulo);        
     }
     else
@@ -802,7 +802,7 @@ void MainWindow::converteSpnVelParaGrausPorSeg(int idxJunta, int velocidade)
     double velocidadeAngularAtual = lstSpnVelGrausPorSeg[idxJunta]->value();
 
     // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-    if(velocidadeAngular != velocidadeAngularAtual)
+    if(!qFuzzyCompare(velocidadeAngular, velocidadeAngularAtual))
         lstSpnVelGrausPorSeg[idxJunta]->setValue(velocidadeAngular);
 }
 
@@ -812,7 +812,7 @@ void MainWindow::converteSpnAclParaGrausPorSegQuad(int idxJunta, int aceleracao)
     double aceleracaoAngularAtual = lstSpnAclGrausPorSegQuad[idxJunta]->value();
 
     // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-    if(aceleracaoAngular != aceleracaoAngularAtual)
+    if(!qFuzzyCompare(aceleracaoAngular, aceleracaoAngularAtual))
         lstSpnAclGrausPorSegQuad[idxJunta]->setValue(aceleracaoAngular);
 }
 
@@ -845,6 +845,12 @@ void MainWindow::converteSpnAclGrausPorSegQuadParaTmpPulso(int idxJunta, double 
     if(aceleracaoTmpPulso != aceleracaoTmpPulsoAtual)
         lstSpnAcl[idxJunta]->setValue(aceleracaoTmpPulso);
 }
+
+float MainWindow::arredondaPara(float num, int casasDecimais)
+{
+    return float(arredondaPara(double(num), casasDecimais));
+}
+
 
 double MainWindow::arredondaPara(double num, int casasDecimais)
 {
@@ -931,9 +937,9 @@ void MainWindow::recebeCaracteresDeResposta(QByteArray data)
 void MainWindow::setaPosicaoPontoVerde(int idxJunta, int posicao)
 {    
     int x, y, width, height;
-    float xf;
+    double xf;
 
-    if(coeffPontoVerde != NULL && offsetPontoVerde != NULL)
+    if(coeffPontoVerde != nullptr && offsetPontoVerde != nullptr)
     {
         QRect geometry = lstPontoVerdeSliderPosAtual[idxJunta]->geometry();
 
@@ -1448,7 +1454,7 @@ void MainWindow::setarValorPosLimiteResposta(QString resposta)
 
 void MainWindow::setaValorItemTabela(QTableWidget *tableWidget, int idxLinha, int idxColuna, QString strValor)
 {
-    if(tableWidget->item(idxLinha, idxColuna) == 0)
+    if(tableWidget->item(idxLinha, idxColuna) == nullptr)
     {
         QTableWidgetItem *item = new QTableWidgetItem();
         item->setText(strValor);
@@ -3385,22 +3391,22 @@ QMatrix4x4 MainWindow::cinematicaDireta(double teta1graus, double teta2graus, do
     double c234 = c23*c4 - s23*s4;
     double s234 = s23*c4 + c23*s4;
 
-    double r11 = c1*c234*c5 + s1*s5;
-    double r21 = s1*c234*c5 - c1*s5;
-    double r31 = s234*c5;
-    double r12 =  s1*c5 - c1*c234*s5;
-    double r22 = -c1*c5 - s1*c234*s5;
-    double r32 = -s234*s5;
-    double r13 = c1*s234;
-    double r23 = s1*s234;
-    double r33 = -c234;
+    float r11 = float(c1*c234*c5 + s1*s5);
+    float r21 = float(s1*c234*c5 - c1*s5);
+    float r31 = float(s234*c5);
+    float r12 = float( s1*c5 - c1*c234*s5);
+    float r22 = float(-c1*c5 - s1*c234*s5);
+    float r32 = float(-s234*s5);
+    float r13 = float(c1*s234);
+    float r23 = float(s1*s234);
+    float r33 = float(-c234);
 
     double f = a1 + a2*c2 + a3*c23 + a4*c234 + d5*s234;
     const double d234 = d2 + d3 + d4;
 
-    double px = s1 * d234 + c1 * f;
-    double py = s1 * f - c1 * d234;
-    double pz = d1 + a2*s2 + a3*s23 + a4*s234 - d5*c234;
+    float px = float(s1 * d234 + c1 * f);
+    float py = float(s1 * f - c1 * d234);
+    float pz = float(d1 + a2*s2 + a3*s23 + a4*s234 - d5*c234);
 
     return QMatrix4x4(r11, r12, r13, px,
                       r21, r22, r23, py,
@@ -3426,7 +3432,7 @@ QMatrix4x4 MainWindow::matrizPosGarra(double teta1graus, double teta2graus, doub
 {
     QMatrix4x4 matrizGarraParaPulso(1, 0, 0, 0,
                                     0, 1, 0, 0,
-                                    0, 0, 1, LgL3,
+                                    0, 0, 1, float(LgL3),
                                     0, 0, 0, 1);
 
     /*
@@ -3472,22 +3478,22 @@ double *MainWindow::posicaoGarra(double teta1graus, double teta2graus, double te
 
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
-            R[i][j] = arredondaPara(MGarra(i,j), 3);
+            R[i][j] = arredondaPara(double(MGarra(i,j)), 3);
 
-    double x = arredondaPara(MGarra(0, 3), CASAS_DECIMAIS_POSICAO_XYZ);
-    double y = arredondaPara(MGarra(1, 3), CASAS_DECIMAIS_POSICAO_XYZ);
-    double z = arredondaPara(MGarra(2, 3), CASAS_DECIMAIS_POSICAO_XYZ);
+    double x = arredondaPara(double(MGarra(0, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
+    double y = arredondaPara(double(MGarra(1, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
+    double z = arredondaPara(double(MGarra(2, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
 
     double beta = atan2(-R[2][0], sqrt(pow(R[0][0], 2) + pow(R[1][0], 2))) * 180 / M_PI;
 
     double alfa, gama;
 
-    if(beta == 90)
+    if(qFuzzyCompare(beta, 90.0))
     {
         alfa = 0;
         gama = atan2(R[0][1], R[1][1]) * 180 / M_PI;
     }
-    else if(beta == -90)
+    else if(qFuzzyCompare(beta, -90.0))
     {
         alfa = 0;
         gama = -atan2(R[0][1], R[1][1]) * 180 / M_PI;
@@ -3554,7 +3560,7 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
                               double *angulosMaxGraus, double *angulosMinGraus,
                               bool *posicaoProjetada, bool *posicaoAtingivel)
 {
-    if(posicaoAtingivel != NULL)
+    if(posicaoAtingivel != nullptr)
         *posicaoAtingivel = true;
 
     double gama = *gamaGraus * M_PI /180;
@@ -3600,9 +3606,9 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
     //          e também, a um plano paralelo que pega a origem da base fixa.
     // WARNING: Ver warnings do arquivo constantes.h referentes aos parâmetros d2, d3, d4 e d5
 
-    QVector3D M = QVector3D(-py/sqrtpx2py2, px/sqrtpx2py2, 0);
-    QVector3D Zt(r13, r23, r33);
-    QVector3D Yt(r12, r22, r32);
+    QVector3D M = QVector3D(float(-py/sqrtpx2py2), float(px/sqrtpx2py2), 0);
+    QVector3D Zt(static_cast<float>(r13), static_cast<float>(r23), static_cast<float>(r33));
+    QVector3D Yt(static_cast<float>(r12), static_cast<float>(r22), static_cast<float>(r32));
 
     QVector3D K = QVector3D::crossProduct(M, Zt);
 
@@ -3613,8 +3619,8 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
      * da garra seja uma posição possível, por conta do vetor M calculado (ver warning referente ao vetor M e ao plano ao
      * qual ele é perpendicular).
      */
-    double cteta = QVector3D::dotProduct(Zt, Ztl);
-    double steta = QVector3D::dotProduct(QVector3D::crossProduct(Zt, Ztl), K);
+    float cteta = QVector3D::dotProduct(Zt, Ztl);
+    float steta = QVector3D::dotProduct(QVector3D::crossProduct(Zt, Ztl), K);
 
     steta = arredondaPara(steta, CASAS_DECIMAIS_SENOS_COSSENOS);
     cteta = arredondaPara(cteta, CASAS_DECIMAIS_SENOS_COSSENOS);
@@ -3633,17 +3639,17 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
         Ztl[i] = arredondaPara(Ztl[i], CASAS_DECIMAIS_SENOS_COSSENOS);
     }
 
-    r11 = Xtl[0];
-    r21 = Xtl[1];
-    r31 = Xtl[2];
+    r11 = double(Xtl[0]);
+    r21 = double(Xtl[1]);
+    r31 = double(Xtl[2]);
 
-    r12 = Ytl[0];
-    r22 = Ytl[1];
-    r32 = Ytl[2];
+    r12 = double(Ytl[0]);
+    r22 = double(Ytl[1]);
+    r32 = double(Ytl[2]);
 
-    r13 = Ztl[0];
-    r23 = Ztl[1];
-    r33 = Ztl[2];
+    r13 = double(Ztl[0]);
+    r23 = double(Ztl[1]);
+    r33 = double(Ztl[2]);
 
     // Recalculando x, y e z da garra    
     double xProj = px + LgL3 * r13;
@@ -3654,12 +3660,12 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
     double betaProj = atan2(-r31, sqrt(pow(r11,2)+pow(r21,2)));
     double alfaProj, gamaProj;
 
-    if(betaProj == M_PI_2)
+    if(qFuzzyCompare(betaProj, M_PI_2))
     {
         alfaProj = 0;
         gamaProj = atan2(r12, r22);
     }
-    else if (betaProj == -M_PI_2)
+    else if (qFuzzyCompare(betaProj, -M_PI_2))
     {
         alfaProj = 0;
         gamaProj = -atan2(r12, r22);
@@ -3684,12 +3690,12 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
     betaGrausProj = arredondaPara(betaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
     gamaGrausProj = arredondaPara(gamaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
 
-    if(posicaoProjetada != NULL)
+    if(posicaoProjetada != nullptr)
     {
-        *posicaoProjetada = xProj != *x || yProj != *y || zProj != *z ||
-                            alfaGrausProj != *alfaGraus ||
-                            betaGrausProj != *betaGraus ||
-                            gamaGrausProj != *gamaGraus;
+        *posicaoProjetada = qFuzzyCompare(xProj, *x) || qFuzzyCompare(yProj, *y) || qFuzzyCompare(zProj, *z) ||
+                            qFuzzyCompare(alfaGrausProj, *alfaGraus) ||
+                            qFuzzyCompare(betaGrausProj, *betaGraus) ||
+                            qFuzzyCompare(gamaGrausProj, *gamaGraus);
     }
 
     *x = xProj;
@@ -3766,7 +3772,7 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
             teta1 = teta1max;            
         }        
 
-        if(posicaoAtingivel != NULL)
+        if(posicaoAtingivel != nullptr)
             *posicaoAtingivel = false;
 
         solucao = new SolucaoCinematicaInversa;
@@ -3938,12 +3944,12 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
     {
         solucao = solucoes[0];
 
-        if(posicaoAtingivel != NULL)
+        if(posicaoAtingivel != nullptr)
         {
             *posicaoAtingivel = solucao->possivel;
         }        
 
-        if(solucao->subSolucao != NULL)
+        if(solucao->subSolucao != nullptr)
         {
             // Unificação da solução com a subsolução
             SubSolucaoCinematicaInversa *subSolucao = solucao->subSolucao;
@@ -3964,15 +3970,15 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
             else
             {
                 // Pega a subsolução de maior peso.
-                double difTeta2 = abs(angulosCorrentesJuntas[1] - subSolucao->teta2);
-                double difTeta3 = abs(angulosCorrentesJuntas[2] - subSolucao->teta3);
-                double difTeta4 = abs(angulosCorrentesJuntas[3] - subSolucao->teta4);
+                double difTeta2 = std::abs(angulosCorrentesJuntas[1] - subSolucao->teta2);
+                double difTeta3 = std::abs(angulosCorrentesJuntas[2] - subSolucao->teta3);
+                double difTeta4 = std::abs(angulosCorrentesJuntas[3] - subSolucao->teta4);
 
                 subSolucao->peso = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
 
-                difTeta2 = abs(angulosCorrentesJuntas[1] - solucao->teta2);
-                difTeta3 = abs(angulosCorrentesJuntas[2] - solucao->teta3);
-                difTeta4 = abs(angulosCorrentesJuntas[3] - solucao->teta4);
+                difTeta2 = std::abs(angulosCorrentesJuntas[1] - solucao->teta2);
+                difTeta3 = std::abs(angulosCorrentesJuntas[2] - solucao->teta3);
+                difTeta4 = std::abs(angulosCorrentesJuntas[3] - solucao->teta4);
 
                 double pesoSolucao = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
 
@@ -3996,20 +4002,20 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
         {
             solucao = solucoes.at(i);
 
-            if(solucao->subSolucao != NULL)
+            if(solucao->subSolucao != nullptr)
             {
                 // Unifica a subsolução com base nos pesos
                 SubSolucaoCinematicaInversa *subSolucao = solucao->subSolucao;
 
-                double difTeta2 = abs(angulosCorrentesJuntas[1] - subSolucao->teta2);
-                double difTeta3 = abs(angulosCorrentesJuntas[2] - subSolucao->teta3);
-                double difTeta4 = abs(angulosCorrentesJuntas[3] - subSolucao->teta4);
+                double difTeta2 = std::abs(angulosCorrentesJuntas[1] - subSolucao->teta2);
+                double difTeta3 = std::abs(angulosCorrentesJuntas[2] - subSolucao->teta3);
+                double difTeta4 = std::abs(angulosCorrentesJuntas[3] - subSolucao->teta4);
 
                 subSolucao->peso = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
 
-                difTeta2 = abs(angulosCorrentesJuntas[1] - solucao->teta2);
-                difTeta3 = abs(angulosCorrentesJuntas[2] - solucao->teta3);
-                difTeta4 = abs(angulosCorrentesJuntas[3] - solucao->teta4);
+                difTeta2 = std::abs(angulosCorrentesJuntas[1] - solucao->teta2);
+                difTeta3 = std::abs(angulosCorrentesJuntas[2] - solucao->teta3);
+                difTeta4 = std::abs(angulosCorrentesJuntas[3] - solucao->teta4);
 
                 double pesoSolucao = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
 
@@ -4069,7 +4075,7 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
         {
             solucao = solucoesValidas.at(0);
 
-            if(posicaoAtingivel != NULL)
+            if(posicaoAtingivel != nullptr)
             {
                 *posicaoAtingivel = solucao->possivel;
             }
@@ -4098,7 +4104,7 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
                 angTeta[4] = solucao->teta5;
 
                 for(int j = 0; j < QTD_SERVOS - 1; j++)
-                    difTeta[j] = abs(angulosCorrentesJuntas[j] - angTeta[j]);
+                    difTeta[j] = std::abs(angulosCorrentesJuntas[j] - angTeta[j]);
 
                 double somatorio = 0, somaPesos = 0;
 
@@ -4127,7 +4133,7 @@ double *MainWindow::angJuntas(double *x, double *y, double *z,
         }
     }
 
-    if(posicaoAtingivel != NULL)
+    if(posicaoAtingivel != nullptr)
     {
         *posicaoAtingivel = solucao->possivel;
     }
