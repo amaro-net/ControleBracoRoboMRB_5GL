@@ -4,6 +4,7 @@
 #include "montagemdecomandosdialog.h"
 #include "console.h"
 #include "constantes.h"
+#include "cinematica.h"
 
 #include <QMainWindow>
 
@@ -47,9 +48,6 @@ class MainWindow : public QMainWindow
         int converteVelGrausPorSegParaTmpPulso(int idxJunta, double velGrausPorSeg);
         double converteAclTmpPulsoParaGrausPorSegQuad(int idxJunta, int aclTmpPulso);
         int converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad);
-
-        float arredondaPara(float num, int casasDecimais);
-        double arredondaPara(double num, int casasDecimais);
 
     private slots:
 
@@ -326,16 +324,9 @@ class MainWindow : public QMainWindow
 
 
         /* Funções para cinemática direta/inversa */
-        QMatrix4x4 cinematicaDireta(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
-        QMatrix4x4 matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
-        double *posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
         double *preencheCamposXYZAtual(double *posicoesAtuaisGraus);
         void preencheCamposXYZAlvo(double* posGarra);
-        double *angJuntas(double *x, double *y, double *z,
-                          double *gamaGraus, double *betaGraus, double *alfaGraus,
-                          double *angulosCorrentesJuntas,
-                          double *angulosMaxGraus, double *angulosMinGraus,
-                          bool *posicaoProjetada = NULL, bool *posicaoAtingivel = NULL);
+
 
 
         Ui::MainWindow *ui;
@@ -421,6 +412,8 @@ class MainWindow : public QMainWindow
         double offsetPontoVerdePropInv[QTD_SERVOS];
         double coeffPontoVerdePropDir[QTD_SERVOS];
         double offsetPontoVerdePropDir[QTD_SERVOS];
+
+        Cinematica cinematica;
 };
 
 #endif // MAINWINDOW_H

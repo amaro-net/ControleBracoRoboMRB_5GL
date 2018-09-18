@@ -29,7 +29,9 @@ SOURCES += \
     console.cpp \
     montagemdecomandosdialog.cpp \
     solucaocinematicainversa.cpp \
-    subsolucaocinematicainversa.cpp
+    subsolucaocinematicainversa.cpp \
+    cinematica.cpp \
+    utils.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -37,7 +39,9 @@ HEADERS += \
     montagemdecomandosdialog.h \
     constantes.h \
     solucaocinematicainversa.h \
-    subsolucaocinematicainversa.h
+    subsolucaocinematicainversa.h \
+    cinematica.h \
+    utils.h
 
 FORMS += \
         mainwindow.ui \
