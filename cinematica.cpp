@@ -120,35 +120,40 @@ QMatrix4x4 Cinematica::matrizPosGarra(double teta1graus, double teta2graus, doub
 
 double *Cinematica::coordenadasAngFixosOuEulerZXY(QMatrix4x4 T)
 {
-    double R[3][3];
+    double r11 = arredondaPara(double(T(0,0)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r21 = arredondaPara(double(T(1,0)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r31 = arredondaPara(double(T(2,0)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r12 = arredondaPara(double(T(0,1)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r22 = arredondaPara(double(T(1,1)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r32 = arredondaPara(double(T(2,1)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    //double r13 = arredondaPara(double(T(0,2)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    //double r23 = arredondaPara(double(T(1,2)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r33 = arredondaPara(double(T(2,2)), CASAS_DECIMAIS_SENOS_COSSENOS);
 
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            R[i][j] = arredondaPara(double(T(i,j)), 3);
 
     double x = arredondaPara(double(T(0, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
     double y = arredondaPara(double(T(1, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
     double z = arredondaPara(double(T(2, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
 
-    double beta = atan2(-R[2][0], sqrt(pow(R[0][0], 2) + pow(R[1][0], 2))) * 180 / M_PI;
+    double beta = atan2(-r31, sqrt(pow(r11, 2) + pow(r21, 2))) * 180 / M_PI;
 
     double alfa, gama;
 
     if(qFuzzyCompare(beta, 90.0))
     {
         alfa = 0;
-        gama = atan2(R[0][1], R[1][1]) * 180 / M_PI;
+        gama = atan2(r12, r22) * 180 / M_PI;
     }
     else if(qFuzzyCompare(beta, -90.0))
     {
         alfa = 0;
-        gama = -atan2(R[0][1], R[1][1]) * 180 / M_PI;
+        gama = -atan2(r12, r22) * 180 / M_PI;
     }
     else
     {
         double cbeta = cos(beta * M_PI / 180);
-        alfa = atan2(R[1][0]/cbeta, R[0][0]/cbeta) * 180 / M_PI;
-        gama = atan2(R[2][1]/cbeta, R[2][2]/cbeta) * 180 / M_PI;
+        alfa = atan2(r21/cbeta, r11/cbeta) * 180 / M_PI;
+        gama = atan2(r32/cbeta, r33/cbeta) * 180 / M_PI;
     }
 
     gama = arredondaPara(gama, CASAS_DECIMAIS_ROTACOES_XYZ);
@@ -159,14 +164,8 @@ double *Cinematica::coordenadasAngFixosOuEulerZXY(QMatrix4x4 T)
 }
 
 
-double* Cinematica::coordenadasElevacaoETorcao(QMatrix4x4 T)
-{
-    double R[3][3];
-
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            R[i][j] = arredondaPara(double(T(i,j)), 3);
-
+double* Cinematica::coordenadasElevacaoETorcao(QMatrix4x4 T, double teta2graus, double teta3graus, double teta4graus, double teta5graus)
+{    
     double x = arredondaPara(double(T(0, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
     double y = arredondaPara(double(T(1, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
     double z = arredondaPara(double(T(2, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
@@ -174,7 +173,8 @@ double* Cinematica::coordenadasElevacaoETorcao(QMatrix4x4 T)
     double elevacao, torcao;
 
     // TODO: Implementar a conversão da matriz da posição da garra para coordenadas de elevação e torção.
-
+    elevacao = teta2graus + teta3graus + teta4graus - 90.0;
+    torcao = teta5graus;
 
     return new double[5]{x, y, z, elevacao, torcao};
 }
@@ -268,6 +268,8 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     //          e também, a um plano paralelo que pega a origem da base fixa.
     // WARNING: Ver warnings do arquivo constantes.h referentes aos parâmetros d2, d3, d4 e d5
 
+    // TODO: Cinemática inversa: Tratar o caso em que o braço robô está totalmente na vertical
+    // TODO: Cinemática inversa: Tratar outros casos em que px = 0 e py = 0
     QVector3D M = QVector3D(float(-py/sqrtpx2py2), float(px/sqrtpx2py2), 0);
     QVector3D Zt(static_cast<float>(r13), static_cast<float>(r23), static_cast<float>(r33));
     QVector3D Yt(static_cast<float>(r12), static_cast<float>(r22), static_cast<float>(r32));
@@ -354,10 +356,12 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
 
     if(posicaoProjetada != nullptr)
     {
-        *posicaoProjetada = qFuzzyCompare(xProj, *x) || qFuzzyCompare(yProj, *y) || qFuzzyCompare(zProj, *z) ||
-                            qFuzzyCompare(alfaGrausProj, *alfaGraus) ||
-                            qFuzzyCompare(betaGrausProj, *betaGraus) ||
-                            qFuzzyCompare(gamaGrausProj, *gamaGraus);
+        *posicaoProjetada = !(qFuzzyCompare(xProj, *x) &&
+                              qFuzzyCompare(yProj, *y) &&
+                              qFuzzyCompare(zProj, *z) &&
+                              qFuzzyCompare(alfaGrausProj, *alfaGraus) &&
+                              qFuzzyCompare(betaGrausProj, *betaGraus) &&
+                              qFuzzyCompare(gamaGrausProj, *gamaGraus));
     }
 
     *x = xProj;
@@ -512,8 +516,22 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
 
         teta234 = atan2(s234, c234);
 
+        double sinalpx2py2;
+
+        if( (teta1 < 0 && (py > 0)) ||
+            (teta1 > 0 && (py < 0)) ||
+            (qFuzzyCompare(teta1, 0.0) && px < 0))
+            sinalpx2py2 = -1;
+        else
+            sinalpx2py2 = 1;
+
         double px2py2pzdl2 = px2py2 + pow(pzd1, 2);
+
         double c3 = (px2py2pzdl2 - pow(a2, 2) - pow(a3, 2))/(2 * a2 * a3);
+
+        if(std::abs(c3) > 1.0 && std::abs(c3) < 1.5)
+            c3 = 1.0;
+
         double s3 = -sqrt(1 - pow(c3, 2)); // teta3 sempre será negativo
 
         teta3 = atan2(s3, c3);
@@ -542,18 +560,20 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
             solucao->teta3possivel = false;
         }
 
-        // TODO: Cinemática inversa: rever as fórmulas para o teta2 e o teta4.
-        double beta2 = atan2(pzd1, px2py2);
+        double beta2 = atan2(pzd1, sinalpx2py2 * sqrt(px2py2));
 
-        //double cksi = (px2py2pzdl2 - pow(a2, 2) - pow(a3, 2))/(2 * a2 * sqrt(px2py2pzdl2));
-        //double ksi = atan2(sqrt(1 - pow(cksi, 2)), cksi);
+        double cksi = (px2py2pzdl2 + pow(a2, 2) - pow(a3, 2))/(2 * a2 * sqrt(px2py2pzdl2));
 
-        double ksi = atan2(a3 * s3, a2 + a3 * c3);
+        if(cksi > 1.0 && cksi < 1.5)
+            cksi = 1.0;
 
-        teta2 = beta2 - ksi;
+        double ksi = atan2(sqrt(1 - pow(cksi, 2)), cksi);
+
+        teta2 = beta2 + ksi;        
 
         teta4 = teta234 - teta2 - teta3;
 
+        // TODO: Cinemática inversa: Remover estas variáveis
         double beta2graus = beta2 * 180 / M_PI;
         double ksigraus = ksi * 180 / M_PI;
 

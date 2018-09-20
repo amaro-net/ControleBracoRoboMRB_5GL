@@ -62,7 +62,7 @@ class Cinematica
 
         /* Representações de coordenadas da garra */
         double *coordenadasAngFixosOuEulerZXY(QMatrix4x4 T);
-        double *coordenadasElevacaoETorcao(QMatrix4x4 T);
+        double *coordenadasElevacaoETorcao(QMatrix4x4 T, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
 
         /* Métodos de cinemática direta */
         QMatrix4x4 cinematicaDireta(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
