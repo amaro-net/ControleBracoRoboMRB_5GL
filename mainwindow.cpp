@@ -11,6 +11,7 @@
 #include "constantes.h"
 #include "utils.h"
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -240,7 +241,6 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         tempoPulsoMin[i] = ui->tabelaPosLimites->item(i,1)->text().toInt();
         tempoPulsoNeutro[i] = ui->tabelaPosLimites->item(i,2)->text().toInt();
         tempoPulsoRepouso[i] = ui->tabelaPosLimites->item(i,3)->text().toInt();
-        // TODO: Cinemática direta/inversa: alterar a tabela de limites de ângulos para considerar a junta 2 com ângulos sempre positivos
         angMax[i] = ui->tabelaPosLimitesGraus->item(i,0)->text().toInt();
         angMin[i] = ui->tabelaPosLimitesGraus->item(i,1)->text().toInt();
         propInv[i] = (ui->tabelaPosLimitesGraus->item(i,4)->checkState() == Qt::CheckState::Checked);
@@ -785,7 +785,7 @@ void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
         double anguloAtual = lstSpnAlvoGraus[idxJunta]->value();
 
         // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-        if(!qFuzzyCompare(angulo, anguloAtual))
+        if(!EhIgual(angulo, anguloAtual, CASAS_DECIMAIS_POSICAO_ANGULAR))
             lstSpnAlvoGraus[idxJunta]->setValue(angulo);        
     }
     else
@@ -802,7 +802,7 @@ void MainWindow::converteSpnVelParaGrausPorSeg(int idxJunta, int velocidade)
     double velocidadeAngularAtual = lstSpnVelGrausPorSeg[idxJunta]->value();
 
     // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-    if(!qFuzzyCompare(velocidadeAngular, velocidadeAngularAtual))
+    if(!EhIgual(velocidadeAngular, velocidadeAngularAtual, CASAS_DECIMAIS_VELOCIDADE_ANGULAR))
         lstSpnVelGrausPorSeg[idxJunta]->setValue(velocidadeAngular);
 }
 
@@ -812,7 +812,7 @@ void MainWindow::converteSpnAclParaGrausPorSegQuad(int idxJunta, int aceleracao)
     double aceleracaoAngularAtual = lstSpnAclGrausPorSegQuad[idxJunta]->value();
 
     // Esta verificação é feita para que não se ative o evento valueChanged desnecessariamente
-    if(!qFuzzyCompare(aceleracaoAngular, aceleracaoAngularAtual))
+    if(!EhIgual(aceleracaoAngular, aceleracaoAngularAtual, CASAS_DECIMAIS_ACELERACAO_ANGULAR))
         lstSpnAclGrausPorSegQuad[idxJunta]->setValue(aceleracaoAngular);
 }
 
@@ -952,7 +952,7 @@ void MainWindow::decodificaResposta()
         int valor;
         double graus;
         bool todasPosicoesMaioresQueZero = true;
-        double *posGarra;
+        double *posGarra = nullptr;
 
         QString comandoRecebido = resposta.mid(1,3);
         comandoJSTParaPararMov = QString(resposta);
@@ -1051,7 +1051,7 @@ void MainWindow::decodificaResposta()
         if(resposta.contains("MOV") || resposta.contains("CTZ") || resposta.contains("IN1"))
         {
             bool todasPosicoesMaioresQueZero = true;
-            double *posGarra;
+            double *posGarra = nullptr;
             QString junta = resposta.mid(4,2);
             QString strValor = resposta.mid(6,4);
 
@@ -1083,7 +1083,7 @@ void MainWindow::decodificaResposta()
 
             for(int k = 0; k < QTD_SERVOS && todasPosicoesMaioresQueZero; k++)
             {
-                posicoesAtuaisGraus[k] = lstEdtAtualGraus[k]->text().replace(STR_UND_GRAUS, "").toDouble();
+                posicoesAtuaisGraus[k] = lstEdtAtualGraus[k]->text().replace(STR_UND_GRAUS, "").replace(",", ".").toDouble();
                 if(k < 5 && lstEdtAtual[k]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt() == 0)
                     todasPosicoesMaioresQueZero = false;
             }
@@ -1984,13 +1984,14 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
 
     for(int i = 0; i < QTD_SERVOS - 1; i++)
     {
-        angulosCorrentes[i] = lstEdtAtualGraus[i]->text().replace(STR_UND_GRAUS, "").toDouble();
+        angulosCorrentes[i] = lstEdtAtualGraus[i]->text().replace(STR_UND_GRAUS, "").replace(",",".").toDouble();
     }
 
     double *angulosJuntas = cinematica.angJuntas(&x, &y, &z, &Rx, &Ry, &Rz, angulosCorrentes, angMax, angMin, &posicaoProjetada, &posicaoAtingivel);
 
     if(posicaoProjetada && posicaoAtingivel)
     {
+        // TODO: Aba Posições das Juntas: Corrigir a descrição dos botões para "Sim" e "Não"
         respostaPosProjetada = QMessageBox::question(this,
                                                        tr("Posição projetada"),
                                                        tr("Posição XYZ foi projetada no plano que corta verticalmente\n"
@@ -2016,7 +2017,7 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
                            "que respeite os limites máximos e mínimos das juntas"+strCompl+".\n"+
                            "Deseja adequar o resultado aos máximos e mínimos dos ângulos das juntas?\n"+
                            "Se clicar em não, "+strCompl2+" os ângulos alvo não serão alterados.";
-
+        // TODO: Aba Posições das Juntas: Corrigir a descrição dos botões para "Sim" e "Não"
         respostaPosInatingivel = QMessageBox::question(this,
                                          tr("Posição inatingível"),
                                          mensagem,

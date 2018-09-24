@@ -30,5 +30,65 @@ double arredondaPara(double num, int casasDecimais)
     //QString strNumArred(charArrayNumArred);
     //double numArred = strNumArred.toDouble();
 
-    return numArred;
+    return numArred;    
+}
+
+bool EhIgual(double p1, double p2, int casasDecimais)
+{
+    double incremento = 0.0;
+
+    if((qAbs(p1) < 1.0) || (qAbs(p2) < 1.0))
+    {
+        if(p1 >= 0.0 && p2 >= 0.0)
+            incremento = 1.0;
+        else if(p1 <= 0.0 && p2 <= 0.0)
+            incremento = -1.0;
+        else if((p1 >= 0.0 && p2 <= 0.0) || (p1 <= 0.0 && p2 >= 0.0))
+            incremento = 2.0;
+
+        p1 += incremento;
+        p2 += incremento;
+    }
+
+    return (qAbs(p1 - p2) * pow(10.0, casasDecimais) <= qMin(qAbs(p1), qAbs(p2)));
+}
+
+bool EhIgual(float p1, float p2, int casasDecimais)
+{
+    float incremento = 0.0f;
+
+    if((qAbs(p1) < 1.0f) || (qAbs(p2) < 1.0f))
+    {
+        if(p1 >= 0.0f && p2 >= 0.0f)
+            incremento = 1.0f;
+        else if(p1 <= 0.0f && p2 <= 0.0f)
+            incremento = -1.0f;
+        else if((p1 >= 0.0f && p2 <= 0.0f) || (p1 <= 0.0f && p2 >= 0.0f))
+            incremento = 2.0f;
+
+        p1 += incremento;
+        p2 += incremento;
+    }
+
+    return (qAbs(p1 - p2) * powf(10.0f, casasDecimais) <= qMin(qAbs(p1), qAbs(p2)));
+}
+
+bool EhMenorOuIgual(double p1, double p2, int casasDecimais)
+{
+    return EhIgual(p1, p2, casasDecimais) || p1 < p2;
+}
+
+bool EhMenorOuIgual(float p1, float p2, int casasDecimais)
+{
+    return EhIgual(p1, p2, casasDecimais) || p1 < p2;
+}
+
+bool EhMaiorOuIgual(double p1, double p2, int casasDecimais)
+{
+    return EhIgual(p1, p2, casasDecimais) || p1 > p2;
+}
+
+bool EhMaiorOuIgual(float p1, float p2, int casasDecimais)
+{
+    return EhIgual(p1, p2, casasDecimais) || p1 > p2;
 }

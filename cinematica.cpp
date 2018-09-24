@@ -25,8 +25,7 @@ Cinematica::Cinematica()
  * @return a matriz da cinemática direta, composta pela matriz de rotação e pela translação do referencial do pulso da garra.
  */
 QMatrix4x4 Cinematica::cinematicaDireta(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus)
-{
-    // TODO: Cinemática direta: Alterar, mesmo que provisoriamente, a cinemática direta para considerar o teta3 sempre positivo.
+{    
     double teta1 = teta1graus * M_PI / 180;
     double teta2 = teta2graus * M_PI / 180;
     double teta3 = teta3graus * M_PI / 180;
@@ -139,12 +138,12 @@ double *Cinematica::coordenadasAngFixosOuEulerZXY(QMatrix4x4 T)
 
     double alfa, gama;
 
-    if(qFuzzyCompare(beta, 90.0))
+    if(EhIgual(beta, 90.0, CASAS_DECIMAIS_ROTACOES_XYZ))
     {
         alfa = 0;
         gama = atan2(r12, r22) * 180 / M_PI;
-    }
-    else if(qFuzzyCompare(beta, -90.0))
+    }    
+    else if(EhIgual(beta, -90.0, CASAS_DECIMAIS_ROTACOES_XYZ))
     {
         alfa = 0;
         gama = -atan2(r12, r22) * 180 / M_PI;
@@ -199,6 +198,242 @@ double *Cinematica::posicaoGarra(double teta1graus, double teta2graus, double te
 }
 
 
+void Cinematica::avaliaAnguloTeta(double* teta, double tetaMin, double tetaMax,
+                                  SolucaoCinematicaInversa* solucao,
+                                  double* tetaSolucao, bool* tetaPossivel)
+{
+    if(EhMaiorOuIgual(*teta, tetaMin, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD) &&
+       EhMenorOuIgual(*teta, tetaMax, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD))
+    {
+        if(tetaSolucao != nullptr)
+            *tetaSolucao = *teta;
+        if(tetaPossivel != nullptr)
+            *tetaPossivel = true;
+    }
+    else
+    {
+        if(*teta < tetaMin)
+        {
+            if(tetaPossivel != nullptr)
+                *tetaPossivel = (std::abs(tetaMin - *teta) < 0.5);
+
+            *teta = tetaMin;
+        }
+        else if(*teta > tetaMax)
+        {
+            if(tetaPossivel != nullptr)
+                *tetaPossivel = (std::abs(*teta - tetaMax) < 0.5);
+
+            *teta = tetaMax;
+        }
+
+        if(tetaSolucao != nullptr)
+            *tetaSolucao = *teta;
+
+        if(solucao != nullptr && tetaPossivel != nullptr && solucao->possivel)
+            solucao->possivel = *tetaPossivel;
+    }
+}
+
+
+void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double teta2max,
+                                     double* teta3ptr, double teta3min, double teta3max,
+                                     double* teta4ptr, double teta4min, double teta4max, double teta1, double teta234,
+                                     double px, double py,
+                                     double px2py2, double pzd1,
+                                     SolucaoCinematicaInversa* solucao)
+{
+    double teta2, teta3, teta4;
+    double sinalpx2py2;
+
+    double *solucaoTeta2 = nullptr,
+           *solucaoTeta3 = nullptr,
+           *solucaoTeta4 = nullptr;
+
+    bool *solucaoTeta2Possivel = nullptr,
+         *solucaoTeta3Possivel = nullptr,
+         *solucaoTeta4Possivel = nullptr;
+
+    if(solucao != nullptr)
+    {
+        solucaoTeta2 = &solucao->teta2;
+        solucaoTeta3 = &solucao->teta3;
+        solucaoTeta4 = &solucao->teta4;
+
+        solucaoTeta2Possivel = &solucao->teta2possivel;
+        solucaoTeta3Possivel = &solucao->teta3possivel;
+        solucaoTeta4Possivel = &solucao->teta4possivel;
+    }
+
+
+    if( (teta1 < 0.0 && (py > 0.0)) ||
+        (teta1 > 0.0 && (py < 0.0)) ||        
+        (EhIgual(teta1, 0.0, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD) && px < 0))
+        sinalpx2py2 = -1;
+    else
+        sinalpx2py2 = 1;
+
+    double px2py2pzdl2 = px2py2 + pow(pzd1, 2);
+
+    // Cálculo do teta3
+    double c3 = (px2py2pzdl2 - pow(a2, 2) - pow(a3, 2))/(2 * a2 * a3);
+
+    if(std::abs(c3) > 1.0 && std::abs(c3) < 1.5)
+        c3 = trunc(c3);
+
+    /* WARNING: Enquanto o ângulo máximo da junta 2 for zero, teta3 sempre será negativo
+                Rever este trecho caso o ângulo máximo da junta 2 passe a ser positivo */
+    double s3 = -sqrt(1 - pow(c3, 2));
+
+    teta3 = atan2(s3, c3);
+
+    avaliaAnguloTeta(&teta3, teta3min, teta3max, solucao, solucaoTeta3, solucaoTeta3Possivel);
+
+    // Cálculo do teta2
+    double beta2 = atan2(pzd1, sinalpx2py2 * sqrt(px2py2));
+
+    double cksi = (px2py2pzdl2 + pow(a2, 2) - pow(a3, 2))/(2 * a2 * sqrt(px2py2pzdl2));
+
+    if(std::abs(cksi) > 1.0 && std::abs(cksi) < 1.5)
+        cksi = trunc(cksi);
+
+    double ksi = atan2(sqrt(1 - pow(cksi, 2)), cksi);
+
+    teta2 = beta2 + ksi;
+
+    avaliaAnguloTeta(&teta2, teta2min, teta2max, solucao, solucaoTeta2, solucaoTeta2Possivel);
+
+    // Cálculo do teta4
+    teta4 = teta234 - teta2 - teta3;
+
+    avaliaAnguloTeta(&teta4, teta4min, teta4max, solucao, solucaoTeta4, solucaoTeta4Possivel);
+
+    *teta2ptr = teta2;
+    *teta3ptr = teta3;
+    *teta4ptr = teta4;
+}
+
+void Cinematica::calculaTeta2Teta3Teta4Singular(double* teta2, double* teta3, double* teta4,
+                                                double teta1graus, double* pz,
+                                                double *angulosMaxGraus, double *angulosMinGraus,
+                                                bool *posicaoAtingivel)
+{
+    if(EhIgual(*pz, d1+a2+a3, CASAS_DECIMAIS_POSICAO_XYZ))
+    {
+        *teta2 = 90.0;
+        *teta3 = 0.0;
+        *teta4 = 90.0;
+    }
+    else if(*pz < d1+a2+a3)
+    {
+        SolucaoCinematicaInversa solucao;
+
+        double teta2min = angulosMinGraus[1] * M_PI / 180.0;
+        double teta2max = angulosMaxGraus[1] * M_PI / 180.0;
+
+        double teta3min = angulosMinGraus[2] * M_PI / 180.0;
+        double teta3max = angulosMaxGraus[2] * M_PI / 180.0;
+
+        double teta4min = angulosMinGraus[3] * M_PI / 180.0;
+        double teta4max = angulosMaxGraus[3] * M_PI / 180.0;
+
+        /* Faz a abordagem geometrica do teta2, teta3 e teta4 */        
+        double teta234 = M_PI; /* teta234 é a inclinação do segmento L3
+                                   em relação à base da garra (90 graus)
+                                   mais 90 graus. */
+
+        double teta1 = teta1graus * M_PI / 180.0;
+
+        solucao.possivel = true;
+
+        abordagemGeometrica(teta2, teta2min, teta2max,
+                            teta3, teta3min, teta3max,
+                            teta4, teta4min, teta4max,
+                            teta1, teta234,
+                            0, 0, 0, *pz - d1, &solucao);
+
+        *teta2 = *teta2 * 180.0 / M_PI;
+        *teta3 = *teta3 * 180.0 / M_PI;
+        *teta4 = *teta4 * 180.0 / M_PI;
+
+        if(posicaoAtingivel != nullptr)
+            *posicaoAtingivel = solucao.possivel;
+    }
+    else // if(pz > d1+a2+a3)
+    {
+        if(posicaoAtingivel != nullptr)
+            *posicaoAtingivel = false;
+
+         *pz = d1+a2+a3;
+         *teta2 = 90.0;
+         *teta3 = 0.0;
+         *teta4 = 90.0;
+    }
+}
+
+double* Cinematica::calculaPosicaoSingular(double* pz,
+                                           double gama, double beta, double alfa,
+                                           double *angulosCorrentesJuntas,
+                                           double *angulosMaxGraus,
+                                           double *angulosMinGraus,
+                                           bool *posicaoAtingivel)
+{
+    double teta1, teta2, teta3, teta4, teta5;
+
+    double teta1Corrente = angulosCorrentesJuntas[0];
+    double teta5Corrente = angulosCorrentesJuntas[4];
+
+    if(EhIgual(gama, 0.0, CASAS_DECIMAIS_ROTACOES_XYZ_RAD) &&
+       EhIgual(beta, 0.0, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
+    {        
+        if(EhIgual(alfa, 0.0, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
+        {
+            /*
+             * teta1 = teta5 = 90.0
+             *         ou
+             * teta1 = teta5 = -90.0
+            */
+            if(teta1Corrente < 0.0)
+            {
+                teta1 = -90.0;
+                teta5 = -90.0;
+            }
+            else
+            {
+                teta1 = 90.0;
+                teta5 = 90.0;
+            }
+
+            calculaTeta2Teta3Teta4Singular(&teta2, &teta3, &teta4,
+                                           teta1, pz,
+                                           angulosMaxGraus,
+                                           angulosMinGraus,
+                                           posicaoAtingivel);
+
+            return new double[5]{teta1, teta2, teta3, teta4, teta5};
+        }        
+        else if(EhIgual(std::abs(alfa), M_PI, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
+        {
+            /*
+             * teta1 = -teta5
+             * sendo que -90.0 <= teta1 <= 90.0
+             */
+            teta5 = teta5Corrente;
+            teta1 = -teta5;
+
+            calculaTeta2Teta3Teta4Singular(&teta2, &teta3, &teta4,
+                                           teta1, pz,
+                                           angulosMaxGraus,
+                                           angulosMinGraus,
+                                           posicaoAtingivel);
+
+            return new double[5]{teta1, teta2, teta3, teta4, teta5};
+        }
+    }
+
+    return nullptr;
+}
+
 /**
  * @brief MainWindow::angJuntas
  *
@@ -222,6 +457,9 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
                               double *angulosMaxGraus, double *angulosMinGraus,
                               bool *posicaoProjetada, bool *posicaoAtingivel)
 {
+    // TODO: Cinemática inversa: incluir tratamento para evitar cálculo de posições impossíveis (que tentem entrar na base fixa).
+    double teta1, teta2, teta3, teta4, teta5;
+
     if(posicaoAtingivel != nullptr)
         *posicaoAtingivel = true;
 
@@ -255,11 +493,29 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     py = arredondaPara(py, CASAS_DECIMAIS_POSICAO_XYZ);
     pz = arredondaPara(pz, CASAS_DECIMAIS_POSICAO_XYZ);
 
+    if(EhIgual(px, 0.0, CASAS_DECIMAIS_POSICAO_XYZ) &&
+       EhIgual(py, 0.0, CASAS_DECIMAIS_POSICAO_XYZ))
+    {
+        double* angulosJuntas = calculaPosicaoSingular(&pz,
+                                                       gama, beta, alfa,
+                                                       angulosCorrentesJuntas,
+                                                       angulosMaxGraus,
+                                                       angulosMinGraus,
+                                                       posicaoAtingivel);
+
+        if(angulosJuntas != nullptr)
+        {
+            if(posicaoProjetada != nullptr)
+                *posicaoProjetada = false;
+            return angulosJuntas;
+        }
+    }
+
     double px2py2 = pow(px,2) + pow(py,2);
     double sqrtpx2py2 = sqrt(px2py2);
 
     // Projetando o ponto desejado no plano do braço. Esta projeção será a que a
-    // garra poderá realmente assumir (ver cap. 4 do craig - The Yasukawa
+    // garra poderá verdadeiramente assumir (ver cap. 4 do craig - The Yasukawa
     // Motoman L-3 página 121)
 
     // WARNING: Ponto da garra e origem do referencial da base: Notar que o ponto da garra (e o ponto do pulso) não está rente com a origem do referencial da base fixa.
@@ -267,10 +523,22 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     //          Ou seja, esse mesmo plano é oblíquo ao plano que pega a coordenada da garra e do pulso
     //          e também, a um plano paralelo que pega a origem da base fixa.
     // WARNING: Ver warnings do arquivo constantes.h referentes aos parâmetros d2, d3, d4 e d5
-
-    // TODO: Cinemática inversa: Tratar o caso em que o braço robô está totalmente na vertical
-    // TODO: Cinemática inversa: Tratar outros casos em que px = 0 e py = 0
-    QVector3D M = QVector3D(float(-py/sqrtpx2py2), float(px/sqrtpx2py2), 0);
+    QVector3D M;
+    if(sqrtpx2py2 != 0.0)
+    {
+        M.setX(float(-py/sqrtpx2py2));
+        M.setY(float(px/sqrtpx2py2));
+        M.setZ(0.0f);
+    }
+    else
+    {
+        // Aqui o x ou o y chegam diferentes de zero, já que o caso em que
+        // px, py, x e y são zero já é tratado no método calculaPosicaoSingular
+        double sqrtx2y2 = sqrt(pow(*x, 2.0) + pow(*y, 2.0));
+        M.setX(float(-(*y/sqrtx2y2)));
+        M.setY(float(*x/sqrtx2y2));
+        M.setZ(0.0f);
+    }
     QVector3D Zt(static_cast<float>(r13), static_cast<float>(r23), static_cast<float>(r33));
     QVector3D Yt(static_cast<float>(r12), static_cast<float>(r22), static_cast<float>(r32));
 
@@ -324,12 +592,12 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     double betaProj = atan2(-r31, sqrt(pow(r11,2)+pow(r21,2)));
     double alfaProj, gamaProj;
 
-    if(qFuzzyCompare(betaProj, M_PI_2))
+    if(EhIgual(betaProj, M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
     {
         alfaProj = 0;
         gamaProj = atan2(r12, r22);
-    }
-    else if (qFuzzyCompare(betaProj, -M_PI_2))
+    }    
+    else if (EhIgual(betaProj, -M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
     {
         alfaProj = 0;
         gamaProj = -atan2(r12, r22);
@@ -346,22 +614,22 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     yProj = arredondaPara(yProj, CASAS_DECIMAIS_POSICAO_XYZ);
     zProj = arredondaPara(zProj, CASAS_DECIMAIS_POSICAO_XYZ);
 
-    double alfaGrausProj = alfaProj * 180 / M_PI;
-    double betaGrausProj = betaProj * 180 / M_PI;
-    double gamaGrausProj = gamaProj * 180 / M_PI;
+    double alfaGrausProj = alfaProj * 180.0 / M_PI;
+    double betaGrausProj = betaProj * 180.0 / M_PI;
+    double gamaGrausProj = gamaProj * 180.0 / M_PI;
 
     alfaGrausProj = arredondaPara(alfaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
     betaGrausProj = arredondaPara(betaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
     gamaGrausProj = arredondaPara(gamaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
 
     if(posicaoProjetada != nullptr)
-    {
-        *posicaoProjetada = !(qFuzzyCompare(xProj, *x) &&
-                              qFuzzyCompare(yProj, *y) &&
-                              qFuzzyCompare(zProj, *z) &&
-                              qFuzzyCompare(alfaGrausProj, *alfaGraus) &&
-                              qFuzzyCompare(betaGrausProj, *betaGraus) &&
-                              qFuzzyCompare(gamaGrausProj, *gamaGraus));
+    {        
+        *posicaoProjetada = !(EhIgual(xProj, *x, CASAS_DECIMAIS_POSICAO_XYZ) &&
+                              EhIgual(yProj, *y, CASAS_DECIMAIS_POSICAO_XYZ) &&
+                              EhIgual(zProj, *z, CASAS_DECIMAIS_POSICAO_XYZ) &&
+                              EhIgual(alfaGrausProj, *alfaGraus, CASAS_DECIMAIS_ROTACOES_XYZ) &&
+                              EhIgual(betaGrausProj, *betaGraus, CASAS_DECIMAIS_ROTACOES_XYZ) &&
+                              EhIgual(gamaGrausProj, *gamaGraus, CASAS_DECIMAIS_ROTACOES_XYZ));
     }
 
     *x = xProj;
@@ -371,21 +639,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     *betaGraus = betaGrausProj;
     *alfaGraus = alfaGrausProj;
 
-    // Início da cinemática inversa propriamente dita
-    SolucaoCinematicaInversa *solucao;
-    QList<SolucaoCinematicaInversa *> solucoes;
-    QList<double> solucaoTeta1;
-
-    const double d234 = d2 + d3 + d4;
-    const double d234quad = d234 * d234;
-
-    double atan2pypx = atan2(-px, py);
-    double atan2sqrt = atan2(sqrt(px2py2 - d234quad),-d234);
-
-    double teta1_1 = atan2pypx + atan2sqrt;
-    double teta1_2 = atan2pypx - atan2sqrt;
-    double teta1_3 = atan2(r23, r13);
-    double teta1_4 = atan2(r23, r13);
+    // ***** Início da cinemática inversa propriamente dita ****
 
     double teta1min = angulosMinGraus[0] * M_PI / 180;
     double teta1max = angulosMaxGraus[0] * M_PI / 180;
@@ -402,25 +656,44 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     double teta5min = angulosMinGraus[4] * M_PI / 180;
     double teta5max = angulosMaxGraus[4] * M_PI / 180;
 
+    SolucaoCinematicaInversa *solucao;
+    QList<SolucaoCinematicaInversa *> solucoes;
+    QList<double> solucaoTeta1;
 
-    double teta1, teta2, teta3, teta4, teta5;
+    const double d234 = d2 + d3 + d4;
+    const double d234quad = d234 * d234;
 
-    if((teta1_1 >= teta1min) && (teta1_1 <= teta1max))
+    // Cálculo do teta1 (todas as soluções possíveis)
+    double atan2pypx = atan2(-px, py);
+    double atan2sqrt = atan2(sqrt(px2py2 - d234quad),-d234);
+
+    double teta1_1 = atan2pypx + atan2sqrt;
+    double teta1_2 = atan2pypx - atan2sqrt;
+    double teta1_3 = atan2(r23, r13);
+    double teta1_4 = atan2(r23, r13);
+
+    if(EhMaiorOuIgual(teta1_1, teta1min, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD) &&
+       EhMenorOuIgual(teta1_1, teta1max, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD))
+    {
         solucaoTeta1.append(teta1_1);
+    }
 
-    if((teta1_2 >= teta1min) && (teta1_2 <= teta1max))
+    if(EhMaiorOuIgual(teta1_2, teta1min, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD) &&
+       EhMenorOuIgual(teta1_2, teta1max, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD))
     {
         if(!solucaoTeta1.contains(teta1_2))
             solucaoTeta1.append(teta1_2);
     }
 
-    if((teta1_3 >= teta1min) && (teta1_3 <= teta1max))
+    if(EhMaiorOuIgual(teta1_3, teta1min, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD) &&
+       EhMenorOuIgual(teta1_3, teta1max, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD))
     {
         if(!solucaoTeta1.contains(teta1_3))
             solucaoTeta1.append(teta1_3);
     }
 
-    if((teta1_4 >= teta1min) && (teta1_4 <= teta1max))
+    if(EhMaiorOuIgual(teta1_4, teta1min, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD) &&
+       EhMenorOuIgual(teta1_4, teta1max, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD))
     {
         if(!solucaoTeta1.contains(teta1_3))
             solucaoTeta1.append(teta1_4);
@@ -433,7 +706,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
             teta1 = teta1min;
 
         }
-        else if (teta1_1 > teta1max || teta1_2 > teta1max || teta1_3 > teta1max || teta1_4 > teta1max)
+        else /*if (teta1_1 > teta1max || teta1_2 > teta1max || teta1_3 > teta1max || teta1_4 > teta1max)*/
         {
             teta1 = teta1max;
         }
@@ -485,29 +758,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
 
         teta5 = atan2(s5, c5);
 
-        if(teta5 >= teta5min && teta5 <= teta5max)
-        {
-            solucao->teta5 = teta5;
-            solucao->s5 = s5;
-            solucao->c5 = c5;
-            solucao->teta5possivel = true;
-        }
-        else
-        {
-            if(teta5 < teta5min)
-                teta5 = teta5min;
-            else if(teta5 > teta5max)
-                teta5 = teta5max;
-
-            s5 = arredondaPara(sin(teta5), CASAS_DECIMAIS_SENOS_COSSENOS);
-            c5 = arredondaPara(cos(teta5), CASAS_DECIMAIS_SENOS_COSSENOS);
-
-            solucao->teta5 = teta5;
-            solucao->s5 = s5;
-            solucao->c5 = c5;
-            solucao->possivel = false;
-            solucao->teta5possivel = false;
-        }
+        avaliaAnguloTeta(&teta5, teta5min, teta5max, solucao, &solucao->teta5, &solucao->teta5possivel);
 
         double c234, s234, teta234;
 
@@ -516,106 +767,12 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
 
         teta234 = atan2(s234, c234);
 
-        double sinalpx2py2;
-
-        if( (teta1 < 0 && (py > 0)) ||
-            (teta1 > 0 && (py < 0)) ||
-            (qFuzzyCompare(teta1, 0.0) && px < 0))
-            sinalpx2py2 = -1;
-        else
-            sinalpx2py2 = 1;
-
-        double px2py2pzdl2 = px2py2 + pow(pzd1, 2);
-
-        double c3 = (px2py2pzdl2 - pow(a2, 2) - pow(a3, 2))/(2 * a2 * a3);
-
-        if(std::abs(c3) > 1.0 && std::abs(c3) < 1.5)
-            c3 = 1.0;
-
-        double s3 = -sqrt(1 - pow(c3, 2)); // teta3 sempre será negativo
-
-        teta3 = atan2(s3, c3);
-
-        if(teta3 >= teta3min && teta3 <= teta3max)
-        {
-            solucao->teta3 = teta3;
-            solucao->s3 = s3;
-            solucao->c3 = c3;
-            solucao->teta3possivel = true;
-        }
-        else
-        {
-            if(teta3 < teta3min)
-                teta3 = teta3min;
-            else if(teta3 > teta3max)
-                teta3 = teta3max;
-
-            s3 = arredondaPara(sin(teta3), CASAS_DECIMAIS_SENOS_COSSENOS);
-            c3 = arredondaPara(cos(teta3), CASAS_DECIMAIS_SENOS_COSSENOS);
-
-            solucao->teta3 = teta3;
-            solucao->s3 = s3;
-            solucao->c3 = c3;
-            solucao->possivel = false;
-            solucao->teta3possivel = false;
-        }
-
-        double beta2 = atan2(pzd1, sinalpx2py2 * sqrt(px2py2));
-
-        double cksi = (px2py2pzdl2 + pow(a2, 2) - pow(a3, 2))/(2 * a2 * sqrt(px2py2pzdl2));
-
-        if(cksi > 1.0 && cksi < 1.5)
-            cksi = 1.0;
-
-        double ksi = atan2(sqrt(1 - pow(cksi, 2)), cksi);
-
-        teta2 = beta2 + ksi;        
-
-        teta4 = teta234 - teta2 - teta3;
-
-        // TODO: Cinemática inversa: Remover estas variáveis
-        double beta2graus = beta2 * 180 / M_PI;
-        double ksigraus = ksi * 180 / M_PI;
-
-        double teta234graus = teta234 * 180 / M_PI;
-        double teta2graus = teta2 * 180 / M_PI;
-        double teta3graus = teta3 * 180 / M_PI;
-        double teta4graus = teta4 * 180 / M_PI;
-
-        if(teta2 >= teta2min && teta2 <= teta2max)
-        {
-            solucao->teta2 = teta2;
-            solucao->teta2possivel = true;
-        }
-        else
-        {
-            if(teta2 < teta2min)
-                teta2 = teta2min;
-            else if(teta2 > teta2max)
-                teta2 = teta2max;
-
-            solucao->teta2 = teta2;
-            solucao->possivel = false;
-            solucao->teta3possivel = false;
-        }
-
-        if(teta4 >= teta4min && teta4 <= teta4max)
-        {
-            solucao->teta4 = teta4;
-            solucao->teta4possivel = true;
-        }
-        else
-        {
-            if(teta4 < teta4min)
-                teta4 = teta4min;
-            else if(teta4 > teta4max)
-                teta4 = teta4max;
-
-            solucao->teta4 = teta4;
-            solucao->possivel = false;
-            solucao->teta4possivel = false;
-        }
-
+        abordagemGeometrica(&teta2, teta2min, teta2max,
+                            &teta3, teta3min, teta3max,
+                            &teta4, teta4min, teta4max,
+                            teta1, teta234,
+                            px, py, px2py2, pzd1,
+                            solucao);
     }
 
 

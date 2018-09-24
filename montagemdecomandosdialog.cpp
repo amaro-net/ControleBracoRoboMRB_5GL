@@ -1,6 +1,7 @@
 #include "montagemdecomandosdialog.h"
 #include "ui_montagemdecomandosdialog.h"
 #include "constantes.h"
+#include "utils.h"
 
 MontagemDeComandosDialog::MontagemDeComandosDialog(QWidget *parent) :
     QDialog(parent),
@@ -8,17 +9,17 @@ MontagemDeComandosDialog::MontagemDeComandosDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    if(mainWindow == NULL)
-        mainWindow = (MainWindow *) parent;
+    if(mainWindow == nullptr)
+        mainWindow = static_cast<MainWindow*>(parent);
 
-    connect(ui->chkLEDP0, &QCheckBox::clicked, this, MontagemDeComandosDialog::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP1, &QCheckBox::clicked, this, MontagemDeComandosDialog::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP2, &QCheckBox::clicked, this, MontagemDeComandosDialog::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP3, &QCheckBox::clicked, this, MontagemDeComandosDialog::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP4, &QCheckBox::clicked, this, MontagemDeComandosDialog::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP5, &QCheckBox::clicked, this, MontagemDeComandosDialog::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP6, &QCheckBox::clicked, this, MontagemDeComandosDialog::on_chkLEDPi_clicked);
-    connect(ui->chkLEDP7, &QCheckBox::clicked, this, MontagemDeComandosDialog::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP0, &QCheckBox::clicked, this, &MontagemDeComandosDialog::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP1, &QCheckBox::clicked, this, &MontagemDeComandosDialog::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP2, &QCheckBox::clicked, this, &MontagemDeComandosDialog::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP3, &QCheckBox::clicked, this, &MontagemDeComandosDialog::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP4, &QCheckBox::clicked, this, &MontagemDeComandosDialog::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP5, &QCheckBox::clicked, this, &MontagemDeComandosDialog::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP6, &QCheckBox::clicked, this, &MontagemDeComandosDialog::on_chkLEDPi_clicked);
+    connect(ui->chkLEDP7, &QCheckBox::clicked, this, &MontagemDeComandosDialog::on_chkLEDPi_clicked);
 
     alimentarListasDeComponentes();
 }
@@ -494,7 +495,8 @@ void MontagemDeComandosDialog::onSpnAlvo_valueChanged(int idxJunta, int posicaoM
         double angulo = mainWindow->converteMicrossegundosParaGraus(idxJunta, posicaoMicrossegundos);
         double anguloAtual = lstSpnPosAlvoGraus[idxJunta]->value();
 
-        if(angulo != anguloAtual)
+        //if(angulo != anguloAtual)
+        if(!EhIgual(angulo, anguloAtual, CASAS_DECIMAIS_POSICAO_ANGULAR))
             lstSpnPosAlvoGraus[idxJunta]->setValue(angulo);
     }
     if(ui->edtComando->text().contains("JST"))
@@ -685,7 +687,8 @@ void MontagemDeComandosDialog::on_spnVel_valueChanged(int velTmpPulso)
     double velocidadeAngular = mainWindow->converteVelTmpPulsoParaGrausPorSeg(idxJunta, velTmpPulso);
     double velocidadeAngularAtual = ui->spnVelGrausPorSeg->value();
 
-    if(velocidadeAngular != velocidadeAngularAtual)
+    //if(velocidadeAngular != velocidadeAngularAtual)
+    if(!EhIgual(velocidadeAngular, velocidadeAngularAtual, CASAS_DECIMAIS_VELOCIDADE_ANGULAR))
     {
         ui->spnVelGrausPorSeg->setValue(velocidadeAngular);
     }
@@ -813,7 +816,8 @@ void MontagemDeComandosDialog::on_spnAcl_valueChanged(int aclTmpPulso)
     double aceleracaoAngular = mainWindow->converteAclTmpPulsoParaGrausPorSegQuad(idxJunta, aclTmpPulso);
     double aceleracaoAngularAtual = ui->spnAclGrausPorSegQuad->value();
 
-    if(aceleracaoAngular != aceleracaoAngularAtual)
+    //if(aceleracaoAngular != aceleracaoAngularAtual)
+    if(!EhIgual(aceleracaoAngular, aceleracaoAngularAtual, CASAS_DECIMAIS_ACELERACAO_ANGULAR))
     {
         ui->spnAclGrausPorSegQuad->setValue(aceleracaoAngular);
     }

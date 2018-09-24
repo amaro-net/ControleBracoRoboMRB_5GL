@@ -20,7 +20,6 @@ const double LgL3 = Lg + L3;
 // ângulos alfa(i-1) em graus
 const double alfa0 = 0.0;
 const double alfa1 = 90.0;
-// TODO: Cinemática direta/inversa: testar uma cinemática provisória com o alfa2 = -180 e o alfa3 = 180, para o teta3 ser sempre positivo
 const double alfa2 = 0.0;
 const double alfa3 = 0.0;
 const double alfa4 = 90.0;
@@ -70,6 +69,27 @@ class Cinematica
         double *posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
 
         /* Métodos de cinemática inversa */
+        void avaliaAnguloTeta(double *teta, double tetaMin, double tetaMax,
+                              SolucaoCinematicaInversa *solucao = nullptr,
+                              double *tetaSolucao = nullptr, bool *tetaPossivel = nullptr);
+        void abordagemGeometrica(double *teta2ptr, double teta2min, double teta2max,
+                                 double *teta3ptr, double teta3min, double teta3max,
+                                 double *teta4ptr, double teta4min, double teta4max,
+                                 double teta1,
+                                 double teta234,
+                                 double px, double py,
+                                 double px2py2, double pzd1,
+                                 SolucaoCinematicaInversa *solucao = nullptr);
+        void calculaTeta2Teta3Teta4Singular(double *teta2, double *teta3, double *teta4,
+                                            double teta1graus, double *pz,
+                                            double *angulosMaxGraus, double *angulosMinGraus,
+                                            bool *posicaoAtingivel);
+        double *calculaPosicaoSingular(double *pz,
+                                       double gama, double beta, double alfa,
+                                       double *angulosCorrentesJuntas,
+                                       double *angulosMaxGraus,
+                                       double *angulosMinGraus,
+                                       bool *posicaoAtingivel);
         double *angJuntas(double *x, double *y, double *z,
                           double *gamaGraus, double *betaGraus, double *alfaGraus,
                           double *angulosCorrentesJuntas,
