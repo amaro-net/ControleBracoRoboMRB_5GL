@@ -78,7 +78,7 @@ class Cinematica
                                  double teta1,
                                  double teta234,
                                  double px, double py,
-                                 double px2py2, double pzd1,
+                                 double pxl2, double pzl,
                                  SolucaoCinematicaInversa *solucao = nullptr);
         void calculaTeta2Teta3Teta4Singular(double *teta2, double *teta3, double *teta4,
                                             double teta1graus, double *pz,

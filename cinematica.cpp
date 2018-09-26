@@ -240,7 +240,7 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
                                      double* teta3ptr, double teta3min, double teta3max,
                                      double* teta4ptr, double teta4min, double teta4max, double teta1, double teta234,
                                      double px, double py,
-                                     double px2py2, double pzd1,
+                                     double pxl2, double pzl,
                                      SolucaoCinematicaInversa* solucao)
 {
     double teta2, teta3, teta4;
@@ -273,10 +273,10 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
     else
         sinalpx2py2 = 1;
 
-    double px2py2pzdl2 = px2py2 + pow(pzd1, 2);
+    double pxl2pzl2 = pxl2 + pow(pzl, 2);
 
     // Cálculo do teta3
-    double c3 = (px2py2pzdl2 - pow(a2, 2) - pow(a3, 2))/(2 * a2 * a3);
+    double c3 = (pxl2pzl2 - pow(a2, 2) - pow(a3, 2))/(2 * a2 * a3);
 
     if(std::abs(c3) > 1.0 && std::abs(c3) < 1.5)
         c3 = trunc(c3);
@@ -290,14 +290,16 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
     avaliaAnguloTeta(&teta3, teta3min, teta3max, solucao, solucaoTeta3, solucaoTeta3Possivel);
 
     // Cálculo do teta2
-    double beta2 = atan2(pzd1, sinalpx2py2 * sqrt(px2py2));
+    double beta2 = atan2(pzl, sinalpx2py2 * sqrt(pxl2));
 
-    double cksi = (px2py2pzdl2 + pow(a2, 2) - pow(a3, 2))/(2 * a2 * sqrt(px2py2pzdl2));
+    double cksi = (pxl2pzl2 + pow(a2, 2) - pow(a3, 2))/(2 * a2 * sqrt(pxl2pzl2));
+
+    double sksi = sqrt(1 - pow(cksi, 2));
 
     if(std::abs(cksi) > 1.0 && std::abs(cksi) < 1.5)
         cksi = trunc(cksi);
 
-    double ksi = atan2(sqrt(1 - pow(cksi, 2)), cksi);
+    double ksi = atan2(sksi, cksi);
 
     teta2 = beta2 + ksi;
 
@@ -511,7 +513,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         }
     }
 
-    double px2py2 = pow(px,2) + pow(py,2);
+    double px2py2 = pow(px, 2.0) + pow(py, 2.0);
     double sqrtpx2py2 = sqrt(px2py2);
 
     // Projetando o ponto desejado no plano do braço. Esta projeção será a que a
@@ -743,8 +745,6 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         }
     }
 
-    double pzd1 = pz - d1;
-
     for(int i = 0; i < solucoes.count(); i++)
     {
         solucao = solucoes.at(i);
@@ -771,7 +771,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
                             &teta3, teta3min, teta3max,
                             &teta4, teta4min, teta4max,
                             teta1, teta234,
-                            px, py, px2py2, pzd1,
+                            px, py, px2py2, pz - d1,
                             solucao);
     }
 
@@ -987,11 +987,11 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         delete solucoes.takeFirst();
     }
 
-    teta1 = teta1 * 180 / M_PI;
-    teta2 = teta2 * 180 / M_PI;
-    teta3 = teta3 * 180 / M_PI;
-    teta4 = teta4 * 180 / M_PI;
-    teta5 = teta5 * 180 / M_PI;
+    teta1 = teta1 * 180.0 / M_PI;
+    teta2 = teta2 * 180.0 / M_PI;
+    teta3 = teta3 * 180.0 / M_PI;
+    teta4 = teta4 * 180.0 / M_PI;
+    teta5 = teta5 * 180.0 / M_PI;
 
     teta1 = arredondaPara(teta1, CASAS_DECIMAIS_POSICAO_ANGULAR);
     teta2 = arredondaPara(teta2, CASAS_DECIMAIS_POSICAO_ANGULAR);
