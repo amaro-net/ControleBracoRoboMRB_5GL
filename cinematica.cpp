@@ -86,12 +86,33 @@ QMatrix4x4 Cinematica::cinematicaDireta(double teta1graus, double teta2graus, do
  * @param teta5graus ângulo em graus da junta 4 (pulso da garra)
  * @return Matriz de posicionamento da garra
  */
-QMatrix4x4 Cinematica::matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus)
+QMatrix4x4 Cinematica::matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus, bool* colideComBaseFixa)
 {
     QMatrix4x4 matrizGarraParaPulso(1, 0, 0, 0,
                                     0, 1, 0, 0,
                                     0, 0, 1, float(LgL3),
                                     0, 0, 0, 1);
+
+    QMatrix4x4 matrizPulsoParaBaseFixa = cinematicaDireta(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus);
+
+    QMatrix4x4 matrizGarraParaBaseFixa = matrizPulsoParaBaseFixa * matrizGarraParaPulso;
+
+    if(colideComBaseFixa != nullptr)
+    {
+        double x = double(matrizGarraParaBaseFixa(0,3));
+        double y = double(matrizGarraParaBaseFixa(1,3));
+        double z = double(matrizGarraParaBaseFixa(2,3));
+        double px = double(matrizPulsoParaBaseFixa(0,3));
+        double py = double(matrizPulsoParaBaseFixa(1,3));
+        double pz = double(matrizPulsoParaBaseFixa(2,3));
+        float r13 = matrizPulsoParaBaseFixa(0,2);
+        float r23 = matrizPulsoParaBaseFixa(1,2);
+        float r33 = matrizPulsoParaBaseFixa(2,2);
+
+        QVector3D Zt(r13, r23, r33);
+
+        *colideComBaseFixa = garraColideComBaseFixa(x, y, z, px, py, pz, Zt);
+    }
 
     /*
     cinDir = ! r11 r12 r13   px !
@@ -112,8 +133,7 @@ QMatrix4x4 Cinematica::matrizPosGarra(double teta1graus, double teta2graus, doub
                    py = y - LgL3 * r23
                    pz = z - LgL3 * r33
     */
-    return cinematicaDireta(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus)
-           * matrizGarraParaPulso;
+    return matrizGarraParaBaseFixa;
 }
 
 
@@ -190,9 +210,9 @@ double* Cinematica::coordenadasElevacaoETorcao(QMatrix4x4 T, double teta2graus, 
  * @param teta5graus ângulo em graus da junta 4 (pulso da garra)
  * @return vetor que contém nos 3 primeiros elementos as coordenadas X, Y e Z da garra em cm, e no restante os ângulos Rx, Ry e Rz em graus.
  */
-double *Cinematica::posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus)
+double *Cinematica::posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus, bool* colideComBaseFixa)
 {
-    QMatrix4x4 MGarra = matrizPosGarra(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus);
+    QMatrix4x4 MGarra = matrizPosGarra(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus, colideComBaseFixa);
 
     return coordenadasAngFixosOuEulerZXY(MGarra);
 }
@@ -433,8 +453,120 @@ double* Cinematica::calculaPosicaoSingular(double* pz,
         }
     }
 
-    return nullptr;
+return nullptr;
 }
+
+bool Cinematica::pontoPertenceASegmentoDeReta(double xc, double yc, double zc, double x1, double y1, double z1, double x2, double y2, double z2)
+{
+    double xMaior, xMenor, yMaior, yMenor, zMaior, zMenor;
+
+    if(x1 > x2)
+    {
+        xMaior = x1;
+        xMenor = x2;
+    }
+    else
+    {
+        xMaior = x2;
+        xMenor = x1;
+    }
+
+    if(y1 > y2)
+    {
+        yMaior = y1;
+        yMenor = y2;
+    }
+    else
+    {
+        yMaior = y2;
+        yMenor = y1;
+    }
+
+    if(z1 > z2)
+    {
+        zMaior = z1;
+        zMenor = z2;
+    }
+    else
+    {
+        zMaior = z2;
+        zMenor = z1;
+    }
+
+
+
+    return EstaDentroDoIntervalo(xMenor, true, xc, xMaior, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+           EstaDentroDoIntervalo(yMenor, true, yc, yMaior, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+           EstaDentroDoIntervalo(zMenor, true, zc, zMaior, true, CASAS_DECIMAIS_POSICAO_XYZ);
+}
+
+bool Cinematica::pontoColideComBaseFixa(double x, double y, double z)
+{
+
+    return ( (EstaDentroDoIntervalo(-5, true, x, 3, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+              EstaDentroDoIntervalo(-2.5, true, y, 2.5, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+              EstaDentroDoIntervalo(0.0, false, z, 13.2, true, CASAS_DECIMAIS_POSICAO_XYZ)   ) ||
+             (EstaDentroDoIntervalo(-34.34, true, x, 3.36, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+              EstaDentroDoIntervalo(-9.95, true, y, 9.95, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+              EhMenorOuIgual(z, 0, CASAS_DECIMAIS_POSICAO_XYZ)));
+
+}
+
+bool Cinematica::garraColideComBaseFixa(double x, double y, double z, double px, double py, double pz, QVector3D Zt)
+{
+    if(pontoColideComBaseFixa(x, y, z) || pontoColideComBaseFixa(px, py, pz))
+        return true;
+
+    double r13 = double(Zt[0]);
+    double r23 = double(Zt[1]);
+    double r33 = double(Zt[2]);
+
+    Plano3D plano5(0.0, 0.0, 13.2, 0.0, 0.0, 1.0, -5.0, 3.0, -2.5, 2.5, 13.2, 13.2);
+    Plano3D plano6(0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -34.34, 3.36, -9.95, 9.95, -INFINITY, 0.0);
+
+    QList<Plano3D> planos;
+
+    planos.append(plano5);
+    planos.append(plano6);
+
+    for(Plano3D plano : planos)
+    {
+        double nx = plano.Nx();
+        double ny = plano.Ny();
+        double nz = plano.Nz();
+
+        double x0 = plano.X0();
+        double y0 = plano.Y0();
+        double z0 = plano.Z0();
+
+        double denominador = nx * r13 + ny * r23 + nz * r33;
+
+        if(denominador != 0.0)
+        {
+            // TODO: Verificar se o t está entre 0 e 1. Verificar se faz sentido t estar nesse intervalo.
+            double t = (nx * (x0 - px) + ny * (y0 - py) + nz * (z0 - pz))/(LgL3 * denominador);
+
+            double xc = px + LgL3 * r13 * t;
+            double yc = py + LgL3 * r23 * t;
+            double zc = pz + LgL3 * r33 * t;
+
+            if(pontoPertenceASegmentoDeReta(xc, yc, zc, px, py, pz, x, y, z) &&
+               plano.contemPonto(xc, yc, zc))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// TODO: Cinemática direta/inversa: Incluir tratamento para detecção de colisão da garra com a base giratória
+// TODO: Cinemática direta/inversa: Incluir tratamento para detecção de colisão da garra com o segmento L1.
+//       Neste caso, tratar o segmento L1 como um plano, e detectar se a posição alvo está "atrás" do plano.
+// TODO: Cinemática direta: Criar um método para calcular o tamanho da abertura da garra com base no ângulo do eixo do servo da garra.
+// TODO: Cinemática direta: Criar a cinemática direta para os dedos da garra, calculando o XYZ de cada dedo.
+// TODO: Cinemática direta/inversa: incluir tratamento para evitar cálculo de posições em que os dedos da garra colidem com a base fixa, com a base giratória ou com o segmento L1
 
 /**
  * @brief MainWindow::angJuntas
@@ -457,13 +589,15 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
                               double *gamaGraus, double *betaGraus, double *alfaGraus,
                               double *angulosCorrentesJuntas,
                               double *angulosMaxGraus, double *angulosMinGraus,
-                              bool *posicaoProjetada, bool *posicaoAtingivel)
-{
-    // TODO: Cinemática inversa: incluir tratamento para evitar cálculo de posições impossíveis (que tentem entrar na base fixa).
+                              bool *posicaoProjetada, bool *posicaoAtingivel, bool *colideComBaseFixa)
+{    
     double teta1, teta2, teta3, teta4, teta5;
 
     if(posicaoAtingivel != nullptr)
         *posicaoAtingivel = true;
+
+    if(colideComBaseFixa != nullptr)
+        *colideComBaseFixa = false;
 
     double gama = *gamaGraus * M_PI /180;
     double beta = *betaGraus * M_PI /180;
@@ -640,6 +774,17 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     *gamaGraus = gamaGrausProj;
     *betaGraus = betaGrausProj;
     *alfaGraus = alfaGrausProj;
+
+    if(garraColideComBaseFixa(*x, *y, *z, px, py, pz, Ztl))
+    {
+        if(posicaoAtingivel != nullptr)
+            *posicaoAtingivel = false;
+
+        if(colideComBaseFixa != nullptr)
+            *colideComBaseFixa = true;
+
+        // TODO: Cinemática inversa: Implementar um mecanismo de reposicionamento para a posição mais próxima em caso de colisão com a base fixa
+    }
 
     // ***** Início da cinemática inversa propriamente dita ****
 

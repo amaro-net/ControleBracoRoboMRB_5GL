@@ -92,3 +92,39 @@ bool EhMaiorOuIgual(float p1, float p2, int casasDecimais)
 {
     return EhIgual(p1, p2, casasDecimais) || p1 > p2;
 }
+
+bool EstaDentroDoIntervalo(double valorMin, bool inclusoMin, double x, double valorMax, bool inclusoMax, int casasDecimais)
+{
+    bool resultado;
+
+    if(inclusoMin)
+        resultado = EhMenorOuIgual(valorMin, x, casasDecimais);
+    else
+        resultado = valorMin < x;
+
+    if(inclusoMax)
+        resultado = resultado && EhMenorOuIgual(x, valorMax, casasDecimais);
+    else
+        resultado = resultado && x < valorMax;
+
+
+    return resultado;
+}
+
+bool EstaDentroDoIntervalo(float valorMin, bool inclusoMin, float x, float valorMax, bool inclusoMax, int casasDecimais)
+{
+    bool resultado;
+
+    if(inclusoMin)
+        resultado = EhMenorOuIgual(valorMin, x, casasDecimais);
+    else
+        resultado = valorMin < x;
+
+    if(inclusoMax)
+        resultado = resultado && EhMenorOuIgual(x, valorMax, casasDecimais);
+    else
+        resultado = resultado && x < valorMax;
+
+
+    return resultado;
+}

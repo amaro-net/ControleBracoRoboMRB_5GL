@@ -322,6 +322,7 @@ class MainWindow : public QMainWindow
 
         void iniciaDLYSemParametro();
 
+        void avisoColisaoBaseFixa();
 
         /* Funções para cinemática direta/inversa */
         double *preencheCamposXYZAtual(double *posicoesAtuaisGraus);

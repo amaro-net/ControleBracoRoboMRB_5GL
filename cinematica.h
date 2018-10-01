@@ -4,6 +4,7 @@
 #include <QMatrix4x4>
 #include "constantes.h"
 #include "solucaocinematicainversa.h"
+#include "plano3d.h"
 
 /************ Tamanhos dos segmentos ************/
 const double L1 = 11.65;
@@ -65,8 +66,8 @@ class Cinematica
 
         /* Métodos de cinemática direta */
         QMatrix4x4 cinematicaDireta(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
-        QMatrix4x4 matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
-        double *posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
+        QMatrix4x4 matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus, bool *colideComBaseFixa = nullptr);
+        double *posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus, bool *colideComBaseFixa = nullptr);
 
         /* Métodos de cinemática inversa */
         void avaliaAnguloTeta(double *teta, double tetaMin, double tetaMax,
@@ -90,11 +91,16 @@ class Cinematica
                                        double *angulosMaxGraus,
                                        double *angulosMinGraus,
                                        bool *posicaoAtingivel);
+        bool pontoPertenceASegmentoDeReta(double xc, double yc, double zc,
+                                          double x1, double y1, double z1,
+                                          double x2, double y2, double z2);
+        bool pontoColideComBaseFixa(double x, double y, double z);
+        bool garraColideComBaseFixa(double x, double y, double z, double px, double py, double pz, QVector3D Zt);
         double *angJuntas(double *x, double *y, double *z,
                           double *gamaGraus, double *betaGraus, double *alfaGraus,
                           double *angulosCorrentesJuntas,
                           double *angulosMaxGraus, double *angulosMinGraus,
-                          bool *posicaoProjetada = nullptr, bool *posicaoAtingivel = nullptr);
+                          bool *posicaoProjetada = nullptr, bool *posicaoAtingivel = nullptr, bool *colideComBaseFixa = nullptr);
 
 };
 

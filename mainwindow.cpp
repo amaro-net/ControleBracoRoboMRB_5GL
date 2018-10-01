@@ -1360,7 +1360,7 @@ void MainWindow::decodificaResposta()
             {
                 ultimoVELcomVelocidadeAnterior = "";
                 paradaDeSequenciaSolicitada = false;
-                // TODO: Reimplementar a parada total com o novo comando de parada total implementado na placa de controle
+                // TODO: Aba Sequência de Comandos: Reimplementar a parada total com o novo comando de parada total implementado na placa de controle
                 ui->chkBtPararEnviaJST->setEnabled(true);
                 ui->btPararSeqComandos->setEnabled(true);
                 foiEnviadoJSTParaPararMov = false;
@@ -1896,16 +1896,45 @@ void MainWindow::on_btAdicionarLedsSeqComandos_clicked()
 
 
 /* NOTE: ***** Aba Posições das Juntas ***** */
+void MainWindow::avisoColisaoBaseFixa()
+{
+    QString mensagem = "Posição XYZ alvo faz a garra colidir com a base fixa.\n"
+                       "Nenhuma alteração será feita na posição XYZ alvo.";
+
+    QMessageBox::warning(this,
+                         tr("Colisão com base fixa"),
+                         mensagem,
+                         QMessageBox::Ok,
+                         QMessageBox::Ok);
+}
 
 void MainWindow::on_btMover_clicked()
 {
     on_btPararSeqComandos_clicked();
+    double teta1 = lstSpnAlvoGraus[0]->value();
+    double teta2 = lstSpnAlvoGraus[1]->value();
+    double teta3 = lstSpnAlvoGraus[2]->value();
+    double teta4 = lstSpnAlvoGraus[3]->value();
+    double teta5 = lstSpnAlvoGraus[4]->value();
 
-    if(ui->rdbReadyForPIC->isChecked())
-        comandoJST();
-    else if(ui->rdbMiniMaestro24->isChecked())
+    bool colideComBaseFixa;
+
+    // TODO: Cinemática direta: Incluir no botão Mover a validação de colisão com a base giratória e com o segmento L1
+    double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5, &colideComBaseFixa);
+    delete posGarra;
+
+    if(!colideComBaseFixa)
     {
-        // TODO: Aba Posições das Juntas: botão mover para a Mini Maestro 24
+        if(ui->rdbReadyForPIC->isChecked())
+            comandoJST();
+        else if(ui->rdbMiniMaestro24->isChecked())
+        {
+            // TODO: Aba Posições das Juntas: botão mover para a Mini Maestro 24
+        }
+    }
+    else
+    {
+        avisoColisaoBaseFixa();
     }
 }
 
@@ -1913,54 +1942,81 @@ void MainWindow::on_btMoverComVelEAcl_clicked()
 {    
     on_btPararSeqComandos_clicked();
 
-    if(ui->rdbReadyForPIC->isChecked())
-    {
-        QString comando, comandoJST;
-        int valor;
-
-        on_btPararSeqComandos_clicked();
-
-        filaComandosMoverComVelAcl.clear();
-
-        comandoJST = "[JST";
-        for(int i = 0; i < QTD_SERVOS; i++)
-        {
-            valor = lstSpnVel[i]->value();
-            comando = QString("[VEL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
-            filaComandosMoverComVelAcl.enqueue(comando);
-
-            valor = lstSpnAcl[i]->value();
-            comando = QString("[ACL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
-            filaComandosMoverComVelAcl.enqueue(comando);
-
-            valor = lstSpnAlvo[i]->value();
-            comandoJST += idJST[i] + QString("%1").arg(valor, 4, 10, QChar('0'));
-        }
-
-        comandoJST += "]";
-
-        filaComandosMoverComVelAcl.enqueue(comandoJST);
-
-        enviaComando(filaComandosMoverComVelAcl.dequeue());
-    }
-    else if(ui->rdbMiniMaestro24->isChecked())
-    {
-        // TODO: Aba Posições das Juntas: botão mover com vel e acl para a placa Mini Maestro 24
-    }
-
-}
-
-void MainWindow::on_btCalcularXYZAlvo_clicked()
-{
+    // TODO: Cinemática direta: Incluir no botão Mover com vel e acl a validação de colisão com a base giratória e com o segmento L1
     double teta1 = lstSpnAlvoGraus[0]->value();
     double teta2 = lstSpnAlvoGraus[1]->value();
     double teta3 = lstSpnAlvoGraus[2]->value();
     double teta4 = lstSpnAlvoGraus[3]->value();
     double teta5 = lstSpnAlvoGraus[4]->value();
 
-    double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5);
+    bool colideComBaseFixa;
 
-    preencheCamposXYZAlvo(posGarra);
+    double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5, &colideComBaseFixa);
+    delete posGarra;
+
+    if(!colideComBaseFixa)
+    {
+        if(ui->rdbReadyForPIC->isChecked())
+        {
+            QString comando, comandoJST;
+            int valor;
+
+            on_btPararSeqComandos_clicked();
+
+            filaComandosMoverComVelAcl.clear();
+
+            comandoJST = "[JST";
+            for(int i = 0; i < QTD_SERVOS; i++)
+            {
+                valor = lstSpnVel[i]->value();
+                comando = QString("[VEL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
+                filaComandosMoverComVelAcl.enqueue(comando);
+
+                valor = lstSpnAcl[i]->value();
+                comando = QString("[ACL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
+                filaComandosMoverComVelAcl.enqueue(comando);
+
+                valor = lstSpnAlvo[i]->value();
+                comandoJST += idJST[i] + QString("%1").arg(valor, 4, 10, QChar('0'));
+            }
+
+            comandoJST += "]";
+
+            filaComandosMoverComVelAcl.enqueue(comandoJST);
+
+            enviaComando(filaComandosMoverComVelAcl.dequeue());
+        }
+        else if(ui->rdbMiniMaestro24->isChecked())
+        {
+            // TODO: Aba Posições das Juntas: botão mover com vel e acl para a placa Mini Maestro 24
+        }
+    }
+    else
+    {
+        avisoColisaoBaseFixa();
+    }
+
+}
+
+void MainWindow::on_btCalcularXYZAlvo_clicked()
+{
+    // TODO: Cinemática direta: Incluir no botão Calcular XYZ Alvo a validação de colisão com a base giratória e com o segmento L1
+    bool colideComBaseFixa;
+
+    double teta1 = lstSpnAlvoGraus[0]->value();
+    double teta2 = lstSpnAlvoGraus[1]->value();
+    double teta3 = lstSpnAlvoGraus[2]->value();
+    double teta4 = lstSpnAlvoGraus[3]->value();
+    double teta5 = lstSpnAlvoGraus[4]->value();
+
+    double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5, &colideComBaseFixa);
+
+    if(!colideComBaseFixa)
+        preencheCamposXYZAlvo(posGarra);
+    else
+    {
+        avisoColisaoBaseFixa();
+    }
     delete(posGarra);
 }
 
@@ -1968,6 +2024,7 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
 {
     bool posicaoProjetada;
     bool posicaoAtingivel;
+    bool colideComBaseFixa;
     int respostaPosInatingivel = QMessageBox::No;
     int respostaPosProjetada = QMessageBox::No;
 
@@ -1987,7 +2044,7 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
         angulosCorrentes[i] = lstEdtAtualGraus[i]->text().replace(STR_UND_GRAUS, "").replace(",",".").toDouble();
     }
 
-    double *angulosJuntas = cinematica.angJuntas(&x, &y, &z, &Rx, &Ry, &Rz, angulosCorrentes, angMax, angMin, &posicaoProjetada, &posicaoAtingivel);
+    double *angulosJuntas = cinematica.angJuntas(&x, &y, &z, &Rx, &Ry, &Rz, angulosCorrentes, angMax, angMin, &posicaoProjetada, &posicaoAtingivel, &colideComBaseFixa);
 
     if(posicaoProjetada && posicaoAtingivel)
     {
@@ -2003,6 +2060,27 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
                                                        QMessageBox::NoButton);
 
         respostaPosInatingivel = respostaPosProjetada;
+    }
+    else if(colideComBaseFixa)
+    {
+        QString strCompl("");
+
+        if(posicaoProjetada)
+        {
+            strCompl = ",\nmesmo com a posição projetada no plano que corta verticalmente o braço robô";
+        }
+        QString mensagem = "Posição XYZ alvo faz a garra colidir com a base fixa"+strCompl+".\n"+
+                           "Nenhuma alteração será feita na posição alvo.";
+
+        QMessageBox::warning(this,
+                             tr("Colisão com base fixa"),
+                             mensagem,
+                             QMessageBox::Ok,
+                             QMessageBox::Ok);
+
+        respostaPosInatingivel = QMessageBox::No;
+        respostaPosProjetada = respostaPosInatingivel;
+        posicaoAtingivel = false;
     }
     else if(!posicaoAtingivel)
     {
@@ -2116,7 +2194,7 @@ void MainWindow::habilitaCamposAbaPosicaoAlvoJunta(int posicaoAba, int idxJunta,
 }
 
 void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrossegundos)
-{
+{    
     if(ui->chkEnviaComandoImediato->isChecked() && !calculoAngulosAlvoAcionado)
     {
         //habilitaCamposAbaPosicaoAlvo(ui->tabUnidadePos->currentIndex(), false);
@@ -2129,19 +2207,48 @@ void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrosse
         {
             lstSpnAlvo[idxJunta]->setValue(tempoPulsoMax[idxJunta]);
         }
-        else if(ui->rdbReadyForPIC->isChecked())
+        else
         {
-            comandoEnvioImediato = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(posicaoMicrossegundos, 4, 10, QChar('0'));
+            // TODO: Cinemática direta/inversa: incluir aqui a validação de colisão com a base giratória e com o segmento L1
+            double teta1 = lstSpnAlvoGraus[0]->value();
+            double teta2 = lstSpnAlvoGraus[1]->value();
+            double teta3 = lstSpnAlvoGraus[2]->value();
+            double teta4 = lstSpnAlvoGraus[3]->value();
+            double teta5 = lstSpnAlvoGraus[4]->value();
 
-            if(!timerEnvioImediato->isActive())
+            bool colideComBaseFixa;
+
+            double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5, &colideComBaseFixa);
+            delete posGarra;
+
+            if(!colideComBaseFixa)
             {
-                timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_MS);
-            }
+                if(ui->rdbReadyForPIC->isChecked())
+                {
+                    comandoEnvioImediato = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(posicaoMicrossegundos, 4, 10, QChar('0'));
 
-        }
-        else if(ui->rdbMiniMaestro24->isChecked())
-        {
-            // TODO: Aba Posições das Juntas: envio imediato de posicao alvo para a Mini Maestro 24
+                    if(!timerEnvioImediato->isActive())
+                    {
+                        timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_MS);
+                    }
+
+                }
+                else if(ui->rdbMiniMaestro24->isChecked())
+                {
+                    // TODO: Aba Posições das Juntas: envio imediato de posicao alvo para a Mini Maestro 24
+                }
+            }
+            else
+            {
+                bool ehNumeroMaiorQueZero;
+                avisoColisaoBaseFixa();
+                ui->chkEnviaComandoImediato->setChecked(false);
+                int posCorrente = lstEdtAtual[idxJunta]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt(&ehNumeroMaiorQueZero);
+                if(ehNumeroMaiorQueZero)
+                {
+                    lstSpnAlvo[idxJunta]->setValue(posCorrente);
+                }
+            }
         }
     }
 }
@@ -3317,8 +3424,6 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
 
 
 /* NOTE: ***** Funções para Cinemática direta/inversa ***** */
-
-
 
 double *MainWindow::preencheCamposXYZAtual(double *posicoesAtuaisGraus)
 {
