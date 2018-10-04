@@ -1,0 +1,6 @@
+Base giratória - medidas projetadas no plano vertical do braço robô
+altura: 5.55cm (z' = -4.35 a z' = 1.2)
+largura: 6.1cm (x' = -3.95 a x' = 2.15)
+
+Segmento L1
+tamanho: 11.65 (x' e z' dependem do ângulo teta2)

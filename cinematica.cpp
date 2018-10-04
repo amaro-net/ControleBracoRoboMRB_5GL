@@ -508,7 +508,7 @@ bool Cinematica::pontoColideComBaseFixa(double x, double y, double z)
               EstaDentroDoIntervalo(0.0, false, z, 13.2, true, CASAS_DECIMAIS_POSICAO_XYZ)   ) ||
              (EstaDentroDoIntervalo(-34.34, true, x, 3.36, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
               EstaDentroDoIntervalo(-9.95, true, y, 9.95, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-              EhMenorOuIgual(z, 0, CASAS_DECIMAIS_POSICAO_XYZ)));
+              EhMenorOuIgual(z, 0, CASAS_DECIMAIS_POSICAO_XYZ)) );
 
 }
 
