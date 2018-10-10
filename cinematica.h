@@ -64,10 +64,37 @@ class Cinematica
         double *coordenadasAngFixosOuEulerZXY(QMatrix4x4 T);
         double *coordenadasElevacaoETorcao(QMatrix4x4 T, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
 
+        void coordenadasNoPlanoDoBracoRobo(double x, double y, double z,
+                                           double px, double py, double pz,
+                                           double teta1,
+                                           double *xgl, double *zgl,
+                                           double *pxl, double *pzl);
+
+        /* Métodos para detecção de colisão */
+        bool pontoPertenceASegmentoDeReta(double xc, double yc, double zc,
+                                          double x1, double y1, double z1,
+                                          double x2, double y2, double z2);
+        bool pontoColideComBaseFixa(double x, double y, double z);
+        bool garraColideComBaseFixa(double x, double y, double z,
+                                    double px, double py, double pz,
+                                    QVector3D Zt);
+        bool garraColideComBaseGiratoria(double xgl, double zgl,
+                                         double pxl, double pzl,
+                                         double teta234);
+        bool garraColideComSegmentoL1(double xgl, double zgl,
+                                      double pxl, double pzl,
+                                      double teta2);
+
         /* Métodos de cinemática direta */
         QMatrix4x4 cinematicaDireta(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus);
-        QMatrix4x4 matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus, bool *colideComBaseFixa = nullptr);
-        double *posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus, bool *colideComBaseFixa = nullptr);
+        QMatrix4x4 matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus,
+                                  bool *colideComBaseFixa = nullptr,
+                                  bool *colideComBaseGir = nullptr,
+                                  bool *colideComSegmentoL1 = nullptr);
+        double *posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus,
+                             bool *colideComBaseFixa = nullptr,
+                             bool *colideComBaseGir = nullptr,
+                             bool *colideComSegmentoL1 = nullptr);
 
         /* Métodos de cinemática inversa */
         void avaliaAnguloTeta(double *teta, double tetaMin, double tetaMax,
@@ -76,13 +103,11 @@ class Cinematica
         void abordagemGeometrica(double *teta2ptr, double teta2min, double teta2max,
                                  double *teta3ptr, double teta3min, double teta3max,
                                  double *teta4ptr, double teta4min, double teta4max,
-                                 double teta1,
                                  double teta234,
-                                 double px, double py,
-                                 double pxl2, double pzl,
+                                 double pxl, double pzl,
                                  SolucaoCinematicaInversa *solucao = nullptr);
         void calculaTeta2Teta3Teta4Singular(double *teta2, double *teta3, double *teta4,
-                                            double teta1graus, double *pz,
+                                            double *pz,
                                             double *angulosMaxGraus, double *angulosMinGraus,
                                             bool *posicaoAtingivel);
         double *calculaPosicaoSingular(double *pz,
@@ -90,17 +115,13 @@ class Cinematica
                                        double *angulosCorrentesJuntas,
                                        double *angulosMaxGraus,
                                        double *angulosMinGraus,
-                                       bool *posicaoAtingivel);
-        bool pontoPertenceASegmentoDeReta(double xc, double yc, double zc,
-                                          double x1, double y1, double z1,
-                                          double x2, double y2, double z2);
-        bool pontoColideComBaseFixa(double x, double y, double z);
-        bool garraColideComBaseFixa(double x, double y, double z, double px, double py, double pz, QVector3D Zt);
+                                       bool *posicaoAtingivel);        
         double *angJuntas(double *x, double *y, double *z,
                           double *gamaGraus, double *betaGraus, double *alfaGraus,
                           double *angulosCorrentesJuntas,
                           double *angulosMaxGraus, double *angulosMinGraus,
-                          bool *posicaoProjetada = nullptr, bool *posicaoAtingivel = nullptr, bool *colideComBaseFixa = nullptr);
+                          bool *posicaoProjetada = nullptr, bool *posicaoAtingivel = nullptr,
+                          bool *colideComBaseFixa = nullptr, bool *colideComBaseGir = nullptr, bool *colideComSegmentoL1 = nullptr);
 
 };
 

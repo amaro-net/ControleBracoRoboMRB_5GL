@@ -1896,13 +1896,55 @@ void MainWindow::on_btAdicionarLedsSeqComandos_clicked()
 
 
 /* NOTE: ***** Aba Posições das Juntas ***** */
-void MainWindow::avisoColisaoBaseFixa()
+void MainWindow::avisoColisaoBaseFixa(bool posicaoProjetada)
 {
-    QString mensagem = "Posição XYZ alvo faz a garra colidir com a base fixa.\n"
-                       "Nenhuma alteração será feita na posição XYZ alvo.";
+    QString strCompl("");
+
+    if(posicaoProjetada)
+    {
+        strCompl = ",\nmesmo com a posição projetada no plano que corta verticalmente o braço robô";
+    }
+    QString mensagem = "Posição XYZ alvo faz a garra colidir com a base fixa"+strCompl+".\n"+
+                       "Nenhuma alteração será feita na posição alvo.";
 
     QMessageBox::warning(this,
                          tr("Colisão com base fixa"),
+                         mensagem,
+                         QMessageBox::Ok,
+                         QMessageBox::Ok);
+}
+
+void MainWindow::avisoColisaoBaseGiratoria(bool posicaoProjetada)
+{
+    QString strCompl("");
+
+    if(posicaoProjetada)
+    {
+        strCompl = ",\nmesmo com a posição projetada no plano que corta verticalmente o braço robô";
+    }
+    QString mensagem = "Posição XYZ alvo faz a garra colidir com a base giratória"+strCompl+".\n"+
+                       "Nenhuma alteração será feita na posição alvo.";
+
+    QMessageBox::warning(this,
+                         tr("Colisão com base giratória"),
+                         mensagem,
+                         QMessageBox::Ok,
+                         QMessageBox::Ok);
+}
+
+void MainWindow::avisoColisaoSegmentoL1(bool posicaoProjetada)
+{
+    QString strCompl("");
+
+    if(posicaoProjetada)
+    {
+        strCompl = ",\nmesmo com a posição projetada no plano que corta verticalmente o braço robô";
+    }
+    QString mensagem = "Posição XYZ alvo faz a garra colidir com o segmento L1"+strCompl+".\n"+
+                       "Nenhuma alteração será feita na posição alvo.";
+
+    QMessageBox::warning(this,
+                         tr("Colisão com o segmento L1"),
                          mensagem,
                          QMessageBox::Ok,
                          QMessageBox::Ok);
@@ -1917,13 +1959,15 @@ void MainWindow::on_btMover_clicked()
     double teta4 = lstSpnAlvoGraus[3]->value();
     double teta5 = lstSpnAlvoGraus[4]->value();
 
-    bool colideComBaseFixa;
+    bool colideComBaseFixa, colideComBaseGir, colideComSegmentoL1;
 
-    // TODO: Cinemática direta: Incluir no botão Mover a validação de colisão com a base giratória e com o segmento L1
-    double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5, &colideComBaseFixa);
+    double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5,
+                                               &colideComBaseFixa,
+                                               &colideComBaseGir,
+                                               &colideComSegmentoL1);
     delete posGarra;
 
-    if(!colideComBaseFixa)
+    if(!(colideComBaseFixa || colideComBaseGir || colideComSegmentoL1))
     {
         if(ui->rdbReadyForPIC->isChecked())
             comandoJST();
@@ -1934,7 +1978,23 @@ void MainWindow::on_btMover_clicked()
     }
     else
     {
-        avisoColisaoBaseFixa();
+        if(colideComBaseFixa)
+            avisoColisaoBaseFixa();
+        else if(colideComBaseGir)
+            avisoColisaoBaseGiratoria();
+        else if(colideComSegmentoL1)
+            avisoColisaoSegmentoL1();
+
+        bool ehNumeroMaiorQueZero;
+
+        for(int idxJunta = 0; idxJunta < 6; idxJunta++)
+        {
+            int posCorrente = lstEdtAtual[idxJunta]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt(&ehNumeroMaiorQueZero);
+            if(ehNumeroMaiorQueZero)
+            {
+                lstSpnAlvo[idxJunta]->setValue(posCorrente);
+            }
+        }
     }
 }
 
@@ -1942,19 +2002,21 @@ void MainWindow::on_btMoverComVelEAcl_clicked()
 {    
     on_btPararSeqComandos_clicked();
 
-    // TODO: Cinemática direta: Incluir no botão Mover com vel e acl a validação de colisão com a base giratória e com o segmento L1
     double teta1 = lstSpnAlvoGraus[0]->value();
     double teta2 = lstSpnAlvoGraus[1]->value();
     double teta3 = lstSpnAlvoGraus[2]->value();
     double teta4 = lstSpnAlvoGraus[3]->value();
     double teta5 = lstSpnAlvoGraus[4]->value();
 
-    bool colideComBaseFixa;
+    bool colideComBaseFixa, colideComBaseGir, colideComSegmentoL1;
 
-    double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5, &colideComBaseFixa);
+    double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5,
+                                               &colideComBaseFixa,
+                                               &colideComBaseGir,
+                                               &colideComSegmentoL1);
     delete posGarra;
 
-    if(!colideComBaseFixa)
+    if(!(colideComBaseFixa || colideComBaseGir || colideComSegmentoL1))
     {
         if(ui->rdbReadyForPIC->isChecked())
         {
@@ -1993,15 +2055,30 @@ void MainWindow::on_btMoverComVelEAcl_clicked()
     }
     else
     {
-        avisoColisaoBaseFixa();
+        if(colideComBaseFixa)
+            avisoColisaoBaseFixa();
+        else if(colideComBaseGir)
+            avisoColisaoBaseGiratoria();
+        else if(colideComSegmentoL1)
+            avisoColisaoSegmentoL1();
+
+        bool ehNumeroMaiorQueZero;
+
+        for(int idxJunta = 0; idxJunta < 6; idxJunta++)
+        {
+            int posCorrente = lstEdtAtual[idxJunta]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt(&ehNumeroMaiorQueZero);
+            if(ehNumeroMaiorQueZero)
+            {
+                lstSpnAlvo[idxJunta]->setValue(posCorrente);
+            }
+        }
     }
 
 }
 
 void MainWindow::on_btCalcularXYZAlvo_clicked()
 {
-    // TODO: Cinemática direta: Incluir no botão Calcular XYZ Alvo a validação de colisão com a base giratória e com o segmento L1
-    bool colideComBaseFixa;
+    bool colideComBaseFixa, colideComBaseGir, colideComSegmentoL1;
 
     double teta1 = lstSpnAlvoGraus[0]->value();
     double teta2 = lstSpnAlvoGraus[1]->value();
@@ -2009,13 +2086,21 @@ void MainWindow::on_btCalcularXYZAlvo_clicked()
     double teta4 = lstSpnAlvoGraus[3]->value();
     double teta5 = lstSpnAlvoGraus[4]->value();
 
-    double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5, &colideComBaseFixa);
+    double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5,
+                                               &colideComBaseFixa,
+                                               &colideComBaseGir,
+                                               &colideComSegmentoL1);
 
-    if(!colideComBaseFixa)
+    if(!(colideComBaseFixa || colideComBaseGir || colideComSegmentoL1))
         preencheCamposXYZAlvo(posGarra);
     else
     {
-        avisoColisaoBaseFixa();
+        if(colideComBaseFixa)
+            avisoColisaoBaseFixa();
+        else if(colideComBaseGir)
+            avisoColisaoBaseGiratoria();
+        else if(colideComSegmentoL1)
+            avisoColisaoSegmentoL1();
     }
     delete(posGarra);
 }
@@ -2025,6 +2110,8 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
     bool posicaoProjetada;
     bool posicaoAtingivel;
     bool colideComBaseFixa;
+    bool colideComBaseGir;
+    bool colideComSegmentoL1;
     int respostaPosInatingivel = QMessageBox::No;
     int respostaPosProjetada = QMessageBox::No;
 
@@ -2044,7 +2131,12 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
         angulosCorrentes[i] = lstEdtAtualGraus[i]->text().replace(STR_UND_GRAUS, "").replace(",",".").toDouble();
     }
 
-    double *angulosJuntas = cinematica.angJuntas(&x, &y, &z, &Rx, &Ry, &Rz, angulosCorrentes, angMax, angMin, &posicaoProjetada, &posicaoAtingivel, &colideComBaseFixa);
+    double *angulosJuntas = cinematica.angJuntas(&x, &y, &z,
+                                                 &Rx, &Ry, &Rz,
+                                                 angulosCorrentes,
+                                                 angMax, angMin,
+                                                 &posicaoProjetada, &posicaoAtingivel,
+                                                 &colideComBaseFixa, &colideComBaseGir, &colideComSegmentoL1);
 
     if(posicaoProjetada && posicaoAtingivel)
     {
@@ -2063,20 +2155,23 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
     }
     else if(colideComBaseFixa)
     {
-        QString strCompl("");
+        avisoColisaoBaseFixa(posicaoProjetada);
 
-        if(posicaoProjetada)
-        {
-            strCompl = ",\nmesmo com a posição projetada no plano que corta verticalmente o braço robô";
-        }
-        QString mensagem = "Posição XYZ alvo faz a garra colidir com a base fixa"+strCompl+".\n"+
-                           "Nenhuma alteração será feita na posição alvo.";
+        respostaPosInatingivel = QMessageBox::No;
+        respostaPosProjetada = respostaPosInatingivel;
+        posicaoAtingivel = false;
+    }
+    else if(colideComBaseGir)
+    {
+        avisoColisaoBaseGiratoria(posicaoProjetada);
 
-        QMessageBox::warning(this,
-                             tr("Colisão com base fixa"),
-                             mensagem,
-                             QMessageBox::Ok,
-                             QMessageBox::Ok);
+        respostaPosInatingivel = QMessageBox::No;
+        respostaPosProjetada = respostaPosInatingivel;
+        posicaoAtingivel = false;
+    }
+    else if(colideComSegmentoL1)
+    {        
+        avisoColisaoSegmentoL1(posicaoProjetada);
 
         respostaPosInatingivel = QMessageBox::No;
         respostaPosProjetada = respostaPosInatingivel;
@@ -2208,20 +2303,22 @@ void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrosse
             lstSpnAlvo[idxJunta]->setValue(tempoPulsoMax[idxJunta]);
         }
         else
-        {
-            // TODO: Cinemática direta/inversa: incluir aqui a validação de colisão com a base giratória e com o segmento L1
+        {            
             double teta1 = lstSpnAlvoGraus[0]->value();
             double teta2 = lstSpnAlvoGraus[1]->value();
             double teta3 = lstSpnAlvoGraus[2]->value();
             double teta4 = lstSpnAlvoGraus[3]->value();
             double teta5 = lstSpnAlvoGraus[4]->value();
 
-            bool colideComBaseFixa;
+            bool colideComBaseFixa, colideComBaseGir, colideComSegmentoL1;
 
-            double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5, &colideComBaseFixa);
+            double *posGarra = cinematica.posicaoGarra(teta1, teta2, teta3, teta4, teta5,
+                                                       &colideComBaseFixa,
+                                                       &colideComBaseGir,
+                                                       &colideComSegmentoL1);
             delete posGarra;
 
-            if(!colideComBaseFixa)
+            if(!(colideComBaseFixa || colideComBaseGir || colideComSegmentoL1))
             {
                 if(ui->rdbReadyForPIC->isChecked())
                 {
@@ -2241,7 +2338,14 @@ void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrosse
             else
             {
                 bool ehNumeroMaiorQueZero;
-                avisoColisaoBaseFixa();
+
+                if(colideComBaseFixa)
+                    avisoColisaoBaseFixa();
+                else if(colideComBaseGir)
+                    avisoColisaoBaseGiratoria();
+                else if(colideComSegmentoL1)
+                    avisoColisaoSegmentoL1();
+
                 ui->chkEnviaComandoImediato->setChecked(false);
                 int posCorrente = lstEdtAtual[idxJunta]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt(&ehNumeroMaiorQueZero);
                 if(ehNumeroMaiorQueZero)
@@ -3226,7 +3330,7 @@ bool MainWindow::parser(QString comando)
 void MainWindow::iniciaDLYSemParametro()
 {
     // Se cair aqui, a sequência para, pois não envia comando para o robô,
-    // consequente não recebe resposta. Como o timer não é iniciado também,
+    // consequentemente não recebe resposta. Como o timer não é iniciado também,
     // não haverá a execução do estouro do timer, restando apenas o evento
     // que pega a tecla ENTER ou duplo clique.
     timerDLY->stop();

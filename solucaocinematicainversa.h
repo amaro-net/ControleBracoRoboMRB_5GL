@@ -33,6 +33,9 @@ class SolucaoCinematicaInversa
 
         bool possivel;
 
+        bool colideComBaseGir;
+        bool colideComSegmentoL1;
+
         /**
          * @brief peso
          * valor que corresponde ao quanto a solução está mais próxima da posicao corrente do braço robô.
@@ -43,6 +46,8 @@ class SolucaoCinematicaInversa
 
         SolucaoCinematicaInversa();
         ~SolucaoCinematicaInversa();
+
+        bool possuiAlgumAnguloImpossivel(int *idxAngulo);
 };
 
 static const double pesoTeta1 = 1.0;

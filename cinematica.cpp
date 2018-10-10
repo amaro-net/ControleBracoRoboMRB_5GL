@@ -6,6 +6,279 @@ Cinematica::Cinematica()
 
 }
 
+double *Cinematica::coordenadasAngFixosOuEulerZXY(QMatrix4x4 T)
+{
+    double r11 = arredondaPara(double(T(0,0)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r21 = arredondaPara(double(T(1,0)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r31 = arredondaPara(double(T(2,0)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r12 = arredondaPara(double(T(0,1)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r22 = arredondaPara(double(T(1,1)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r32 = arredondaPara(double(T(2,1)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    //double r13 = arredondaPara(double(T(0,2)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    //double r23 = arredondaPara(double(T(1,2)), CASAS_DECIMAIS_SENOS_COSSENOS);
+    double r33 = arredondaPara(double(T(2,2)), CASAS_DECIMAIS_SENOS_COSSENOS);
+
+
+    double x = arredondaPara(double(T(0, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
+    double y = arredondaPara(double(T(1, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
+    double z = arredondaPara(double(T(2, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
+
+    double beta = atan2(-r31, sqrt(pow(r11, 2) + pow(r21, 2))) * 180 / M_PI;
+
+    double alfa, gama;
+
+    if(EhIgual(beta, 90.0, CASAS_DECIMAIS_ROTACOES_XYZ))
+    {
+        alfa = 0;
+        gama = atan2(r12, r22) * 180 / M_PI;
+    }
+    else if(EhIgual(beta, -90.0, CASAS_DECIMAIS_ROTACOES_XYZ))
+    {
+        alfa = 0;
+        gama = -atan2(r12, r22) * 180 / M_PI;
+    }
+    else
+    {
+        double cbeta = cos(beta * M_PI / 180);
+        alfa = atan2(r21/cbeta, r11/cbeta) * 180 / M_PI;
+        gama = atan2(r32/cbeta, r33/cbeta) * 180 / M_PI;
+    }
+
+    gama = arredondaPara(gama, CASAS_DECIMAIS_ROTACOES_XYZ);
+    beta = arredondaPara(beta, CASAS_DECIMAIS_ROTACOES_XYZ);
+    alfa = arredondaPara(alfa, CASAS_DECIMAIS_ROTACOES_XYZ);
+
+    return new double[6]{x, y, z, gama, beta, alfa};
+}
+
+
+double* Cinematica::coordenadasElevacaoETorcao(QMatrix4x4 T, double teta2graus, double teta3graus, double teta4graus, double teta5graus)
+{
+    double x = arredondaPara(double(T(0, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
+    double y = arredondaPara(double(T(1, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
+    double z = arredondaPara(double(T(2, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
+
+    double elevacao, torcao;
+
+    // TODO: Implementar a conversão da matriz da posição da garra para coordenadas de elevação e torção.
+    elevacao = teta2graus + teta3graus + teta4graus - 90.0;
+    torcao = teta5graus;
+
+    return new double[5]{x, y, z, elevacao, torcao};
+}
+
+void Cinematica::coordenadasNoPlanoDoBracoRobo(double x, double y, double z,
+                                               double px, double py, double pz,
+                                               double teta1,
+                                               double *xgl, double *zgl,
+                                               double *pxl, double *pzl)
+{
+    double sinalxgl, sinalpxl;
+
+    if( (teta1 < 0.0 && (y > 0.0)) ||
+        (teta1 > 0.0 && (y < 0.0)) ||
+        (EhIgual(teta1, 0.0, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD) && x < 0))
+        sinalxgl = -1;
+    else
+        sinalxgl = 1;
+
+    *xgl = sinalxgl * sqrt(pow(x, 2) + pow(y, 2));
+
+    *zgl = z - d1;
+
+
+    if( (teta1 < 0.0 && (py > 0.0)) ||
+        (teta1 > 0.0 && (py < 0.0)) ||
+        (EhIgual(teta1, 0.0, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD) && px < 0))
+        sinalpxl = -1;
+    else
+        sinalpxl = 1;
+
+    *pxl = sinalpxl * sqrt(pow(px, 2) + pow(py, 2));
+
+    *pzl = pz - d1;
+}
+
+
+bool Cinematica::pontoPertenceASegmentoDeReta(double xc, double yc, double zc,
+                                              double x1, double y1, double z1,
+                                              double x2, double y2, double z2)
+{
+    double xMaior = fmax(x1, x2);
+    double xMenor = fmin(x1, x2);
+    double yMaior = fmax(y1, y2);
+    double yMenor = fmin(y1, y2);
+    double zMaior = fmax(z1, z2);
+    double zMenor = fmin(z1, z2);
+
+    if(EstaDentroDoIntervalo(xMenor, true, xc, xMaior, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+       EstaDentroDoIntervalo(yMenor, true, yc, yMaior, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+       EstaDentroDoIntervalo(zMenor, true, zc, zMaior, true, CASAS_DECIMAIS_POSICAO_XYZ))
+        return true;
+
+    return false;
+}
+
+bool Cinematica::pontoColideComBaseFixa(double x, double y, double z)
+{
+
+    return ( (EstaDentroDoIntervalo(-5, true, x, 3, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+              EstaDentroDoIntervalo(-2.5, true, y, 2.5, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+              EstaDentroDoIntervalo(0.0, false, z, 13.2, true, CASAS_DECIMAIS_POSICAO_XYZ)   ) ||
+             (EstaDentroDoIntervalo(-34.34, true, x, 3.36, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+              EstaDentroDoIntervalo(-9.95, true, y, 9.95, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+              EhMenorOuIgual(z, 0, CASAS_DECIMAIS_POSICAO_XYZ)) );
+
+}
+
+bool Cinematica::garraColideComBaseFixa(double x, double y, double z,
+                                        double px, double py, double pz,
+                                        QVector3D Zt)
+{
+    if(pontoColideComBaseFixa(x, y, z) || pontoColideComBaseFixa(px, py, pz))
+        return true;
+
+    double r13 = double(Zt[0]);
+    double r23 = double(Zt[1]);
+    double r33 = double(Zt[2]);
+
+    Plano3D plano5(0.0, 0.0, 13.2, 0.0, 0.0, 1.0, -5.0, 3.0, -2.5, 2.5, 13.2, 13.2);
+    Plano3D plano6(0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -34.34, 3.36, -9.95, 9.95, -INFINITY, 0.0);
+
+    QList<Plano3D> planos;
+
+    planos.append(plano5);
+    planos.append(plano6);
+
+    for(Plano3D plano : planos)
+    {
+        double nx = plano.Nx();
+        double ny = plano.Ny();
+        double nz = plano.Nz();
+
+        double x0 = plano.X0();
+        double y0 = plano.Y0();
+        double z0 = plano.Z0();
+
+        double denominador = nx * r13 + ny * r23 + nz * r33;
+
+        if(denominador != 0.0)
+        {            
+            double t = (nx * (x0 - px) + ny * (y0 - py) + nz * (z0 - pz))/(LgL3 * denominador);
+
+            double xc = px + LgL3 * r13 * t;
+            double yc = py + LgL3 * r23 * t;
+            double zc = pz + LgL3 * r33 * t;
+
+            if(pontoPertenceASegmentoDeReta(xc, yc, zc, px, py, pz, x, y, z) &&
+               plano.contemPonto(xc, yc, zc))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool Cinematica::garraColideComBaseGiratoria(double xgl, double zgl,
+                                             double pxl, double pzl,
+                                             double teta234)
+{
+    double tetag = teta234 - M_PI_2;
+
+    if( (EhMenorOuIgual(xgl, 2.15, CASAS_DECIMAIS_POSICAO_XYZ) &&
+         EhMenorOuIgual(zgl, 1.2, CASAS_DECIMAIS_POSICAO_XYZ)   ) ||
+        (EhMenorOuIgual(pxl, 2.15, CASAS_DECIMAIS_POSICAO_XYZ) &&
+         EhMenorOuIgual(pzl, 1.2, CASAS_DECIMAIS_POSICAO_XYZ))       )
+    {
+        return true;
+    }
+    else
+    {
+        if(!(EhIgual(tetag, M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD) ||
+             EhIgual(tetag, -M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD)) )
+        {
+            double a = tan(tetag);
+            double b = pzl - a * pxl;
+
+
+            if(EstaDentroDoIntervalo(fmin(xgl, pxl), true, 2.15, fmax(xgl, pxl), true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+               EhMenorOuIgual(a * 2.15 + b, 1.2, CASAS_DECIMAIS_POSICAO_XYZ))
+            {
+                return true;
+            }
+
+        }
+        else
+        {
+            if(EhIgual(2.15, pxl, CASAS_DECIMAIS_ROTACOES_XYZ) &&
+               EstaDentroDoIntervalo(fmin(pzl, zgl), true, 1.2, fmax(pzl, zgl), true, CASAS_DECIMAIS_POSICAO_XYZ))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool Cinematica::garraColideComSegmentoL1(double xgl, double zgl,
+                                          double pxl, double pzl,
+                                          double teta2)
+{
+    if(!(EhIgual(teta2, M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD) ||
+         EhIgual(teta2, -M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD)) )
+    {
+        double al1 = tan(teta2);
+
+        double denominador = (zgl - pzl - al1 * (xgl - pxl));
+
+        if(!EhIgual(denominador, 0.0, CASAS_DECIMAIS_POSICAO_XYZ))
+        {
+            double t = (al1 * pxl - pzl)/denominador;
+            double xl = pxl + (xgl - pxl) * t;
+            double zl = pzl + (zgl - pzl) * t;
+            double zlJ2 = L1 * sin(teta2);
+            double xlJ2 = L1 * cos(teta2);
+
+            if(EhIgual(zl, al1 * xl, CASAS_DECIMAIS_POSICAO_XYZ) &&
+               EstaDentroDoIntervalo(fmin(0.0, xlJ2), true, xl, fmax(0.0, xlJ2), true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+               EstaDentroDoIntervalo(fmin(0.0, zlJ2), true, zl, fmax(0.0, zlJ2), true, CASAS_DECIMAIS_POSICAO_XYZ) &&               
+               EstaDentroDoIntervalo(fmin(xgl, pxl), true, xl, fmax(xgl, pxl), true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+               EstaDentroDoIntervalo(fmin(zgl, pzl), true, zl, fmax(zgl, pzl), true, CASAS_DECIMAIS_POSICAO_XYZ))
+                return true;
+        }
+    }
+    else
+    {
+        //double denominador = L1 - xgl + pxl - zgl + pzl;
+        double denominador = (xgl - pxl);
+
+        if(!EhIgual(denominador, 0.0, CASAS_DECIMAIS_POSICAO_XYZ))
+        {
+            //double t = (pxl + pzl)/denominador;
+            double t = -pxl / denominador;
+
+            double xl = pxl + (xgl - pxl) * t;
+            double zl = pzl + (zgl - pzl) * t;
+
+            double xlJ2 = 0.0;
+            double zlJ2 = L1;
+
+            if(EhIgual(xl, xlJ2, CASAS_DECIMAIS_POSICAO_XYZ) &&
+               EstaDentroDoIntervalo(0.0, true, zl, zlJ2, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+               EstaDentroDoIntervalo(fmin(xgl, pxl), true, xl, fmax(xgl, pxl), true, CASAS_DECIMAIS_POSICAO_XYZ) &&
+               EstaDentroDoIntervalo(fmin(zgl, pzl), true, zl, fmax(zgl, pzl), true, CASAS_DECIMAIS_POSICAO_XYZ))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+
+
 /**
  * @brief MainWindow::cinematicaDireta
  * Função que retorna uma matriz 4 x 4 que faz a transformação
@@ -86,7 +359,10 @@ QMatrix4x4 Cinematica::cinematicaDireta(double teta1graus, double teta2graus, do
  * @param teta5graus ângulo em graus da junta 4 (pulso da garra)
  * @return Matriz de posicionamento da garra
  */
-QMatrix4x4 Cinematica::matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus, bool* colideComBaseFixa)
+QMatrix4x4 Cinematica::matrizPosGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus,
+                                      bool* colideComBaseFixa,
+                                      bool* colideComBaseGir,
+                                      bool* colideComSegmentoL1)
 {
     QMatrix4x4 matrizGarraParaPulso(1, 0, 0, 0,
                                     0, 1, 0, 0,
@@ -114,6 +390,40 @@ QMatrix4x4 Cinematica::matrizPosGarra(double teta1graus, double teta2graus, doub
         *colideComBaseFixa = garraColideComBaseFixa(x, y, z, px, py, pz, Zt);
     }
 
+    if(colideComBaseGir != nullptr || colideComSegmentoL1 != nullptr)
+    {
+        double xgl, zgl, pxl, pzl;
+
+        double x = double(matrizGarraParaBaseFixa(0,3));
+        double y = double(matrizGarraParaBaseFixa(1,3));
+        double z = double(matrizGarraParaBaseFixa(2,3));
+        double px = double(matrizPulsoParaBaseFixa(0,3));
+        double py = double(matrizPulsoParaBaseFixa(1,3));
+        double pz = double(matrizPulsoParaBaseFixa(2,3));
+
+        coordenadasNoPlanoDoBracoRobo(x, y, z,
+                                      px, py, pz,
+                                      teta1graus * M_PI / 180.0,
+                                      &xgl, &zgl,
+                                      &pxl, &pzl);
+
+        if(colideComBaseGir != nullptr)
+        {
+            double teta234 = (teta2graus + teta3graus + teta4graus) * M_PI / 180.0;
+
+            teta234 = arredondaPara(teta234, CASAS_DECIMAIS_POSICAO_ANGULAR);
+
+            *colideComBaseGir = garraColideComBaseGiratoria(xgl, zgl, pxl, pzl, teta234);
+        }
+
+        if(colideComSegmentoL1 != nullptr)
+        {
+            double teta2 = teta2graus * M_PI / 180.0;
+            teta2 = arredondaPara(teta2, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD);
+            *colideComSegmentoL1 = garraColideComSegmentoL1(xgl, zgl, pxl, pzl, teta2);
+        }
+    }
+
     /*
     cinDir = ! r11 r12 r13   px !
              ! r21 r22 r23   py !
@@ -137,66 +447,7 @@ QMatrix4x4 Cinematica::matrizPosGarra(double teta1graus, double teta2graus, doub
 }
 
 
-double *Cinematica::coordenadasAngFixosOuEulerZXY(QMatrix4x4 T)
-{
-    double r11 = arredondaPara(double(T(0,0)), CASAS_DECIMAIS_SENOS_COSSENOS);
-    double r21 = arredondaPara(double(T(1,0)), CASAS_DECIMAIS_SENOS_COSSENOS);
-    double r31 = arredondaPara(double(T(2,0)), CASAS_DECIMAIS_SENOS_COSSENOS);
-    double r12 = arredondaPara(double(T(0,1)), CASAS_DECIMAIS_SENOS_COSSENOS);
-    double r22 = arredondaPara(double(T(1,1)), CASAS_DECIMAIS_SENOS_COSSENOS);
-    double r32 = arredondaPara(double(T(2,1)), CASAS_DECIMAIS_SENOS_COSSENOS);
-    //double r13 = arredondaPara(double(T(0,2)), CASAS_DECIMAIS_SENOS_COSSENOS);
-    //double r23 = arredondaPara(double(T(1,2)), CASAS_DECIMAIS_SENOS_COSSENOS);
-    double r33 = arredondaPara(double(T(2,2)), CASAS_DECIMAIS_SENOS_COSSENOS);
 
-
-    double x = arredondaPara(double(T(0, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
-    double y = arredondaPara(double(T(1, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
-    double z = arredondaPara(double(T(2, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
-
-    double beta = atan2(-r31, sqrt(pow(r11, 2) + pow(r21, 2))) * 180 / M_PI;
-
-    double alfa, gama;
-
-    if(EhIgual(beta, 90.0, CASAS_DECIMAIS_ROTACOES_XYZ))
-    {
-        alfa = 0;
-        gama = atan2(r12, r22) * 180 / M_PI;
-    }    
-    else if(EhIgual(beta, -90.0, CASAS_DECIMAIS_ROTACOES_XYZ))
-    {
-        alfa = 0;
-        gama = -atan2(r12, r22) * 180 / M_PI;
-    }
-    else
-    {
-        double cbeta = cos(beta * M_PI / 180);
-        alfa = atan2(r21/cbeta, r11/cbeta) * 180 / M_PI;
-        gama = atan2(r32/cbeta, r33/cbeta) * 180 / M_PI;
-    }
-
-    gama = arredondaPara(gama, CASAS_DECIMAIS_ROTACOES_XYZ);
-    beta = arredondaPara(beta, CASAS_DECIMAIS_ROTACOES_XYZ);
-    alfa = arredondaPara(alfa, CASAS_DECIMAIS_ROTACOES_XYZ);
-
-    return new double[6]{x, y, z, gama, beta, alfa};
-}
-
-
-double* Cinematica::coordenadasElevacaoETorcao(QMatrix4x4 T, double teta2graus, double teta3graus, double teta4graus, double teta5graus)
-{    
-    double x = arredondaPara(double(T(0, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
-    double y = arredondaPara(double(T(1, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
-    double z = arredondaPara(double(T(2, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
-
-    double elevacao, torcao;
-
-    // TODO: Implementar a conversão da matriz da posição da garra para coordenadas de elevação e torção.
-    elevacao = teta2graus + teta3graus + teta4graus - 90.0;
-    torcao = teta5graus;
-
-    return new double[5]{x, y, z, elevacao, torcao};
-}
 
 /**
  * @brief MainWindow::posicaoGarra
@@ -210,9 +461,15 @@ double* Cinematica::coordenadasElevacaoETorcao(QMatrix4x4 T, double teta2graus, 
  * @param teta5graus ângulo em graus da junta 4 (pulso da garra)
  * @return vetor que contém nos 3 primeiros elementos as coordenadas X, Y e Z da garra em cm, e no restante os ângulos Rx, Ry e Rz em graus.
  */
-double *Cinematica::posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus, bool* colideComBaseFixa)
+double *Cinematica::posicaoGarra(double teta1graus, double teta2graus, double teta3graus, double teta4graus, double teta5graus,
+                                 bool* colideComBaseFixa,
+                                 bool* colideComBaseGir,
+                                 bool* colideComSegmentoL1)
 {
-    QMatrix4x4 MGarra = matrizPosGarra(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus, colideComBaseFixa);
+    QMatrix4x4 MGarra = matrizPosGarra(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus,
+                                       colideComBaseFixa,
+                                       colideComBaseGir,
+                                       colideComSegmentoL1);
 
     return coordenadasAngFixosOuEulerZXY(MGarra);
 }
@@ -258,13 +515,12 @@ void Cinematica::avaliaAnguloTeta(double* teta, double tetaMin, double tetaMax,
 
 void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double teta2max,
                                      double* teta3ptr, double teta3min, double teta3max,
-                                     double* teta4ptr, double teta4min, double teta4max, double teta1, double teta234,
-                                     double px, double py,
-                                     double pxl2, double pzl,
+                                     double* teta4ptr, double teta4min, double teta4max,
+                                     double teta234,
+                                     double pxl, double pzl,
                                      SolucaoCinematicaInversa* solucao)
 {
     double teta2, teta3, teta4;
-    double sinalpx2py2;
 
     double *solucaoTeta2 = nullptr,
            *solucaoTeta3 = nullptr,
@@ -286,14 +542,7 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
     }
 
 
-    if( (teta1 < 0.0 && (py > 0.0)) ||
-        (teta1 > 0.0 && (py < 0.0)) ||        
-        (EhIgual(teta1, 0.0, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD) && px < 0))
-        sinalpx2py2 = -1;
-    else
-        sinalpx2py2 = 1;
-
-    double pxl2pzl2 = pxl2 + pow(pzl, 2);
+    double pxl2pzl2 = pow(pxl, 2) + pow(pzl, 2);
 
     // Cálculo do teta3
     double c3 = (pxl2pzl2 - pow(a2, 2) - pow(a3, 2))/(2 * a2 * a3);
@@ -310,7 +559,7 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
     avaliaAnguloTeta(&teta3, teta3min, teta3max, solucao, solucaoTeta3, solucaoTeta3Possivel);
 
     // Cálculo do teta2
-    double beta2 = atan2(pzl, sinalpx2py2 * sqrt(pxl2));
+    double beta2 = atan2(pzl, pxl);
 
     double cksi = (pxl2pzl2 + pow(a2, 2) - pow(a3, 2))/(2 * a2 * sqrt(pxl2pzl2));
 
@@ -336,7 +585,7 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
 }
 
 void Cinematica::calculaTeta2Teta3Teta4Singular(double* teta2, double* teta3, double* teta4,
-                                                double teta1graus, double* pz,
+                                                double* pz,
                                                 double *angulosMaxGraus, double *angulosMinGraus,
                                                 bool *posicaoAtingivel)
 {
@@ -362,17 +611,15 @@ void Cinematica::calculaTeta2Teta3Teta4Singular(double* teta2, double* teta3, do
         /* Faz a abordagem geometrica do teta2, teta3 e teta4 */        
         double teta234 = M_PI; /* teta234 é a inclinação do segmento L3
                                    em relação à base da garra (90 graus)
-                                   mais 90 graus. */
-
-        double teta1 = teta1graus * M_PI / 180.0;
+                                   mais 90 graus. */        
 
         solucao.possivel = true;
 
         abordagemGeometrica(teta2, teta2min, teta2max,
                             teta3, teta3min, teta3max,
                             teta4, teta4min, teta4max,
-                            teta1, teta234,
-                            0, 0, 0, *pz - d1, &solucao);
+                            teta234,
+                            0, *pz - d1, &solucao);
 
         *teta2 = *teta2 * 180.0 / M_PI;
         *teta3 = *teta3 * 180.0 / M_PI;
@@ -427,7 +674,7 @@ double* Cinematica::calculaPosicaoSingular(double* pz,
             }
 
             calculaTeta2Teta3Teta4Singular(&teta2, &teta3, &teta4,
-                                           teta1, pz,
+                                           pz,
                                            angulosMaxGraus,
                                            angulosMinGraus,
                                            posicaoAtingivel);
@@ -444,7 +691,7 @@ double* Cinematica::calculaPosicaoSingular(double* pz,
             teta1 = -teta5;
 
             calculaTeta2Teta3Teta4Singular(&teta2, &teta3, &teta4,
-                                           teta1, pz,
+                                           pz,
                                            angulosMaxGraus,
                                            angulosMinGraus,
                                            posicaoAtingivel);
@@ -453,117 +700,9 @@ double* Cinematica::calculaPosicaoSingular(double* pz,
         }
     }
 
-return nullptr;
+    return nullptr;
 }
 
-bool Cinematica::pontoPertenceASegmentoDeReta(double xc, double yc, double zc, double x1, double y1, double z1, double x2, double y2, double z2)
-{
-    double xMaior, xMenor, yMaior, yMenor, zMaior, zMenor;
-
-    if(x1 > x2)
-    {
-        xMaior = x1;
-        xMenor = x2;
-    }
-    else
-    {
-        xMaior = x2;
-        xMenor = x1;
-    }
-
-    if(y1 > y2)
-    {
-        yMaior = y1;
-        yMenor = y2;
-    }
-    else
-    {
-        yMaior = y2;
-        yMenor = y1;
-    }
-
-    if(z1 > z2)
-    {
-        zMaior = z1;
-        zMenor = z2;
-    }
-    else
-    {
-        zMaior = z2;
-        zMenor = z1;
-    }
-
-
-
-    return EstaDentroDoIntervalo(xMenor, true, xc, xMaior, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-           EstaDentroDoIntervalo(yMenor, true, yc, yMaior, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-           EstaDentroDoIntervalo(zMenor, true, zc, zMaior, true, CASAS_DECIMAIS_POSICAO_XYZ);
-}
-
-bool Cinematica::pontoColideComBaseFixa(double x, double y, double z)
-{
-
-    return ( (EstaDentroDoIntervalo(-5, true, x, 3, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-              EstaDentroDoIntervalo(-2.5, true, y, 2.5, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-              EstaDentroDoIntervalo(0.0, false, z, 13.2, true, CASAS_DECIMAIS_POSICAO_XYZ)   ) ||
-             (EstaDentroDoIntervalo(-34.34, true, x, 3.36, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-              EstaDentroDoIntervalo(-9.95, true, y, 9.95, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-              EhMenorOuIgual(z, 0, CASAS_DECIMAIS_POSICAO_XYZ)) );
-
-}
-
-bool Cinematica::garraColideComBaseFixa(double x, double y, double z, double px, double py, double pz, QVector3D Zt)
-{
-    if(pontoColideComBaseFixa(x, y, z) || pontoColideComBaseFixa(px, py, pz))
-        return true;
-
-    double r13 = double(Zt[0]);
-    double r23 = double(Zt[1]);
-    double r33 = double(Zt[2]);
-
-    Plano3D plano5(0.0, 0.0, 13.2, 0.0, 0.0, 1.0, -5.0, 3.0, -2.5, 2.5, 13.2, 13.2);
-    Plano3D plano6(0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -34.34, 3.36, -9.95, 9.95, -INFINITY, 0.0);
-
-    QList<Plano3D> planos;
-
-    planos.append(plano5);
-    planos.append(plano6);
-
-    for(Plano3D plano : planos)
-    {
-        double nx = plano.Nx();
-        double ny = plano.Ny();
-        double nz = plano.Nz();
-
-        double x0 = plano.X0();
-        double y0 = plano.Y0();
-        double z0 = plano.Z0();
-
-        double denominador = nx * r13 + ny * r23 + nz * r33;
-
-        if(denominador != 0.0)
-        {
-            // TODO: Verificar se o t está entre 0 e 1. Verificar se faz sentido t estar nesse intervalo.
-            double t = (nx * (x0 - px) + ny * (y0 - py) + nz * (z0 - pz))/(LgL3 * denominador);
-
-            double xc = px + LgL3 * r13 * t;
-            double yc = py + LgL3 * r23 * t;
-            double zc = pz + LgL3 * r33 * t;
-
-            if(pontoPertenceASegmentoDeReta(xc, yc, zc, px, py, pz, x, y, z) &&
-               plano.contemPonto(xc, yc, zc))
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-// TODO: Cinemática direta/inversa: Incluir tratamento para detecção de colisão da garra com a base giratória
-// TODO: Cinemática direta/inversa: Incluir tratamento para detecção de colisão da garra com o segmento L1.
-//       Neste caso, tratar o segmento L1 como um plano, e detectar se a posição alvo está "atrás" do plano.
 // TODO: Cinemática direta: Criar um método para calcular o tamanho da abertura da garra com base no ângulo do eixo do servo da garra.
 // TODO: Cinemática direta: Criar a cinemática direta para os dedos da garra, calculando o XYZ de cada dedo.
 // TODO: Cinemática direta/inversa: incluir tratamento para evitar cálculo de posições em que os dedos da garra colidem com a base fixa, com a base giratória ou com o segmento L1
@@ -589,7 +728,8 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
                               double *gamaGraus, double *betaGraus, double *alfaGraus,
                               double *angulosCorrentesJuntas,
                               double *angulosMaxGraus, double *angulosMinGraus,
-                              bool *posicaoProjetada, bool *posicaoAtingivel, bool *colideComBaseFixa)
+                              bool *posicaoProjetada, bool *posicaoAtingivel,
+                              bool *colideComBaseFixa, bool *colideComBaseGir, bool *colideComSegmentoL1)
 {    
     double teta1, teta2, teta3, teta4, teta5;
 
@@ -775,14 +915,11 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     *betaGraus = betaGrausProj;
     *alfaGraus = alfaGrausProj;
 
+    bool bColideComBaseFixa = false;
+
     if(garraColideComBaseFixa(*x, *y, *z, px, py, pz, Ztl))
     {
-        if(posicaoAtingivel != nullptr)
-            *posicaoAtingivel = false;
-
-        if(colideComBaseFixa != nullptr)
-            *colideComBaseFixa = true;
-
+        bColideComBaseFixa = true;
         // TODO: Cinemática inversa: Implementar um mecanismo de reposicionamento para a posição mais próxima em caso de colisão com a base fixa
     }
 
@@ -890,6 +1027,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         }
     }
 
+    // Cálculo do teta2, teta3, teta4 e teta5
     for(int i = 0; i < solucoes.count(); i++)
     {
         solucao = solucoes.at(i);
@@ -912,12 +1050,24 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
 
         teta234 = atan2(s234, c234);
 
+        double xgl, zgl, pxl, pzl;
+
+        coordenadasNoPlanoDoBracoRobo(*x, *y, *z,
+                                      px, py, pz,
+                                      teta1,
+                                      &xgl, &zgl,
+                                      &pxl, &pzl);
+
+        solucao->colideComBaseGir = garraColideComBaseGiratoria(xgl, zgl, pxl, pzl, teta234);
+
         abordagemGeometrica(&teta2, teta2min, teta2max,
                             &teta3, teta3min, teta3max,
                             &teta4, teta4min, teta4max,
-                            teta1, teta234,
-                            px, py, px2py2, pz - d1,
+                            teta234,
+                            pxl, pzl,
                             solucao);
+
+        solucao->colideComSegmentoL1 = garraColideComSegmentoL1(xgl, zgl, pxl, pzl, teta2);
     }
 
 
@@ -1114,11 +1264,17 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
 
             solucao = solucoes.at(idxSolucaoPesoMaior);
         }
-    }
+    }    
+
+    if(colideComBaseFixa != nullptr)
+        *colideComBaseFixa = bColideComBaseFixa;
 
     if(posicaoAtingivel != nullptr)
     {
-        *posicaoAtingivel = solucao->possivel;
+        *posicaoAtingivel = solucao->possivel &&
+                            !(bColideComBaseFixa ||
+                              solucao->colideComBaseGir ||
+                              solucao->colideComSegmentoL1);
     }
 
     teta1 = solucao->teta1;
@@ -1126,6 +1282,11 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     teta3 = solucao->teta3;
     teta4 = solucao->teta4;
     teta5 = solucao->teta5;
+
+    if(colideComBaseGir != nullptr)
+        *colideComBaseGir = solucao->colideComBaseGir;
+    if(colideComSegmentoL1 != nullptr)
+        *colideComSegmentoL1 = solucao->colideComSegmentoL1;
 
     while(!solucoes.isEmpty())
     {

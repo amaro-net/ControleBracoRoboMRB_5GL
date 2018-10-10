@@ -322,7 +322,9 @@ class MainWindow : public QMainWindow
 
         void iniciaDLYSemParametro();
 
-        void avisoColisaoBaseFixa();
+        void avisoColisaoBaseFixa(bool posicaoProjetada = false);
+        void avisoColisaoBaseGiratoria(bool posicaoProjetada = false);
+        void avisoColisaoSegmentoL1(bool posicaoProjetada = false);
 
         /* Funções para cinemática direta/inversa */
         double *preencheCamposXYZAtual(double *posicoesAtuaisGraus);

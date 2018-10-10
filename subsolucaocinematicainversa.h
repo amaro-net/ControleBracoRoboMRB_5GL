@@ -24,6 +24,10 @@ class SubSolucaoCinematicaInversa
 
         bool possivel;
 
+        bool colideComBaseFixa;
+        bool colideComBaseGir;
+        bool colideComSegmentoL1;
+
         /**
          * @brief peso
          * valor que corresponde ao quanto a solução está mais próxima da posicao corrente do braço robô.
