@@ -302,6 +302,8 @@ class MainWindow : public QMainWindow
         void habilitaBotoesContinuarDLYSemParam();
         void continuaExecucaoPartindoDoDLYSemParam();
 
+        int caixaDialogoPerguntaSimNao(const QString &titulo, const QString &texto);
+
         /* Comandos */
         void abrirGarra();
         void garraSemiaberta();

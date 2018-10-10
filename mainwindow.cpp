@@ -2105,6 +2105,33 @@ void MainWindow::on_btCalcularXYZAlvo_clicked()
     delete(posGarra);
 }
 
+int MainWindow::caixaDialogoPerguntaSimNao(const QString &titulo, const QString &texto)
+{
+    QMessageBox msgPerguntaPosProjetada;
+
+    msgPerguntaPosProjetada.setParent(this);
+    msgPerguntaPosProjetada.setWindowTitle(titulo);
+    msgPerguntaPosProjetada.setText(texto);
+    QPushButton* btSim = msgPerguntaPosProjetada.addButton(tr("Sim"), QMessageBox::YesRole);
+    QPushButton* btNao = msgPerguntaPosProjetada.addButton(tr("Não"), QMessageBox::NoRole);
+
+    msgPerguntaPosProjetada.setDefaultButton(btNao);
+    msgPerguntaPosProjetada.setEscapeButton(btNao);
+    msgPerguntaPosProjetada.setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    msgPerguntaPosProjetada.setIcon(QMessageBox::Question);
+
+    msgPerguntaPosProjetada.exec();
+
+    QAbstractButton* btClicado = msgPerguntaPosProjetada.clickedButton();
+
+    if(btClicado == btSim)
+    {
+        return QMessageBox::Yes;
+    }
+
+    return QMessageBox::No;
+}
+
 void MainWindow::on_btCalcularAngulosAlvo_clicked()
 {
     bool posicaoProjetada;
@@ -2140,16 +2167,11 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
 
     if(posicaoProjetada && posicaoAtingivel)
     {
-        // TODO: Aba Posições das Juntas: Corrigir a descrição dos botões para "Sim" e "Não"
-        respostaPosProjetada = QMessageBox::question(this,
-                                                       tr("Posição projetada"),
-                                                       tr("Posição XYZ foi projetada no plano que corta verticalmente\n"
-                                                          "o braço robô.\n"
-                                                          "Deseja atualizar a posição XYZ alvo com os valores projetados?\n"
-                                                          "Se clicar em não, os ângulos alvo não serão alterados."),
-                                                       QMessageBox::Yes,
-                                                       QMessageBox::No | QMessageBox::Default | QMessageBox::Escape,
-                                                       QMessageBox::NoButton);
+        respostaPosProjetada = caixaDialogoPerguntaSimNao(tr("Posição projetada"),
+                                                          tr("Posição XYZ foi projetada no plano que corta verticalmente\n"
+                                                             "o braço robô.\n"
+                                                             "Deseja atualizar a posição XYZ alvo com os valores projetados?\n"
+                                                             "Se clicar em não, os ângulos alvo não serão alterados."));
 
         respostaPosInatingivel = respostaPosProjetada;
     }
@@ -2184,19 +2206,15 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
         if(posicaoProjetada)
         {
             strCompl = ",\nmesmo com a posição projetada no plano que corta verticalmente o braço robô";
-            strCompl2 = "as posições XYZ e";
+            strCompl2 = "as posições XYZ e ";
         }
         QString mensagem = "Posição XYZ não possui ângulos de junta correspondente\n"
                            "que respeite os limites máximos e mínimos das juntas"+strCompl+".\n"+
                            "Deseja adequar o resultado aos máximos e mínimos dos ângulos das juntas?\n"+
-                           "Se clicar em não, "+strCompl2+" os ângulos alvo não serão alterados.";
-        // TODO: Aba Posições das Juntas: Corrigir a descrição dos botões para "Sim" e "Não"
-        respostaPosInatingivel = QMessageBox::question(this,
-                                         tr("Posição inatingível"),
-                                         mensagem,
-                                         QMessageBox::Yes,
-                                         QMessageBox::No | QMessageBox::Default | QMessageBox::Escape,
-                                         QMessageBox::NoButton);
+                           "Se clicar em não, "+strCompl2+"os ângulos alvo não serão alterados.";
+
+
+        respostaPosInatingivel = caixaDialogoPerguntaSimNao(tr("Posição inatingível"), mensagem);
 
         respostaPosProjetada = respostaPosInatingivel;
     }
