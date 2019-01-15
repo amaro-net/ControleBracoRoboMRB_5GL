@@ -219,8 +219,16 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
         for(int i = 0; i < QTD_SERVOS; i++)
         {
             for(int j = 0; j < 4; j++)
-            {
-                setaValorItemTabela(ui->tabelaPosLimites, i, j, QString("%1").arg(tabelaPosLimitesDefault[i][j]));
+            {                
+                if(ui->rdbReadyForPIC->isChecked())
+                {
+                    setaValorItemTabela(ui->tabelaPosLimites, i, j, QString("%1").arg(tabelaPosLimitesDefault[i][j]));
+                }
+                else if(ui->rdbMiniMaestro24->isChecked())
+                {
+                    setaValorItemTabela(ui->tabelaPosLimites, i, j, QString("%1").arg(tabelaPosLimitesDefaultMM24[i][j]));
+                }
+
                 setaValorItemTabela(ui->tabelaPosLimitesGraus, i, j, QString("%1").arg(tabelaPosLimitesGrausDefault[i][j]));
             }
 
@@ -556,6 +564,9 @@ MainWindow::~MainWindow()
     if(serial->isOpen())
         serial->close();
 
+    if(this->mm24 != nullptr)
+        delete(this->mm24);
+
     delete montagemDeComandosDialog;
     delete ui;
 }
@@ -606,7 +617,53 @@ void MainWindow::abrirPortaSerial()
         ui->btAbrirPortaSerial->setEnabled(false);
         console->setEnabled(true);
         inicializando = true;
-        configuracoesIniciais();
+        if(ui->rdbReadyForPIC->isChecked())
+            configuracoesIniciais();
+        else if(ui->rdbMiniMaestro24->isChecked())
+        {            
+            this->mm24 = new MiniMaestro24(serial);
+            for(int canal = 0; canal < 5; canal++)
+            {
+                this->mm24->posicaoRepouso[canal] = static_cast<unsigned int>(tabelaPosLimitesDefaultMM24[canal][3]);
+            }
+
+            connect(this->mm24, &MiniMaestro24::positionChanged, this, &MainWindow::positionChangedMiniMaestro24);
+            //connect(this->mm24, SIGNAL(MiniMaestro24::positionError()), this, SLOT(this->positionErrorMiniMaestro()));
+            connect(this->mm24, &MiniMaestro24::fimMovimento, this, &MainWindow::fimMovimentoMiniMaestro24);
+            connect(this->mm24, &MiniMaestro24::setouPosicaoAlvo, this, &MainWindow::setouPosicaoAlvoMiniMaestro24);
+            connect(this->mm24, &MiniMaestro24::setouVelocidade, this, &MainWindow::setouVelocidadeMiniMaestro24);
+            connect(this->mm24, &MiniMaestro24::setouAceleracao, this, &MainWindow::setouAceleracaoMiniMaestro24);
+
+            configurarConversaoEntreMicrossegundosEAngulos(true);
+
+            for(char canal = 0; canal < 4; canal++)
+            {
+                this->mm24->SetAcceleration(canal, 0x0004);
+            }
+
+            this->mm24->SetAcceleration(0x05, 0x0000);
+
+            this->mm24->timerMonitoramentoPosicao->start();
+
+            this->mm24->inicializacaoSolicitada = true; // Para atualizar os campos de posição alvo
+
+            habilitarComponentesConn(true);
+            habilitaBotoesExecComandos(true);
+            habilitaCamposAbaPosicaoAlvo(0, true);
+            habilitaCamposAbaPosicaoAlvo(1, true);
+
+            // TODO: Mini Maestro 24: Remover estas linhas
+            /*ui->btAbrirGarra->setEnabled(true);
+            ui->btGarraSemiaberta->setEnabled(true);
+            ui->btFecharGarra->setEnabled(true);
+            ui->btGiroGarraMais90->setEnabled(true);
+            ui->btGarraPosNeutra->setEnabled(true);
+            ui->btGiroGarraMenos90->setEnabled(true);
+            ui->btPosNeutraJST->setEnabled(true);
+            ui->btPosNeutraCTZ->setEnabled(true);
+            */            
+        }
+
     }
     else
     {
@@ -622,6 +679,13 @@ void MainWindow::fecharPortaSerial()
         serial->close();
     console->setEnabled(false);
     ui->chkEnviaComandoImediato->setChecked(false);
+
+    if(this->mm24 != nullptr)
+    {
+        this->mm24->disconnect();
+        delete(this->mm24);
+        this->mm24 = nullptr;
+    }
 
     habilitarComponentesConn(false);
 
@@ -643,8 +707,8 @@ void MainWindow::readData()
     }
     else
     {
-        // TODO: Aba Terminal: Tratamento do console para comandos diretos da Mini Maestro 24
-        // TODO: Geral: Tratamento da recepção de bytes de resposta da Mini Maestro 24
+        // TODO: Aba Terminal: Tratamento do console para comandos diretos da Mini Maestro 24        
+        recebeBytesMiniMaestro24(data);
     }
 
 }
@@ -775,9 +839,9 @@ void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
     {
         lstChkHab[idxJunta]->setChecked(true);
         lstSpnAlvo[idxJunta]->setEnabled(true);
-        lstSpnAlvoGraus[idxJunta]->setEnabled(true);
-
+        lstSpnAlvoGraus[idxJunta]->setEnabled(true);        
         lstSlider[idxJunta]->setEnabled(true);
+
         if(posicaoAlvo != lstSlider[idxJunta]->value())
             lstSlider[idxJunta]->setValue(posicaoAlvo);
 
@@ -793,6 +857,7 @@ void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
         lstChkHab[idxJunta]->setChecked(false);
         lstSpnAlvo[idxJunta]->setEnabled(false);
         lstSpnAlvoGraus[idxJunta]->setEnabled(false);
+        lstSlider[idxJunta]->setEnabled(false);
     }
 }
 
@@ -1025,6 +1090,7 @@ void MainWindow::decodificaResposta()
                     lstChkHab[i]->setChecked(false);
                     lstSpnAlvo[i]->setEnabled(false);
                     lstSpnAlvoGraus[i]->setEnabled(false);
+                    lstSlider[i]->setEnabled(false);
                 }                                
             }
 
@@ -1120,13 +1186,15 @@ void MainWindow::decodificaResposta()
                     if(!this->lstSpnAlvo[i]->isEnabled() || !this->lstSpnAlvoGraus[i]->isEnabled())
                     {
                         this->lstChkHab[i]->setChecked(true);
+                        this->lstSpnAlvo[i]->setEnabled(true);
+                        this->lstSpnAlvoGraus[i]->setEnabled(true);
                     }
                 }
                 else
                 {
-                    lstChkHab[i]->setChecked(false);
-                    lstSpnAlvo[i]->setEnabled(false);
-                    lstSpnAlvoGraus[i]->setEnabled(false);
+                    this->lstChkHab[i]->setChecked(false);
+                    this->lstSpnAlvo[i]->setEnabled(false);
+                    this->lstSpnAlvoGraus[i]->setEnabled(false);
                 }
 
                 if(todasPosicoesMaioresQueZero)
@@ -1386,6 +1454,196 @@ void MainWindow::decodificaResposta()
                 configurarConversaoEntreMicrossegundosEAngulos();
         }
     }
+}
+
+void MainWindow::recebeBytesMiniMaestro24(QByteArray data)
+{
+    // TODO: Mini Maestro 24: Recepção dos bytes de resposta dos comandos
+    char rChar;
+
+    comando_mm cmd;    
+
+    if(mm24->filaComMonitoramentoEnviados.isEmpty())
+        return;
+
+    //mm24->timerMonitoramentoPosicao->stop();
+
+    cmd = mm24->filaComMonitoramentoEnviados.dequeue();    
+
+    int qtd_bytes = 0;
+
+    for(int i = 0; i < data.length() /*&& !mm24->filaComandosEnviados.isEmpty()*/; i++)
+    {
+        rChar = data.at(i);
+        cmd.resposta[qtd_bytes++] = rChar;
+
+        if(qtd_bytes == cmd.qtdBytesAReceber)
+        {
+            mm24->filaComRespostaRecebida.enqueue(cmd);
+
+            mm24->decodificaResposta();
+
+            if(!mm24->filaComMonitoramentoEnviados.isEmpty())
+            {
+                cmd = mm24->filaComMonitoramentoEnviados.dequeue();
+                qtd_bytes = 0;
+            }
+        }
+    }
+    // TODO: Mini Maestro 24: Avaliar se é adequado esta chamada do HabilitarComponentesComServosLigados() estar aqui;
+    HabilitarComponentesComServosLigados();
+}
+
+void MainWindow::positionChangedMiniMaestro24(unsigned int posicao[])
+{    
+    QString strValor;
+    int valor;
+    double graus;
+    double posicoesAtuaisGraus[6];
+    bool todasPosicoesMaioresQueZero = false;
+    double *posGarra = nullptr;
+
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        valor = int(posicao[i]);
+
+        lstEdtAtual[i]->setText(strValor.setNum(valor) + STR_UND_MICROSSEGUNDOS);
+
+        if(valor > 0)
+        {
+            graus = converteMicrossegundosParaGraus(i, valor);
+            posicoesAtuaisGraus[i] = graus;
+            lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO_ANGULAR) + STR_UND_GRAUS);
+            lstPontoVerdeSliderPosAtual[i]->setVisible(true);
+            setaPosicaoPontoVerde(i, valor);
+        }
+        else
+        {
+            lstPontoVerdeSliderPosAtual[i]->setVisible(false);
+            posicoesAtuaisGraus[i] = -9999;
+            if(i < 5)
+                todasPosicoesMaioresQueZero = false;
+        }
+    }
+
+    if(todasPosicoesMaioresQueZero)
+    {
+        posGarra = preencheCamposXYZAtual(posicoesAtuaisGraus);
+        delete posGarra;
+    }
+}
+
+void MainWindow::positionErrorMiniMaestro()
+{
+    // TODO: Mini Maestro 24: Avaliar o que fazer em caso de erro na obtenção de posição atual da mini maestro 24. Avaliar se este sinal deve existir.
+}
+
+void MainWindow::fimMovimentoMiniMaestro24(unsigned int posicao[])
+{    
+    QString strValor;
+    int valor;
+    double graus;
+    double posicoesAtuaisGraus[6];
+    bool todasPosicoesMaioresQueZero = false;
+    double *posGarra = nullptr;
+
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        valor = int(posicao[i]);
+
+        lstEdtAtual[i]->setText(strValor.setNum(valor) + STR_UND_MICROSSEGUNDOS);
+
+        if(valor > 0)
+        {
+            graus = converteMicrossegundosParaGraus(i, valor);
+            posicoesAtuaisGraus[i] = graus;
+            lstEdtAtualGraus[i]->setText(QString("%L1").arg(graus, 0, 'f', CASAS_DECIMAIS_POSICAO_ANGULAR) + STR_UND_GRAUS);
+            lstPontoVerdeSliderPosAtual[i]->setVisible(true);
+            setaPosicaoPontoVerde(i, valor);
+        }
+        else
+        {
+            lstPontoVerdeSliderPosAtual[i]->setVisible(false);
+            posicoesAtuaisGraus[i] = -9999;
+            if(i < 5)
+                todasPosicoesMaioresQueZero = false;
+        }
+    }
+
+    if(todasPosicoesMaioresQueZero)
+    {
+        posGarra = preencheCamposXYZAtual(posicoesAtuaisGraus);
+    }
+
+    for(int i = 0; i < QTD_SERVOS; i++)
+    {
+        valor = int(posicao[i]);
+
+        if(valor > 0)
+        {
+            if(valor != lstSpnAlvo[i]->value())
+            {
+                if(!ui->chkEnviaComandoImediato->isChecked() || countAbaPosicoesValueChanged <= 0)
+                {
+                    countAbaPosicoesValueChanged = -1;
+                    lstSpnAlvo[i]->setValue(valor);
+                }
+                else
+                {
+                    countAbaPosicoesValueChanged--;
+                }
+            }
+
+            if(!this->lstSpnAlvo[i]->isEnabled() || !this->lstSpnAlvoGraus[i]->isEnabled())
+            {
+                this->lstChkHab[i]->setChecked(true);
+                this->lstSpnAlvo[i]->setEnabled(true);
+                this->lstSpnAlvoGraus[i]->setEnabled(true);
+                this->lstSlider[i]->setEnabled(true);
+            }
+        }
+        else
+        {
+            this->lstChkHab[i]->setChecked(false);
+            this->lstSpnAlvo[i]->setEnabled(false);
+            this->lstSpnAlvoGraus[i]->setEnabled(false);
+            this->lstSlider[i]->setEnabled(false);
+        }
+    }
+
+    if(todasPosicoesMaioresQueZero)
+    {
+        preencheCamposXYZAlvo(posGarra);
+        delete(posGarra);
+    }
+
+    //HabilitarComponentesComServosLigados();
+}
+
+void MainWindow::setouPosicaoAlvoMiniMaestro24(int canal, unsigned int valor)
+{
+    if(valor > 0)
+    {
+        lstSpnAlvo[canal]->setValue(int(valor));
+        lstChkHab[canal]->setChecked(true);
+        lstSlider[canal]->setEnabled(true);
+    }
+    else
+    {
+        lstSpnAlvo[canal]->setEnabled(false);
+        lstChkHab[canal]->setChecked(false);
+        lstSlider[canal]->setEnabled(false);
+    }
+}
+
+void MainWindow::setouVelocidadeMiniMaestro24(int canal, unsigned int valor)
+{
+    lstSpnVel[canal]->setValue(int(valor));
+}
+
+void MainWindow::setouAceleracaoMiniMaestro24(int canal, unsigned int valor)
+{
+    lstSpnAcl[canal]->setValue(int(valor));
 }
 
 void MainWindow::setarValorPosLimiteResposta(QString resposta)
@@ -1652,9 +1910,7 @@ void MainWindow::on_btAbrirGarra_clicked()
     if(ui->rdbReadyForPIC->isChecked())
         abrirGarra();
     else if(ui->rdbMiniMaestro24->isChecked())
-    {
-        // TODO: Aba Comandos: botão abrir garra com a mini maestro 24
-    }
+        abrirGarraMiniMaestro24();
 }
 
 void MainWindow::on_btGarraSemiaberta_clicked()
@@ -1669,9 +1925,7 @@ void MainWindow::on_btGarraSemiaberta_clicked()
     if(ui->rdbReadyForPIC->isChecked())
         garraSemiaberta();
     else if(ui->rdbMiniMaestro24->isChecked())
-    {
-        // TODO: Aba Comandos: botão garra semiaberta com a mini maestro 24
-    }
+        garraSemiabertaMiniMaestro24();
 }
 
 void MainWindow::on_btFecharGarra_clicked()
@@ -1685,10 +1939,8 @@ void MainWindow::on_btFecharGarra_clicked()
 
     if(ui->rdbReadyForPIC->isChecked())
         fecharGarra();
-    else if(ui->rdbMiniMaestro24->isChecked())
-    {
-        // TODO: Aba Comandos: botão fechar garra da mini maestro 24
-    }
+    else if(ui->rdbMiniMaestro24->isChecked())        
+        fecharGarraMiniMaestro24();
 }
 
 void MainWindow::on_btGiroGarraMais90_clicked()
@@ -1706,9 +1958,7 @@ void MainWindow::on_btGiroGarraMais90_clicked()
     if(ui->rdbReadyForPIC->isChecked())
         giroGarraMais90();
     else if(ui->rdbMiniMaestro24->isChecked())
-    {
-        // TODO: Aba Comandos: botão giro garra +90º da mini maestro 24
-    }
+        giroGarraMais90MiniMaestro24();
 }
 
 void MainWindow::on_btGarraPosNeutra_clicked()
@@ -1723,9 +1973,7 @@ void MainWindow::on_btGarraPosNeutra_clicked()
     if(ui->rdbReadyForPIC->isChecked())
         garraPosNeutra();
     else if(ui->rdbMiniMaestro24->isChecked())
-    {
-        // TODO: Aba Comandos: botão garra pos. neutra da mini maestro 24
-    }
+        garraPosNeutraMiniMaestro24();
 }
 
 void MainWindow::on_btGiroGarraMenos90_clicked()
@@ -1742,10 +1990,8 @@ void MainWindow::on_btGiroGarraMenos90_clicked()
 
     if(ui->rdbReadyForPIC->isChecked())
         giroGarraMenos90();
-    else if(ui->rdbMiniMaestro24->isChecked())
-    {
-        // TODO: Aba Comandos: botão giro garra -90º da mini maestro 24
-    }
+    else if(ui->rdbMiniMaestro24->isChecked())        
+        giroGarraMenos90MiniMaestro24();
 }
 
 void MainWindow::on_btPosicaoRepouso_clicked()
@@ -1760,9 +2006,7 @@ void MainWindow::on_btPosicaoRepouso_clicked()
     if(ui->rdbReadyForPIC->isChecked())
         posicaoDeRepouso();
     else if(ui->rdbMiniMaestro24->isChecked())
-    {
-        // TODO: Aba Comandos: botão posição de repouso da mini maestro 24
-    }
+        posicaoDeRepousoMiniMaestro24();
 }
 
 void MainWindow::on_btPosNeutraJST_clicked()
@@ -1785,9 +2029,7 @@ void MainWindow::on_btPosNeutraJST_clicked()
     if(ui->rdbReadyForPIC->isChecked())
         posicaoNeutraJST();
     else if(ui->rdbMiniMaestro24->isChecked())
-    {
-        // TODO: Aba Comandos: botão posição neutra (JST) da mini maestro 24
-    }
+        posicaoNeutraJSTMiniMaestro24();
 }
 
 void MainWindow::on_btDesligaServos_clicked()
@@ -1802,9 +2044,7 @@ void MainWindow::on_btDesligaServos_clicked()
     if(ui->rdbReadyForPIC->isChecked())
         desligaServos();
     else if(ui->rdbMiniMaestro24->isChecked())
-    {
-        // TODO: Aba Comandos: botão desliga servos da mini maestro 24
-    }
+        desligaServosMiniMaestro24();
 }
 
 void MainWindow::on_btPosNeutraCTZ_clicked()
@@ -1822,9 +2062,7 @@ void MainWindow::on_btPosNeutraCTZ_clicked()
     if(ui->rdbReadyForPIC->isChecked())
         posicaoNeutraCTZ();
     else if(ui->rdbMiniMaestro24->isChecked())
-    {
-        // TODO: Aba Comandos: botão posição neutra (CTZ) da mini maestro 24
-    }
+        posicaoNeutraCTZMiniMaestro24();
 }
 
 void MainWindow::on_btAdicionarComandoAASeqComandos_clicked()
@@ -2829,7 +3067,9 @@ void MainWindow::on_btAdicionarComando_clicked()
 
 void MainWindow::adicionarComandoAASequencia(QString comando)
 {
-    ui->listSequenciaComandos->addItem(comando);
+    // TODO: Aba sequência: Permitir comandos serem adicionados no meio da sequência, ao invés de só no final
+    // Obs.: ver o insertItem() do QListWidget
+    ui->listSequenciaComandos->addItem(comando);        
     on_btPararSeqComandos_clicked();
 }
 
@@ -3360,6 +3600,140 @@ void MainWindow::iniciaDLYSemParametro()
     habilitaBotoesContinuarDLYSemParam();
 }
 
+
+/* NOTE: ***** Comandos Mini Maestro 24 ***** */
+
+void MainWindow::abrirGarraMiniMaestro24()
+{    
+    unsigned short valorGarraAberta = ui->tabelaPosLimites->item(5, 0)->text().toUShort();    
+    this->mm24->SetTarget(5, valorGarraAberta);
+
+}
+
+void MainWindow::garraSemiabertaMiniMaestro24()
+{    
+    unsigned short valorGarraSemiaberta = ui->tabelaPosLimites->item(5, 2)->text().toUShort();
+    this->mm24->SetTarget(5, valorGarraSemiaberta);
+}
+
+void MainWindow::fecharGarraMiniMaestro24()
+{    
+    unsigned short valorGarraFechada = ui->tabelaPosLimites->item(5, 1)->text().toUShort();
+    this->mm24->SetTarget(5, valorGarraFechada);
+}
+
+void MainWindow::giroGarraMais90MiniMaestro24()
+{    
+    unsigned short valorPulsoGarraMais90 = ui->tabelaPosLimites->item(4, 0)->text().toUShort();
+    this->mm24->SetTarget(4, valorPulsoGarraMais90);
+}
+
+void MainWindow::garraPosNeutraMiniMaestro24()
+{    
+    unsigned short valorPulsoGarraPosNeutra = ui->tabelaPosLimites->item(4, 2)->text().toUShort();
+    this->mm24->SetTarget(4, valorPulsoGarraPosNeutra);
+}
+
+void MainWindow::giroGarraMenos90MiniMaestro24()
+{    
+    unsigned short valorPulsoGarraMenos90 = ui->tabelaPosLimites->item(4, 1)->text().toUShort();
+    this->mm24->SetTarget(4, valorPulsoGarraMenos90);
+}
+
+void MainWindow::posicaoDeRepousoMiniMaestro24()
+{
+    uint16_t posicaoRepouso[5];
+
+    this->mm24->filaComAcionamento.clear();
+
+    for(int i = 0; i < 5; i++)
+    {
+        posicaoRepouso[i] = ui->tabelaPosLimites->item(i, 3)->text().toUShort();
+    }
+
+    this->mm24->SetMultipleTargets(5, 0, posicaoRepouso);
+
+//    comando_mm comandoRepouso;
+//    comandoRepouso.comando = MM24_SET_MULTIPLE_TARGETS;
+//    comandoRepouso.numTargets = 5;
+//    comandoRepouso.canal = 0; // primeiro canal
+//    for(int canal = 0; canal < 5; canal++)
+//    {
+//        comandoRepouso.target[canal] = ui->tabelaPosLimites->item(canal, 3)->text().toUInt();
+//    }
+
+//    this->mm24->filaComandosAEnviar.enqueue(comandoRepouso);
+
+    //this->mm24->flagMovimento = true;
+    this->mm24->posicaoRepousoAcionada = true;
+}
+
+void MainWindow::posicaoNeutraJSTMiniMaestro24()
+{    
+    uint16_t posicaoNeutra[6];
+
+    this->mm24->filaComAcionamento.clear();
+
+    for(int i = 0; i < 6; i++)
+    {
+        posicaoNeutra[i] = ui->tabelaPosLimites->item(i, 2)->text().toUShort();
+    }
+
+    this->mm24->SetMultipleTargets(6, 0, posicaoNeutra);    
+}
+
+void MainWindow::posicaoNeutraCTZMiniMaestro24()
+{    
+    uint16_t posicaoNeutra;
+
+    this->mm24->filaComAcionamento.clear();
+
+    for(int i = 0; i < 6; i++)
+    {
+        posicaoNeutra = ui->tabelaPosLimites->item(i, 2)->text().toUShort();
+        comando_mm comandoCTZ;
+        comandoCTZ.comando = MM24_SET_TARGET;
+        comandoCTZ.canal = static_cast<char>(i);
+        comandoCTZ.target[0] = posicaoNeutra;
+        comandoCTZ.qtdBytesAReceber = 0;
+        this->mm24->filaComAcionamento.enqueue(comandoCTZ);
+    }
+
+    // TODO: Mini Maestro 24: Verificar se esta instrução é necessária aqui
+    this->mm24->flagMovimento = true;    
+}
+
+void MainWindow::desligaServosMiniMaestro24()
+{
+    this->mm24->filaComAcionamento.clear();
+
+    comando_mm comandoRepouso;
+    comandoRepouso.comando = MM24_SET_MULTIPLE_TARGETS;
+    comandoRepouso.numTargets = 5;
+    comandoRepouso.canal = 0; // primeiro canal
+    for(int canal = 0; canal < 5; canal++)
+    {
+        comandoRepouso.target[canal] = ui->tabelaPosLimites->item(canal, 3)->text().toUShort();
+    }
+
+    this->mm24->filaComAcionamento.enqueue(comandoRepouso);
+
+    comando_mm desligaServos;
+    desligaServos.comando = MM24_SET_MULTIPLE_TARGETS;
+    desligaServos.numTargets = 6;
+    desligaServos.canal = 0; // primeiro canal
+    for(unsigned int canal = 0; canal < 6; canal++)
+    {
+        desligaServos.target[canal] = 0;
+    }
+
+    this->mm24->filaComAcionamento.enqueue(desligaServos);
+
+    this->mm24->desligaServosAcionado = true;
+}
+
+
+
 void MainWindow::timeoutDLY()
 {
     if(!seqEmExecucao)
@@ -3571,6 +3945,3 @@ void MainWindow::preencheCamposXYZAlvo(double *posGarra)
     ui->spnRyAlvo->setValue(posGarra[4]);
     ui->spnRzAlvo->setValue(posGarra[5]);
 }
-
-
-

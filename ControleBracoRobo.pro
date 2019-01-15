@@ -32,7 +32,8 @@ SOURCES += \
     subsolucaocinematicainversa.cpp \
     cinematica.cpp \
     utils.cpp \
-    plano3d.cpp
+    plano3d.cpp \
+    minimaestro24.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -43,7 +44,8 @@ HEADERS += \
     subsolucaocinematicainversa.h \
     cinematica.h \
     utils.h \
-    plano3d.h
+    plano3d.h \
+    minimaestro24.h
 
 FORMS += \
         mainwindow.ui \

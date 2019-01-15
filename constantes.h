@@ -43,6 +43,13 @@ static const int tabelaPosLimitesDefault[QTD_SERVOS][4] = {{2432, 480, 1405,    
                                                            {2432, 512, 1472,         1472},
                                                            {2000, 416, (2000+416)/2, 2000}};
 
+static const int tabelaPosLimitesDefaultMM24[QTD_SERVOS][4] = {{2432, 480, 1405,          480},
+                                                               {2256, 768, 1798,         2256},
+                                                               {2208, 800, 2208,          959},
+                                                               {2480, 528, 1251,         1836},
+                                                               {2432, 512, 1472,         1472},
+                                                               {2176, 448, (2176+448)/2, 2000}};
+
 // Estes ângulos condizem com a notação de Denavit-Hatenberg para o nosso braço-robô
 static const double tabelaPosLimitesGrausDefault[QTD_SERVOS][5] = {{100,  -90, 0, 0, 0},
                                                                    {130,    0, 0, 0, 0},

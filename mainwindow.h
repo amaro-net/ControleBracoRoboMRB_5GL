@@ -5,6 +5,7 @@
 #include "console.h"
 #include "constantes.h"
 #include "cinematica.h"
+#include "minimaestro24.h"
 
 #include <QMainWindow>
 
@@ -35,7 +36,7 @@ class MainWindow : public QMainWindow
         Q_OBJECT
 
     public:
-        explicit MainWindow(QWidget *parent = 0);
+        explicit MainWindow(QWidget *parent = nullptr);
         ~MainWindow();
 
         void adicionarComandoAASequencia(QString comando);
@@ -59,6 +60,14 @@ class MainWindow : public QMainWindow
         void timeoutDLY();
         void timeoutConfig();
         void timeoutEnvioImediato();
+
+        void positionChangedMiniMaestro24(unsigned int posicao[]);
+        void positionErrorMiniMaestro();
+        void fimMovimentoMiniMaestro24(unsigned int posicao[]);
+        void setouPosicaoAlvoMiniMaestro24(int canal, unsigned int valor);
+        void setouVelocidadeMiniMaestro24(int canal, unsigned int valor);
+        void setouAceleracaoMiniMaestro24(int canal, unsigned int valor);
+
 
         void on_rdbReadyForPIC_clicked();
 
@@ -276,6 +285,9 @@ class MainWindow : public QMainWindow
         void montaJSTParaPararMov1Junta();
         void decodificaResposta();
 
+        void recebeBytesMiniMaestro24(QByteArray data);
+        void decodificaRespostaMiniMaestro24();
+
         void setarValorPosLimiteResposta(QString resposta);
         void setaValorItemTabela(QTableWidget *tableWidget, int idxLinha, int idxColuna, QString strValor);
         void setarVelOuAclResposta(QString resposta, QList<QSpinBox *> listaSpinBox);
@@ -324,6 +336,19 @@ class MainWindow : public QMainWindow
 
         void iniciaDLYSemParametro();
 
+        /* Comandos Mini Maestro 24 */
+        void abrirGarraMiniMaestro24();
+        void garraSemiabertaMiniMaestro24();
+        void fecharGarraMiniMaestro24();
+        void giroGarraMais90MiniMaestro24();
+        void garraPosNeutraMiniMaestro24();
+        void giroGarraMenos90MiniMaestro24();
+        void posicaoDeRepousoMiniMaestro24();
+        void posicaoNeutraJSTMiniMaestro24();
+        void posicaoNeutraCTZMiniMaestro24();
+        void desligaServosMiniMaestro24();
+
+        /* Avisos de Colisão */
         void avisoColisaoBaseFixa(bool posicaoProjetada = false);
         void avisoColisaoBaseGiratoria(bool posicaoProjetada = false);
         void avisoColisaoSegmentoL1(bool posicaoProjetada = false);
@@ -398,6 +423,8 @@ class MainWindow : public QMainWindow
         QString comandoJSTParaPararMov;
 
         bool calculoAngulosAlvoAcionado = false;
+
+        MiniMaestro24* mm24 = nullptr;
 
         /**** Variáveis para conversão entre ângulos em graus e posições em microssegundos ****/
         double coeffAng[QTD_SERVOS];

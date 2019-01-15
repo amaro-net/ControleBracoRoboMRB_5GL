@@ -52,7 +52,7 @@ const double d4 = 0;
 /* WARNING: O d5 zerado significa que, para efeito de cálculo, a posição do pulso da garra
  * (junta 4) será a mesma posição da junta 3, isto levando-se em conta que a
  * soma das distâncias d2, d3 e d4 serão zero.
-   */
+ */
 const double d5 = 0;
 
 class Cinematica

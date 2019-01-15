@@ -60,7 +60,7 @@ double* Cinematica::coordenadasElevacaoETorcao(QMatrix4x4 T, double teta2graus, 
 
     double elevacao, torcao;
 
-    // TODO: Implementar a conversão da matriz da posição da garra para coordenadas de elevação e torção.
+    // TODO: Cinemática direta/inversa: Implementar a conversão da matriz da posição da garra para coordenadas de elevação e torção.
     elevacao = teta2graus + teta3graus + teta4graus - 90.0;
     torcao = teta5graus;
 
