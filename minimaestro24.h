@@ -10,6 +10,8 @@
 
 #define MM24_SET_TARGET           "setTarget"
 #define MM24_SET_MULTIPLE_TARGETS "setMultipleTargets"
+#define MM24_SET_SPEED            "setSpeed"
+#define MM24_SET_ACCELERATION     "setAcceleration"
 #define MM24_GET_POSITION         "getPosition"
 #define MM24_GET_MOVING_STATE     "getMovingState"
 #define MM24_GET_ERRORS           "getErrors"

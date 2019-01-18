@@ -193,6 +193,10 @@ void MiniMaestro24::timeoutMonitoramentoPosicao()
         else if(comando.comando == MM24_GET_MOVING_STATE)
         {
             this->GetMovingState();            
+        }        
+        else if(comando.comando == MM24_GET_ERRORS)
+        {
+            this->GetErrors();
         }
         else if(comando.comando == MM24_SET_TARGET)
         {
@@ -202,7 +206,14 @@ void MiniMaestro24::timeoutMonitoramentoPosicao()
         {
             this->SetMultipleTargets(comando.numTargets, comando.canal, comando.target);
         }
-        // TODO: Mini Maestro 24: Incluir chamada do comando GetErrors no MiniMaestro24::timeoutMonitoramentoPosicao()
+        else if(comando.comando == MM24_SET_SPEED)
+        {
+            this->SetSpeed(comando.canal, comando.target[0]);
+        }
+        else if(comando.comando == MM24_SET_ACCELERATION)
+        {
+            this->SetAcceleration(comando.canal, comando.target[0]);
+        }
     }
     else
         this->GetMovingState();

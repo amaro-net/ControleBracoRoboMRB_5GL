@@ -1457,22 +1457,19 @@ void MainWindow::decodificaResposta()
 }
 
 void MainWindow::recebeBytesMiniMaestro24(QByteArray data)
-{
-    // TODO: Mini Maestro 24: Recepção dos bytes de resposta dos comandos
+{    
     char rChar;
 
     comando_mm cmd;    
 
     if(mm24->filaComMonitoramentoEnviados.isEmpty())
-        return;
-
-    //mm24->timerMonitoramentoPosicao->stop();
+        return;    
 
     cmd = mm24->filaComMonitoramentoEnviados.dequeue();    
 
     int qtd_bytes = 0;
 
-    for(int i = 0; i < data.length() /*&& !mm24->filaComandosEnviados.isEmpty()*/; i++)
+    for(int i = 0; i < data.length(); i++)
     {
         rChar = data.at(i);
         cmd.resposta[qtd_bytes++] = rChar;
@@ -2210,8 +2207,14 @@ void MainWindow::on_btMover_clicked()
         if(ui->rdbReadyForPIC->isChecked())
             comandoJST();
         else if(ui->rdbMiniMaestro24->isChecked())
-        {
-            // TODO: Aba Posições das Juntas: botão mover para a Mini Maestro 24
+        {            
+            uint16_t posicaoAlvo[QTD_SERVOS];
+
+            for(int i = 0; i < QTD_SERVOS; i++)
+            {
+                posicaoAlvo[i] = static_cast<uint16_t>(lstSpnAlvo[i]->value());
+            }
+            this->mm24->SetMultipleTargets(QTD_SERVOS, 0, posicaoAlvo);
         }
     }
     else
@@ -2276,7 +2279,11 @@ void MainWindow::on_btMoverComVelEAcl_clicked()
                 comando = QString("[ACL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
                 filaComandosMoverComVelAcl.enqueue(comando);
 
-                valor = lstSpnAlvo[i]->value();
+                if(lstChkHab[i]->isChecked())
+                    valor = lstSpnAlvo[i]->value();
+                else
+                    valor = 0;
+
                 comandoJST += idJST[i] + QString("%1").arg(valor, 4, 10, QChar('0'));
             }
 
@@ -2288,7 +2295,23 @@ void MainWindow::on_btMoverComVelEAcl_clicked()
         }
         else if(ui->rdbMiniMaestro24->isChecked())
         {
-            // TODO: Aba Posições das Juntas: botão mover com vel e acl para a placa Mini Maestro 24
+            uint16_t targets[6];
+
+            for(int i = 0; i < QTD_SERVOS; i++)
+            {
+                  uint16_t speed = static_cast<uint16_t>(lstSpnVel[i]->value());
+                  this->mm24->SetSpeed(char(i), speed);
+
+                  uint16_t accel = static_cast<uint16_t>(lstSpnAcl[i]->value());
+                  this->mm24->SetAcceleration(char(i), accel);
+
+                  if(lstChkHab[i]->isChecked())
+                    targets[i] = static_cast<uint16_t>(lstSpnAlvo[i]->value());
+                  else
+                    targets[i] = 0;
+            }
+
+            this->mm24->SetMultipleTargets(QTD_SERVOS, 0, targets);
         }
     }
     else
@@ -2587,8 +2610,8 @@ void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrosse
 
                 }
                 else if(ui->rdbMiniMaestro24->isChecked())
-                {
-                    // TODO: Aba Posições das Juntas: envio imediato de posicao alvo para a Mini Maestro 24
+                {                    
+                    mm24->SetTarget(char(idxJunta), uint16_t(posicaoMicrossegundos));
                 }
             }
             else
@@ -2639,8 +2662,8 @@ void MainWindow::enviaVelocidadeAssimQueMudar(int idxJunta, int velocidadeMicros
             }
         }
         else if(ui->rdbMiniMaestro24->isChecked())
-        {
-            // TODO: Aba Posições das Juntas: envio imediato de velocidade para a Mini Maestro 24
+        {            
+            mm24->SetSpeed(char(idxJunta), uint16_t(velocidadeMicrossegundos));
         }
     }
 }
@@ -2671,8 +2694,8 @@ void MainWindow::enviaAceleracaoAssimQueMudar(int idxJunta, int aceleracaoMicros
             }
         }
         else if(ui->rdbMiniMaestro24->isChecked())
-        {
-            // TODO: Aba Posições das Juntas: envio imediato de aceleração para a Mini Maestro 24
+        {            
+            mm24->SetAcceleration(char(idxJunta), uint16_t(aceleracaoMicrossegundos));
         }
     }
 }
@@ -3653,18 +3676,6 @@ void MainWindow::posicaoDeRepousoMiniMaestro24()
 
     this->mm24->SetMultipleTargets(5, 0, posicaoRepouso);
 
-//    comando_mm comandoRepouso;
-//    comandoRepouso.comando = MM24_SET_MULTIPLE_TARGETS;
-//    comandoRepouso.numTargets = 5;
-//    comandoRepouso.canal = 0; // primeiro canal
-//    for(int canal = 0; canal < 5; canal++)
-//    {
-//        comandoRepouso.target[canal] = ui->tabelaPosLimites->item(canal, 3)->text().toUInt();
-//    }
-
-//    this->mm24->filaComandosAEnviar.enqueue(comandoRepouso);
-
-    //this->mm24->flagMovimento = true;
     this->mm24->posicaoRepousoAcionada = true;
 }
 
@@ -3684,23 +3695,29 @@ void MainWindow::posicaoNeutraJSTMiniMaestro24()
 
 void MainWindow::posicaoNeutraCTZMiniMaestro24()
 {    
-    uint16_t posicaoNeutra;
+    uint16_t posicaoNeutra, posicaoCorrente;
 
     this->mm24->filaComAcionamento.clear();
 
     for(int i = 0; i < 6; i++)
     {
         posicaoNeutra = ui->tabelaPosLimites->item(i, 2)->text().toUShort();
-        comando_mm comandoCTZ;
-        comandoCTZ.comando = MM24_SET_TARGET;
-        comandoCTZ.canal = static_cast<char>(i);
-        comandoCTZ.target[0] = posicaoNeutra;
-        comandoCTZ.qtdBytesAReceber = 0;
-        this->mm24->filaComAcionamento.enqueue(comandoCTZ);
+        posicaoCorrente = lstEdtAtual[i]->text().replace(STR_UND_MICROSSEGUNDOS, "").toUShort();
+
+        if(posicaoCorrente != posicaoNeutra)
+        {
+            comando_mm comandoCTZ;
+            comandoCTZ.comando = MM24_SET_TARGET;
+            comandoCTZ.canal = static_cast<char>(i);
+            comandoCTZ.target[0] = posicaoNeutra;
+            comandoCTZ.qtdBytesAReceber = 0;
+            this->mm24->filaComAcionamento.enqueue(comandoCTZ);
+        }
     }
 
-    // TODO: Mini Maestro 24: Verificar se esta instrução é necessária aqui
-    this->mm24->flagMovimento = true;    
+    comando_mm primeiroCTZ = this->mm24->filaComAcionamento.dequeue();
+    this->mm24->SetTarget(primeiroCTZ.canal, primeiroCTZ.target[0]);
+
 }
 
 void MainWindow::desligaServosMiniMaestro24()
