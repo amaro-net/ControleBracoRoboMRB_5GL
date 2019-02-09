@@ -64,6 +64,7 @@ class MainWindow : public QMainWindow
         void positionChangedMiniMaestro24(unsigned int posicao[]);
         void positionErrorMiniMaestro();
         void fimMovimentoMiniMaestro24(unsigned int posicao[]);
+        void semMovimentoMiniMaestro24(unsigned int posicao[]);
         void setouPosicaoAlvoMiniMaestro24(int canal, unsigned int valor);
         void setouVelocidadeMiniMaestro24(int canal, unsigned int valor);
         void setouAceleracaoMiniMaestro24(int canal, unsigned int valor);
@@ -277,9 +278,6 @@ class MainWindow : public QMainWindow
         void habilitarComponentesReadyForPIC(bool estadoHab);
         void HabilitarComponentesComServosLigados();
 
-        void enviaComando(QString comando);
-        void executaComandoDaSequencia();
-
         void recebeCaracteresDeResposta(QByteArray data);
         void setaPosicaoPontoVerde(int idxJunta, int posicao);
         void montaJSTParaPararMov1Junta();
@@ -317,6 +315,8 @@ class MainWindow : public QMainWindow
         int caixaDialogoPerguntaSimNao(const QString &titulo, const QString &texto);
 
         /* Comandos */
+        void enviaComando(QString comando);
+        void executaComandoDaSequencia();
         void abrirGarra();
         void garraSemiaberta();
         void fecharGarra();
@@ -332,7 +332,7 @@ class MainWindow : public QMainWindow
         void comandoLED();
         void comandoLEDSemParametros();
 
-        bool parser(QString comando);
+        bool parser(QString comando);        
 
         void iniciaDLYSemParametro();
 
@@ -347,6 +347,9 @@ class MainWindow : public QMainWindow
         void posicaoNeutraJSTMiniMaestro24();
         void posicaoNeutraCTZMiniMaestro24();
         void desligaServosMiniMaestro24();
+        bool parserMM24(QString comando);
+        void executaComandoDaSequenciaMM24();
+
 
         /* Avisos de Colisão */
         void avisoColisaoBaseFixa(bool posicaoProjetada = false);

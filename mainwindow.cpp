@@ -630,6 +630,7 @@ void MainWindow::abrirPortaSerial()
             connect(this->mm24, &MiniMaestro24::positionChanged, this, &MainWindow::positionChangedMiniMaestro24);
             //connect(this->mm24, SIGNAL(MiniMaestro24::positionError()), this, SLOT(this->positionErrorMiniMaestro()));
             connect(this->mm24, &MiniMaestro24::fimMovimento, this, &MainWindow::fimMovimentoMiniMaestro24);
+            connect(this->mm24, &MiniMaestro24::semMovimento, this, &MainWindow::semMovimentoMiniMaestro24);
             connect(this->mm24, &MiniMaestro24::setouPosicaoAlvo, this, &MainWindow::setouPosicaoAlvoMiniMaestro24);
             connect(this->mm24, &MiniMaestro24::setouVelocidade, this, &MainWindow::setouVelocidadeMiniMaestro24);
             connect(this->mm24, &MiniMaestro24::setouAceleracao, this, &MainWindow::setouAceleracaoMiniMaestro24);
@@ -650,18 +651,7 @@ void MainWindow::abrirPortaSerial()
             habilitarComponentesConn(true);
             habilitaBotoesExecComandos(true);
             habilitaCamposAbaPosicaoAlvo(0, true);
-            habilitaCamposAbaPosicaoAlvo(1, true);
-
-            // TODO: Mini Maestro 24: Remover estas linhas
-            /*ui->btAbrirGarra->setEnabled(true);
-            ui->btGarraSemiaberta->setEnabled(true);
-            ui->btFecharGarra->setEnabled(true);
-            ui->btGiroGarraMais90->setEnabled(true);
-            ui->btGarraPosNeutra->setEnabled(true);
-            ui->btGiroGarraMenos90->setEnabled(true);
-            ui->btPosNeutraJST->setEnabled(true);
-            ui->btPosNeutraCTZ->setEnabled(true);
-            */            
+            habilitaCamposAbaPosicaoAlvo(1, true);                
         }
 
     }
@@ -1615,6 +1605,16 @@ void MainWindow::fimMovimentoMiniMaestro24(unsigned int posicao[])
     }
 
     //HabilitarComponentesComServosLigados();
+}
+
+void MainWindow::semMovimentoMiniMaestro24(unsigned int posicao[])
+{
+    Q_UNUSED(posicao);
+
+    if(seqEmExecucao && !timerDLY->isActive() && !emDLYSemParam)
+    {
+        executaComandoDaSequenciaMM24();
+    }
 }
 
 void MainWindow::setouPosicaoAlvoMiniMaestro24(int canal, unsigned int valor)
@@ -3304,8 +3304,11 @@ void MainWindow::on_btExecutarSeqComandos_clicked()
             }
         }
         else if(ui->rdbMiniMaestro24->isChecked())
-        {
-            // TODO: Aba sequência: parser para a Mini Maestro 24
+        {            
+            if(!parserMM24(ui->listSequenciaComandos->currentItem()->text()))
+            {
+                executaComandoDaSequenciaMM24();
+            }
         }
     }
 }
@@ -3337,8 +3340,11 @@ void MainWindow::on_btContinuarSeqComandos_clicked()
                 }
             }
             else if(ui->rdbMiniMaestro24->isChecked())
-            {
-                // TODO: Aba sequência: parser para a Mini Maestro 24
+            {                
+                if(!parserMM24(ui->listSequenciaComandos->currentItem()->text()))
+                {
+                    executaComandoDaSequenciaMM24();
+                }
             }
         }
     }
@@ -3362,8 +3368,11 @@ void MainWindow::on_btExecutarLoopSeqComandos_clicked()
             }
         }
         else if(ui->rdbMiniMaestro24->isChecked())
-        {
-            // TODO: Aba sequência: parser para a Mini Maestro 24
+        {            
+            if(!parserMM24(ui->listSequenciaComandos->currentItem()->text()))
+            {
+                executaComandoDaSequenciaMM24();
+            }
         }
     }
 }
@@ -3396,8 +3405,11 @@ void MainWindow::on_btContinuarLoopSeqComandos_clicked()
                 }
             }
             else if(ui->rdbMiniMaestro24->isChecked())
-            {
-                // TODO: Aba sequência: parser para a Mini Maestro 24
+            {                
+                if(!parserMM24(ui->listSequenciaComandos->currentItem()->text()))
+                {
+                    executaComandoDaSequenciaMM24();
+                }
             }
         }
     }
@@ -3412,8 +3424,9 @@ void MainWindow::on_btPararSeqComandos_clicked()
         emLoop = false;
         emDLYSemParam = false;
 
-        if(ui->chkBtPararEnviaJST->isChecked())
+        if(ui->chkBtPararEnviaJST->isChecked() && ui->rdbReadyForPIC->isChecked())
         {
+            // TODO: Mini Maestro 24: Implementar parada total
             ui->chkBtPararEnviaJST->setEnabled(false);
             ui->btPararSeqComandos->setEnabled(false);
             filaComandosParaPararMov.clear();
@@ -3624,41 +3637,98 @@ void MainWindow::iniciaDLYSemParametro()
 }
 
 
+
+
+
+void MainWindow::timeoutDLY()
+{
+    if(!seqEmExecucao)
+        return;
+
+    if(ui->rdbReadyForPIC->isChecked())
+        executaComandoDaSequencia();
+    else if(ui->rdbMiniMaestro24->isChecked())
+        executaComandoDaSequenciaMM24();
+}
+
+void MainWindow::continuaExecucaoPartindoDoDLYSemParam()
+{
+    ui->lblStatusSeqComandos->setText(ultimoStatusSeqComandos);
+
+    emDLYSemParam = false;
+
+    if(posUltimoDLYSemParam >= 0)
+    {
+        ui->listSequenciaComandos->setCurrentRow(posUltimoDLYSemParam);
+        posUltimoDLYSemParam = -1;
+    }
+
+    if(ui->rdbReadyForPIC->isChecked())
+        executaComandoDaSequencia();
+    else if(ui->rdbMiniMaestro24->isChecked())
+        executaComandoDaSequenciaMM24();
+}
+
+void MainWindow::on_listSequenciaComandos_itemActivated(QListWidgetItem *item)
+{
+    Q_UNUSED(item)
+
+    if(!seqEmExecucao)
+    {
+        QString comando = item->text();
+
+        if(ui->rdbReadyForPIC->isChecked())
+            parser(comando);
+        else if(ui->rdbMiniMaestro24->isChecked())
+            parserMM24(comando);
+
+        return;
+    }
+
+    if(!emDLYSemParam)
+    {
+        return;
+    }
+
+    continuaExecucaoPartindoDoDLYSemParam();
+}
+
+
 /* NOTE: ***** Comandos Mini Maestro 24 ***** */
 
 void MainWindow::abrirGarraMiniMaestro24()
-{    
-    unsigned short valorGarraAberta = ui->tabelaPosLimites->item(5, 0)->text().toUShort();    
+{
+    unsigned short valorGarraAberta = ui->tabelaPosLimites->item(5, 0)->text().toUShort();
     this->mm24->SetTarget(5, valorGarraAberta);
 
 }
 
 void MainWindow::garraSemiabertaMiniMaestro24()
-{    
+{
     unsigned short valorGarraSemiaberta = ui->tabelaPosLimites->item(5, 2)->text().toUShort();
     this->mm24->SetTarget(5, valorGarraSemiaberta);
 }
 
 void MainWindow::fecharGarraMiniMaestro24()
-{    
+{
     unsigned short valorGarraFechada = ui->tabelaPosLimites->item(5, 1)->text().toUShort();
     this->mm24->SetTarget(5, valorGarraFechada);
 }
 
 void MainWindow::giroGarraMais90MiniMaestro24()
-{    
+{
     unsigned short valorPulsoGarraMais90 = ui->tabelaPosLimites->item(4, 0)->text().toUShort();
     this->mm24->SetTarget(4, valorPulsoGarraMais90);
 }
 
 void MainWindow::garraPosNeutraMiniMaestro24()
-{    
+{
     unsigned short valorPulsoGarraPosNeutra = ui->tabelaPosLimites->item(4, 2)->text().toUShort();
     this->mm24->SetTarget(4, valorPulsoGarraPosNeutra);
 }
 
 void MainWindow::giroGarraMenos90MiniMaestro24()
-{    
+{
     unsigned short valorPulsoGarraMenos90 = ui->tabelaPosLimites->item(4, 1)->text().toUShort();
     this->mm24->SetTarget(4, valorPulsoGarraMenos90);
 }
@@ -3680,7 +3750,7 @@ void MainWindow::posicaoDeRepousoMiniMaestro24()
 }
 
 void MainWindow::posicaoNeutraJSTMiniMaestro24()
-{    
+{
     uint16_t posicaoNeutra[6];
 
     this->mm24->filaComAcionamento.clear();
@@ -3690,11 +3760,11 @@ void MainWindow::posicaoNeutraJSTMiniMaestro24()
         posicaoNeutra[i] = ui->tabelaPosLimites->item(i, 2)->text().toUShort();
     }
 
-    this->mm24->SetMultipleTargets(6, 0, posicaoNeutra);    
+    this->mm24->SetMultipleTargets(6, 0, posicaoNeutra);
 }
 
 void MainWindow::posicaoNeutraCTZMiniMaestro24()
-{    
+{
     uint16_t posicaoNeutra, posicaoCorrente;
 
     this->mm24->filaComAcionamento.clear();
@@ -3749,51 +3819,237 @@ void MainWindow::desligaServosMiniMaestro24()
     this->mm24->desligaServosAcionado = true;
 }
 
-
-
-void MainWindow::timeoutDLY()
+bool MainWindow::parserMM24(QString comando)
 {
-    if(!seqEmExecucao)
-        return;
+    if(comando.at(0) != '[' || comando.at(comando.length() - 1) != ']')
+        return false;
 
-    executaComandoDaSequencia();
-}
-
-void MainWindow::continuaExecucaoPartindoDoDLYSemParam()
-{
-    ui->lblStatusSeqComandos->setText(ultimoStatusSeqComandos);
-
-    emDLYSemParam = false;
-
-    if(posUltimoDLYSemParam >= 0)
+    if(comando.contains("VEL"))
     {
-        ui->listSequenciaComandos->setCurrentRow(posUltimoDLYSemParam);
-        posUltimoDLYSemParam = -1;
+        QString strJunta = comando.mid(4,2);
+
+        if(comando.size() == 11)
+        {
+            int valor = comando.mid(6,4).toInt();
+
+            int idxJunta = -1;
+
+            if(strJunta.at(0) == 'J')
+                idxJunta = strJunta.at(1).toLatin1() - '0';
+            else if(strJunta.at(0) == 'G')
+                idxJunta = 5;
+            else
+                return false;
+
+            if(idxJunta != -1)
+            {
+                lstSpnVel[idxJunta]->setValue(valor);
+
+                mm24->SetSpeed(char(idxJunta), uint16_t(valor));
+
+                return true;
+            }
+        }
+    }
+    else if(comando.contains("ACL"))
+    {
+        QString strJunta = comando.mid(4,2);
+
+        if(comando.size() == 11)
+        {
+            int valor = comando.mid(6,4).toInt();
+
+            int idxJunta = -1;
+
+            if(strJunta.at(0) == 'J')
+                idxJunta = strJunta.at(1).toLatin1() - '0';
+            else if(strJunta.at(0) == 'G')
+                idxJunta = 5;
+            else
+                return false;
+
+            if(idxJunta != -1)
+            {
+                lstSpnAcl[idxJunta]->setValue(valor);
+
+                mm24->SetAcceleration(char(idxJunta), uint16_t(valor));
+
+                return true;
+            }
+        }
+    }
+    else if(comando.contains("JST"))
+    {
+        int tam = comando.length();
+        if(tam >= 10 && tam <= 35 && tam % 5 == 0)
+        {
+            uint16_t posicoesAlvo[QTD_SERVOS];
+            int qtJuntas = (tam-5)/5;
+            int primeiroCanal = 5;
+
+            for(int i = 0; i < QTD_SERVOS; i++)
+            {
+                if(lstChkHab[i]->isChecked())
+                    posicoesAlvo[i] = uint16_t(lstSpnAlvo[i]->value());
+                else
+                    posicoesAlvo[i] = 0;
+            }
+
+            for(int i = 0; i < qtJuntas; i++)
+            {
+                char juntaJST = comando.at(5*i+4).toLatin1();
+
+                int idxJunta = -1;
+                if(juntaJST >= 'A' && juntaJST <= 'E')
+                    idxJunta = juntaJST - 'A';
+                else if (juntaJST == 'G')
+                    idxJunta = 5;
+                else
+                    return false;
+
+                if(primeiroCanal > idxJunta) primeiroCanal = idxJunta;
+
+                if(idxJunta != -1)
+                {
+                    int valor = comando.mid(5*(i+1), 4).toInt();
+
+                    if(valor > 0)
+                    {
+                        lstSpnAlvo[idxJunta]->setValue(valor);
+                    }
+                    else
+                        lstChkHab[idxJunta]->setChecked(false);
+
+                    posicoesAlvo[idxJunta] = uint16_t(valor);
+                }
+            }
+
+            mm24->SetMultipleTargets(char(qtJuntas), char(primeiroCanal), posicoesAlvo);
+
+            return true;
+        }
+    }
+    else if(comando.contains("RPS"))
+    {
+        uint16_t posRepouso[5];
+        for (int i = 0; i < 5; i++)
+        {
+            int valor = ui->tabelaPosLimites->item(i, 3)->text().toInt();
+            this->lstSpnAlvo[i]->setValue(valor);
+            posRepouso[i] = uint16_t(valor);
+        }
+
+        mm24->SetMultipleTargets(5, 0, posRepouso);
+
+        return true;
+    }
+    else if(comando.contains("CTZ"))
+    {
+        QString strJunta = comando.mid(4,2);
+
+        int idxJunta = -1;
+
+        if(strJunta.at(0) == 'J')
+            idxJunta = strJunta.at(1).toLatin1() - '0';
+        else if(strJunta.at(0) == 'G')
+            idxJunta = 5;
+        else
+            return false;
+
+        if(idxJunta != -1)
+        {
+            int valor = ui->tabelaPosLimites->item(idxJunta, 2)->text().toInt();
+            lstSpnAlvo[idxJunta]->setValue(valor);
+            mm24->SetTarget(char(idxJunta), uint16_t(valor));
+        }
+
+        return true;
+    }
+    else if(comando.contains("GA"))
+    {
+        int valor = ui->tabelaPosLimites->item(5, 0)->text().toInt();
+        ui->spnGRAlvo->setValue(valor);
+
+        mm24->SetTarget(5, uint16_t(valor));
+
+        return true;
+    }
+    else if(comando.contains("GF"))
+    {
+        int valor = ui->tabelaPosLimites->item(5, 1)->text().toInt();
+        ui->spnGRAlvo->setValue(valor);
+
+        mm24->SetTarget(5, uint16_t(valor));
+        return true;
+    }
+    // Não possui comando LED. Este será ignorado para a Mini Maestro 24
+    else if(comando.contains("DLY"))
+    {
+        if(comando.length() == 9)
+        {
+            int delayMs = comando.mid(4, 4).toInt();
+            if(delayMs > 0)
+                timerDLY->start(delayMs);
+            else
+            {
+                iniciaDLYSemParametro();
+            }
+            return true;
+        }
+        else if(comando.length() == 5)
+        {
+            iniciaDLYSemParametro();
+            return true;
+        }
     }
 
-    executaComandoDaSequencia();
+    return false;
 }
 
-void MainWindow::on_listSequenciaComandos_itemActivated(QListWidgetItem *item)
+void MainWindow::executaComandoDaSequenciaMM24()
 {
-    Q_UNUSED(item)
+    // BUG: Mini Maestro 24: Com a sequência em execução, se clicar em uma linha diferente do comando que está sendo executado, a linha clicada é executada.
+    int index_selected = ui->listSequenciaComandos->currentRow();
 
-    if(!seqEmExecucao)
+    if(index_selected + 1 < ui->listSequenciaComandos->count())
     {
-        QString comando = item->text();
+        ui->listSequenciaComandos->setCurrentRow(++index_selected);
 
-        parser(comando);
-
-        return;
+        while (!parserMM24(ui->listSequenciaComandos->currentItem()->text()) &&
+               (index_selected + 1 < ui->listSequenciaComandos->count()) )
+        {
+            ui->listSequenciaComandos->setCurrentRow(++index_selected);
+        }
     }
-
-    if(!emDLYSemParam)
+    else
     {
-        return;
-    }
+        if(emLoop)
+        {
+            int index_selected = 0;
+            ui->listSequenciaComandos->setCurrentRow(index_selected);
 
-    continuaExecucaoPartindoDoDLYSemParam();
+            while (!parserMM24(ui->listSequenciaComandos->currentItem()->text()) &&
+                   (index_selected + 1 < ui->listSequenciaComandos->count()) )
+            {
+                ui->listSequenciaComandos->setCurrentRow(++index_selected);
+            }
+        }
+        else
+        {
+            seqEmExecucao = false;
+
+            if(ui->listSequenciaComandos->count() == 0)
+                ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_PARADA_VAZIA);
+            else
+            {
+                ui->lblStatusSeqComandos->setText(STATUS_SEQCOM_PARADA_NAO_VAZIA);
+                ui->lblStatusSeqComandos->setFocus();
+            }
+            habilitaBotoesExecComandos(true);
+        }
+    }
 }
+
 
 
 /*NOTE: ***** Aba configurações ***** */

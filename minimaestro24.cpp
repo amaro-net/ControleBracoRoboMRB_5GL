@@ -304,12 +304,6 @@ void MiniMaestro24::decodificaResposta()
                     emit this->fimMovimento(this->posicao);
                     if(this->posicaoAlvoPronta)
                         posicaoAlvoPronta = false;
-
-                    if(!this->filaComAcionamento.isEmpty())
-                    {
-                        this->filaComandosAEnviar.enqueue(this->filaComAcionamento.dequeue());
-                        this->flagMovimento = !this->filaComAcionamento.isEmpty();
-                    }
                 }
             }
             else if(this->posicaoRepousoAcionada)
@@ -333,6 +327,16 @@ void MiniMaestro24::decodificaResposta()
             {
                 // Aviso para atualizar this->posicao antes
                 this->atualizacaoPosicaoSolicitada = true;
+            }
+
+            if(!this->filaComAcionamento.isEmpty())
+            {
+                this->filaComandosAEnviar.enqueue(this->filaComAcionamento.dequeue());
+                this->flagMovimento = !this->filaComAcionamento.isEmpty();
+            }
+            else
+            {
+                emit semMovimento(this->posicao);
             }
         }
 

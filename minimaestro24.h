@@ -36,6 +36,7 @@ class MiniMaestro24 : public QObject
         void positionChanged(unsigned int posicao[]);
         void positionError();
         void fimMovimento(unsigned int posicao[]);
+        void semMovimento(unsigned int posicao[]);
         void setouPosicaoAlvo(int canal, unsigned int valor);
         void setouVelocidade(int canal, unsigned int valor);
         void setouAceleracao(int canal, unsigned int valor);
