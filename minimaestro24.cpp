@@ -71,11 +71,10 @@ short MiniMaestro24::SetMultipleTargets(char numTargets, char primeiroCanal, uin
     data[2] = primeiroCanal;
 
     int j = 3;
-    // TODO: Mini Maestro 24: Resolver problema ocasionado quando o valor de primeiroCanal é maior que o valor de numTargets
-    //       Nesta situação, as posições alvo não são atribuídas, ocasionando não só
-    //       o envio de valores lixo, mas o envio de quantidades erradas de bytes,
-    //       ocasionando erro na Mini Maestro 24.
-    for(int i = primeiroCanal; i < numTargets; i++)
+
+    int aposUltimoCanal = numTargets + primeiroCanal;
+
+    for(int i = primeiroCanal; i < aposUltimoCanal; i++)
     {
         target = targets[i];
         uint16_t target4 = target * 4;
