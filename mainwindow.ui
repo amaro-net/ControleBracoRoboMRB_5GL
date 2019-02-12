@@ -34,9 +34,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>301</y>
+        <y>299</y>
         <width>461</width>
-        <height>65</height>
+        <height>71</height>
        </rect>
       </property>
       <property name="title">
@@ -49,7 +49,7 @@
        <property name="geometry">
         <rect>
          <x>7</x>
-         <y>16</y>
+         <y>19</y>
          <width>168</width>
          <height>46</height>
         </rect>
@@ -140,8 +140,8 @@
       <widget class="QLineEdit" name="edtComandoLEDAcionado">
        <property name="geometry">
         <rect>
-         <x>256</x>
-         <y>12</y>
+         <x>259</x>
+         <y>18</y>
          <width>197</width>
          <height>20</height>
         </rect>
@@ -150,8 +150,8 @@
       <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
-         <x>170</x>
-         <y>11</y>
+         <x>175</x>
+         <y>18</y>
          <width>82</width>
          <height>48</height>
         </rect>
@@ -185,8 +185,8 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>254</x>
-         <y>36</y>
+         <x>257</x>
+         <y>41</y>
          <width>201</width>
          <height>24</height>
         </rect>
@@ -3572,7 +3572,7 @@ alterada.</string>
        <string>lblStatusSeqComandos</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="chkBtPararEnviaJST">
+     <widget class="QCheckBox" name="chkParadaTotal">
       <property name="geometry">
        <rect>
         <x>190</x>
@@ -3583,8 +3583,8 @@ alterada.</string>
       </property>
       <property name="text">
        <string>Parada total. 
-Botão Parar envia comando JST com posição
-atual para parar completamente o movimento
+Botão Parar envia  posição atual como posição 
+alvo para parar completamente o movimento 
 do braço robô (experimental).</string>
       </property>
      </widget>

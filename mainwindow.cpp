@@ -516,7 +516,7 @@ void MainWindow::habilitarComponentes(bool estadoHab)
     ui->btPararSeqComandos->setEnabled(estadoHab);
     ui->btComandoUp->setEnabled(estadoHab);
     ui->btComandoDown->setEnabled(estadoHab);
-    ui->chkBtPararEnviaJST->setEnabled(estadoHab);
+    ui->chkParadaTotal->setEnabled(estadoHab);
 }
 
 void MainWindow::habilitarComponentesReadyForPIC(bool estadoHab)
@@ -1351,7 +1351,7 @@ void MainWindow::decodificaResposta()
         }
         inicializando = false;
 
-        if(paradaDeSequenciaSolicitada && ui->chkBtPararEnviaJST->isChecked())
+        if(paradaDeSequenciaSolicitada && ui->chkParadaTotal->isChecked())
         {
             if(filaComandosParaPararMov.count() > 0)
             {
@@ -1419,7 +1419,7 @@ void MainWindow::decodificaResposta()
                 ultimoVELcomVelocidadeAnterior = "";
                 paradaDeSequenciaSolicitada = false;
                 // TODO: Aba Sequência de Comandos: Reimplementar a parada total com o novo comando de parada total implementado na placa de controle
-                ui->chkBtPararEnviaJST->setEnabled(true);
+                ui->chkParadaTotal->setEnabled(true);
                 ui->btPararSeqComandos->setEnabled(true);
                 foiEnviadoJSTParaPararMov = false;
             }
@@ -1614,6 +1614,18 @@ void MainWindow::semMovimentoMiniMaestro24(unsigned int posicao[])
     if(seqEmExecucao && !timerDLY->isActive() && !emDLYSemParam)
     {
         executaComandoDaSequenciaMM24();
+    }
+    else if(mm24->paradaTotalSolicitada)
+    {
+        mm24->paradaTotalSolicitada = false;
+
+        for(char canal = 0; canal < 6; canal++)
+        {
+            mm24->SetSpeed(canal, uint16_t(velocidadesAnterioresAAParada[int(canal)]));
+        }
+
+        ui->chkParadaTotal->setEnabled(true);
+        ui->btPararSeqComandos->setEnabled(true);
     }
 }
 
@@ -3424,20 +3436,35 @@ void MainWindow::on_btPararSeqComandos_clicked()
         emLoop = false;
         emDLYSemParam = false;
 
-        if(ui->chkBtPararEnviaJST->isChecked() && ui->rdbReadyForPIC->isChecked())
+        if(ui->chkParadaTotal->isChecked())
         {
-            // TODO: Mini Maestro 24: Implementar parada total
-            ui->chkBtPararEnviaJST->setEnabled(false);
-            ui->btPararSeqComandos->setEnabled(false);
-            filaComandosParaPararMov.clear();
-            for(int i = 0; i < QTD_SERVOS; i++)
+            if(ui->rdbReadyForPIC->isChecked())
             {
-                velocidadesAnterioresAAParada[i] = lstSpnVel[i]->value();
-                filaComandosParaPararMov.enqueue(QString("[VEL%1%2]").arg(junta[i]).arg(1, 4, 10, QChar('0')));
+                ui->chkParadaTotal->setEnabled(false);
+                ui->btPararSeqComandos->setEnabled(false);
+                filaComandosParaPararMov.clear();
+                for(int i = 0; i < QTD_SERVOS; i++)
+                {
+                    velocidadesAnterioresAAParada[i] = lstSpnVel[i]->value();
+                    filaComandosParaPararMov.enqueue(QString("[VEL%1%2]").arg(junta[i]).arg(1, 4, 10, QChar('0')));
+                }
+                enviaComando(filaComandosParaPararMov.dequeue());
+                paradaDeSequenciaSolicitada = true;
+                foiEnviadoJSTParaPararMov = false;
             }
-            enviaComando(filaComandosParaPararMov.dequeue());
-            paradaDeSequenciaSolicitada = true;
-            foiEnviadoJSTParaPararMov = false;
+            else if(ui->rdbMiniMaestro24->isChecked())
+            {                
+                ui->chkParadaTotal->setEnabled(false);
+                ui->btPararSeqComandos->setEnabled(false);
+
+                for(int i = 0; i < QTD_SERVOS; i++)
+                {
+                    velocidadesAnterioresAAParada[i] = lstSpnVel[i]->value();
+                    mm24->SetSpeed(char(i), 1);
+                }
+
+                mm24->paradaTotalSolicitada = true;
+            }
         }
     }
 

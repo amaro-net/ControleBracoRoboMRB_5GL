@@ -109,6 +109,7 @@ class MiniMaestro24 : public QObject
 
         /* Checagens da posição dos canais */
         bool todasPosicoesDasJuntasAtualizadas();
+        bool todasPosicoesDosCanaisAtualizados();
         bool algumaPosicaoDeJuntaZerada();
         bool todasPosicoesDasJuntasZeradas();
         bool posicaoAtualEhDeRepouso();        
@@ -131,7 +132,7 @@ class MiniMaestro24 : public QObject
 
         bool flagMovimento = false;
 
-        bool posicaoAtualizadaJunta[5];
+        bool posicaoAtualizadaCanal[6];
 
         unsigned int posicaoRepouso[5];
 
@@ -139,6 +140,8 @@ class MiniMaestro24 : public QObject
         bool desligaServosAcionado = false;
         bool inicializacaoSolicitada = false;
         bool atualizacaoPosicaoSolicitada = true;
+
+        bool paradaTotalSolicitada = false;
 };
 
 #endif // MINIMAESTRO24_H

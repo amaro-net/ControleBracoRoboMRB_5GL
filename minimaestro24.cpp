@@ -71,7 +71,10 @@ short MiniMaestro24::SetMultipleTargets(char numTargets, char primeiroCanal, uin
     data[2] = primeiroCanal;
 
     int j = 3;
-
+    // TODO: Mini Maestro 24: Resolver problema ocasionado quando o valor de primeiroCanal é maior que o valor de numTargets
+    //       Nesta situação, as posições alvo não são atribuídas, ocasionando não só
+    //       o envio de valores lixo, mas o envio de quantidades erradas de bytes,
+    //       ocasionando erro na Mini Maestro 24.
     for(int i = primeiroCanal; i < numTargets; i++)
     {
         target = targets[i];
@@ -226,7 +229,18 @@ bool MiniMaestro24::todasPosicoesDasJuntasAtualizadas()
     bool resultado = true;
     for(int i = 0; i < 5 && resultado; i++)
     {
-        resultado = posicaoAtualizadaJunta[i];
+        resultado = posicaoAtualizadaCanal[i];
+    }
+
+    return resultado;
+}
+
+bool MiniMaestro24::todasPosicoesDosCanaisAtualizados()
+{
+    bool resultado = true;
+    for(int i = 0; i < 6 && resultado; i++)
+    {
+        resultado = posicaoAtualizadaCanal[i];
     }
 
     return resultado;
@@ -287,7 +301,7 @@ void MiniMaestro24::decodificaResposta()
 
         this->filaComandosAEnviar.clear();
 
-        if(resposta == 0x01)
+        if(resposta == 0x01) // em movimento
         {
             this->flagMovimento = true;
         }
@@ -295,13 +309,14 @@ void MiniMaestro24::decodificaResposta()
         {
             if(this->flagMovimento)
             {
-                // Se posicaoAlvoPronta então posicaoAlvoAtingida
+                // Se posicaoAlvoPronta então posicaoAlvoAtingida()
                 // posicaoAlvoPronta => posicaoAlvoAtingida()
                 if(!this->posicaoAlvoPronta || posicaoAlvoAtingida())
                 {
                     this->flagMovimento = false;
 
                     emit this->fimMovimento(this->posicao);
+
                     if(this->posicaoAlvoPronta)
                         posicaoAlvoPronta = false;
                 }
@@ -367,14 +382,21 @@ void MiniMaestro24::decodificaResposta()
         int canal = int(cmdrec.canal);
         this->posicao[canal] = position;        
 
-        if(canal < 5)
-            this->posicaoAtualizadaJunta[canal] = true;
+        this->posicaoAtualizadaCanal[canal] = true;
 
-        if(this->todasPosicoesDasJuntasAtualizadas())
+        if(this->todasPosicoesDosCanaisAtualizados())
         {
-            for(int i = 0; i < 5; i++)
+            uint16_t posicaoParadaTotal[6];
+
+            for(int i = 0; i < 6; i++)
             {
-                this->posicaoAtualizadaJunta[i] = false;
+                this->posicaoAtualizadaCanal[i] = false;
+                posicaoParadaTotal[i] = uint16_t(this->posicao[i]);
+            }
+
+            if(paradaTotalSolicitada)
+            {
+                this->SetMultipleTargets(6, 0, posicaoParadaTotal);
             }
 
             emit this->positionChanged(this->posicao);
