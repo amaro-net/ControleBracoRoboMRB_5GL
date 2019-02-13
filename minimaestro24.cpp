@@ -354,22 +354,28 @@ void MiniMaestro24::decodificaResposta()
             }
         }
 
+        comando_mm comandoGetErrors;
+        comandoGetErrors.comando = MM24_GET_ERRORS;
+        comandoGetErrors.qtdBytesAReceber = 2;
+        this->filaComandosAEnviar.enqueue(comandoGetErrors);
 
         for (char canal = 0; canal < 6; canal++)
         {
-            comando_mm comando;
+            comando_mm comandoGetPosition;
 
-            comando.comando = MM24_GET_POSITION;
-            comando.canal = canal;
-            comando.qtdBytesAReceber = 2;
+            comandoGetPosition.comando = MM24_GET_POSITION;
+            comandoGetPosition.canal = canal;
+            comandoGetPosition.qtdBytesAReceber = 2;
 
-            this->filaComandosAEnviar.enqueue(comando);
+            this->filaComandosAEnviar.enqueue(comandoGetPosition);
         }
 
-        comando_mm comando;
-        comando.comando = MM24_GET_MOVING_STATE;
-        comando.qtdBytesAReceber = 1;
-        this->filaComandosAEnviar.enqueue(comando);
+        /* Sempre manter o getMovingState como o último da fila, pois
+           é durante a resposta dele que a fila é realimentada */
+        comando_mm comandoGetMovingState;
+        comandoGetMovingState.comando = MM24_GET_MOVING_STATE;
+        comandoGetMovingState.qtdBytesAReceber = 1;
+        this->filaComandosAEnviar.enqueue(comandoGetMovingState);
     }
     else if(cmdrec.comando == MM24_GET_POSITION)
     {
@@ -430,7 +436,10 @@ void MiniMaestro24::decodificaResposta()
         }        
     }
     else if(cmdrec.comando == MM24_GET_ERRORS)
-    {
-        // TODO: Mini Maestro 24: Implementar resposta do getErrors
+    {        
+        this->bytesDeErro[0] = static_cast<unsigned char>(cmdrec.resposta[0]);
+        this->bytesDeErro[1] = static_cast<unsigned char>(cmdrec.resposta[1]);
+
+        emit respostaGetErrors(this->bytesDeErro);
     }
 }

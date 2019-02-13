@@ -32,6 +32,23 @@ MainWindow::MainWindow(QWidget *parent) :
 
     preencheCombosPortaSerial();
 
+    tabTerminalReadyForPIC = ui->tabTerminal;
+    idxTerminal = ui->tabPrincipal->indexOf(ui->tabTerminal);
+    tabTerminalReadyForPICLabel = ui->tabPrincipal->tabText(idxTerminal);
+
+    tabTerminalMiniMaestro = ui->tabTerminalMiniMaestro;
+    tabTerminalMiniMaestroLabel = ui->tabPrincipal->tabText(ui->tabPrincipal->indexOf(ui->tabTerminalMiniMaestro));
+
+    ui->tabPrincipal->removeTab(ui->tabPrincipal->indexOf(ui->tabTerminalMiniMaestro));
+
+    if(ui->rdbReadyForPIC->isChecked())
+        mostrarAbaTerminal(ui->rdbReadyForPIC);
+    else if(ui->rdbMiniMaestro24->isChecked())
+    {
+        mostrarAbaTerminal(ui->rdbMiniMaestro24);
+        ui->listErrosAtivos->clear();
+    }
+
     connect(serial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
             this, &MainWindow::handleError);
 
@@ -627,13 +644,14 @@ void MainWindow::abrirPortaSerial()
                 this->mm24->posicaoRepouso[canal] = static_cast<unsigned int>(tabelaPosLimitesDefaultMM24[canal][3]);
             }
 
-            connect(this->mm24, &MiniMaestro24::positionChanged, this, &MainWindow::positionChangedMiniMaestro24);
-            //connect(this->mm24, SIGNAL(MiniMaestro24::positionError()), this, SLOT(this->positionErrorMiniMaestro()));
+            connect(this->mm24, &MiniMaestro24::positionChanged, this, &MainWindow::positionChangedMiniMaestro24);            
             connect(this->mm24, &MiniMaestro24::fimMovimento, this, &MainWindow::fimMovimentoMiniMaestro24);
             connect(this->mm24, &MiniMaestro24::semMovimento, this, &MainWindow::semMovimentoMiniMaestro24);
             connect(this->mm24, &MiniMaestro24::setouPosicaoAlvo, this, &MainWindow::setouPosicaoAlvoMiniMaestro24);
             connect(this->mm24, &MiniMaestro24::setouVelocidade, this, &MainWindow::setouVelocidadeMiniMaestro24);
             connect(this->mm24, &MiniMaestro24::setouAceleracao, this, &MainWindow::setouAceleracaoMiniMaestro24);
+            connect(this->mm24, &MiniMaestro24::respostaGetErrors, this, &MainWindow::respostaGetErrorsMiniMaestro24);
+
 
             configurarConversaoEntreMicrossegundosEAngulos(true);
 
@@ -821,6 +839,34 @@ int MainWindow::converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclG
         aclTmpPulso = aclGrausPorSegQuad / (incrementosAng[idxJunta] * 10e-3 * 80e-3);
 
     return qRound(aclTmpPulso);
+}
+
+bool MainWindow::doesContain(QListView *listView, QString expression)
+{
+    QAbstractItemModel* model = listView->model() ;
+    int rowCount = model->rowCount();
+    int columnCount = model->columnCount();
+
+    for(int i = 0; i < rowCount; i++)
+        for(int j = 0; j < columnCount; j++)
+            if(model->index(i, j).data(Qt::DisplayRole).toString().contains(expression))
+                return true;
+
+    return false;
+}
+
+void MainWindow::mostrarAbaTerminal(QRadioButton *rdbPlaca)
+{
+    if(rdbPlaca == ui->rdbReadyForPIC)
+    {
+        ui->tabPrincipal->removeTab(idxTerminal);
+        ui->tabPrincipal->insertTab(idxTerminal, tabTerminalReadyForPIC, tabTerminalReadyForPICLabel);
+    }
+    else if(rdbPlaca == ui->rdbMiniMaestro24)
+    {
+        ui->tabPrincipal->removeTab(idxTerminal);
+        ui->tabPrincipal->insertTab(idxTerminal, tabTerminalMiniMaestro, tabTerminalMiniMaestroLabel);
+    }
 }
 
 void MainWindow::converteSpnAlvoParaGraus(int idxJunta, int posicaoAlvo)
@@ -1520,11 +1566,6 @@ void MainWindow::positionChangedMiniMaestro24(unsigned int posicao[])
     }
 }
 
-void MainWindow::positionErrorMiniMaestro()
-{
-    // TODO: Mini Maestro 24: Avaliar o que fazer em caso de erro na obtenção de posição atual da mini maestro 24. Avaliar se este sinal deve existir.
-}
-
 void MainWindow::fimMovimentoMiniMaestro24(unsigned int posicao[])
 {    
     QString strValor;
@@ -1653,6 +1694,41 @@ void MainWindow::setouVelocidadeMiniMaestro24(int canal, unsigned int valor)
 void MainWindow::setouAceleracaoMiniMaestro24(int canal, unsigned int valor)
 {
     lstSpnAcl[canal]->setValue(int(valor));
+}
+
+void MainWindow::respostaGetErrorsMiniMaestro24(unsigned char bytesErro[])
+{
+    uint16_t mascaraErro = 0x0001;
+    uint16_t bytesErro16 = bytesErro[0] + 256 * bytesErro[1];
+    uint16_t byteBitSetado;
+
+    int idxErro;
+
+    if(bytesErro16 > 0)
+    {
+        ui->lblCodigoErroMM24->setText(QString("0x%1").arg(bytesErro16, 4, 16, QLatin1Char('0')).toUpper());
+
+        ui->listErrosAtivos->clear();
+
+        for(int i = 0; i < 9; i++)
+        {
+            byteBitSetado = bytesErro16 & mascaraErro; // Deve resultar em uma potência de 2
+
+            if(byteBitSetado > 0)
+            {
+                idxErro = int(log2(byteBitSetado));
+
+                QString descricaoErro = descricaoBitErro[idxErro];
+
+                if(!doesContain(ui->listErrosAtivos, descricaoErro))
+                {
+                    ui->listErrosAtivos->addItem(descricaoErro);
+                }
+            }
+
+            mascaraErro = mascaraErro * 2;
+        }
+    }
 }
 
 void MainWindow::setarValorPosLimiteResposta(QString resposta)
@@ -4083,12 +4159,14 @@ void MainWindow::executaComandoDaSequenciaMM24()
 
 void MainWindow::on_rdbReadyForPIC_clicked()
 {
-    ui->rdbMiniMaestro24->setChecked(false);
+    ui->rdbMiniMaestro24->setChecked(false);    
+    mostrarAbaTerminal(ui->rdbReadyForPIC);
 }
 
 void MainWindow::on_rdbMiniMaestro24_clicked()
 {
-    ui->rdbReadyForPIC->setChecked(false);
+    ui->rdbReadyForPIC->setChecked(false);    
+    mostrarAbaTerminal(ui->rdbMiniMaestro24);
 }
 
 void MainWindow::on_btObterPosLimites_clicked()
@@ -4217,7 +4295,14 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
     console->setLocalEchoEnabled(checked);
 }
 
+void MainWindow::on_btLimparErrosMM24_clicked()
+{
+    mm24->bytesDeErro[0] = 0x00;
+    mm24->bytesDeErro[1] = 0x00;
 
+    ui->lblCodigoErroMM24->setText("0x0000");
+    ui->listErrosAtivos->clear();
+}
 
 /* NOTE: ***** Funções para Cinemática direta/inversa ***** */
 

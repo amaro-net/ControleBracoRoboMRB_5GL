@@ -18,6 +18,7 @@
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QTableWidget>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QRadioButton>
 #include <QListWidgetItem>
 #include <qqueue.h>
 #include <QTimer>
@@ -50,6 +51,10 @@ class MainWindow : public QMainWindow
         double converteAclTmpPulsoParaGrausPorSegQuad(int idxJunta, int aclTmpPulso);
         int converteAclGrausPorSegQuadParaTmpPulso(int idxJunta, double aclGrausPorSegQuad);
 
+        bool doesContain(QListView *listView, QString expression);
+
+        void mostrarAbaTerminal(QRadioButton *rdbPlaca);
+
     private slots:
 
         void abrirPortaSerial();
@@ -62,12 +67,12 @@ class MainWindow : public QMainWindow
         void timeoutEnvioImediato();
 
         void positionChangedMiniMaestro24(unsigned int posicao[]);
-        void positionErrorMiniMaestro();
         void fimMovimentoMiniMaestro24(unsigned int posicao[]);
         void semMovimentoMiniMaestro24(unsigned int posicao[]);
         void setouPosicaoAlvoMiniMaestro24(int canal, unsigned int valor);
         void setouVelocidadeMiniMaestro24(int canal, unsigned int valor);
         void setouAceleracaoMiniMaestro24(int canal, unsigned int valor);
+        void respostaGetErrorsMiniMaestro24(unsigned char bytesErro[]);
 
 
         void on_rdbReadyForPIC_clicked();
@@ -262,6 +267,8 @@ class MainWindow : public QMainWindow
 
         void on_tabUnidadePos_currentChanged(int index);
 
+        void on_btLimparErrosMM24_clicked();
+
     private:
         void preencheCombosPortaSerial();
         void showStatusMessage(const QString &message);
@@ -385,6 +392,14 @@ class MainWindow : public QMainWindow
         QList<QCheckBox *> lstChkLeds;
 
         QList<QLabel *> lstPontoVerdeSliderPosAtual;
+
+        QWidget *tabTerminalReadyForPIC = nullptr;
+        QString tabTerminalReadyForPICLabel;
+
+        QWidget *tabTerminalMiniMaestro = nullptr;
+        QString tabTerminalMiniMaestroLabel;
+
+        int idxTerminal;
 
         QQueue<QString> filaBufferEntrada;
         bool bufferPronto = false;

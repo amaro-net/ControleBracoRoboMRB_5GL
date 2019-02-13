@@ -25,6 +25,18 @@ typedef struct _comando_mm{
     char resposta[2];
 }comando_mm;
 
+const QString descricaoBitErro[9] = {
+    "Serial Signal Error",
+    "Serial Overrun Error",
+    "Serial RX buffer full",
+    "Serial CRC error",
+    "Serial protocol error",
+    "Serial timeout error",
+    "Script stack error",
+    "Script call stack error",
+    "Script program counter error"
+};
+
 class MiniMaestro24 : public QObject
 {
     Q_OBJECT
@@ -34,12 +46,12 @@ class MiniMaestro24 : public QObject
 
     signals:
         void positionChanged(unsigned int posicao[]);
-        void positionError();
         void fimMovimento(unsigned int posicao[]);
         void semMovimento(unsigned int posicao[]);
         void setouPosicaoAlvo(int canal, unsigned int valor);
         void setouVelocidade(int canal, unsigned int valor);
         void setouAceleracao(int canal, unsigned int valor);
+        void respostaGetErrors(unsigned char bytesErro[]);
 
     public:
         MiniMaestro24(QSerialPort *serial);
@@ -142,6 +154,8 @@ class MiniMaestro24 : public QObject
         bool atualizacaoPosicaoSolicitada = true;
 
         bool paradaTotalSolicitada = false;
+
+        unsigned char bytesDeErro[2] = {0x00, 0x00};
 };
 
 #endif // MINIMAESTRO24_H
