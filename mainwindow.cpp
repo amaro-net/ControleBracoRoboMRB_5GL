@@ -1552,9 +1552,7 @@ void MainWindow::recebeBytesMiniMaestro24(QByteArray data)
                 qtd_bytes = 0;
             }
         }
-    }
-    // TODO: Mini Maestro 24: Avaliar se é adequado esta chamada do HabilitarComponentesComServosLigados() estar aqui;
-    HabilitarComponentesComServosLigados();
+    }    
 }
 
 void MainWindow::positionChangedMiniMaestro24(unsigned int posicao[])
@@ -1675,7 +1673,7 @@ void MainWindow::fimMovimentoMiniMaestro24(unsigned int posicao[])
         delete(posGarra);
     }
 
-    //HabilitarComponentesComServosLigados();
+    HabilitarComponentesComServosLigados();
 }
 
 void MainWindow::semMovimentoMiniMaestro24(unsigned int posicao[])
@@ -1698,6 +1696,8 @@ void MainWindow::semMovimentoMiniMaestro24(unsigned int posicao[])
         ui->chkParadaTotal->setEnabled(true);
         ui->btPararSeqComandos->setEnabled(true);
     }
+
+    HabilitarComponentesComServosLigados();
 }
 
 void MainWindow::setouPosicaoAlvoMiniMaestro24(int canal, unsigned int valor)
