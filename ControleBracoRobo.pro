@@ -33,7 +33,8 @@ SOURCES += \
     cinematica.cpp \
     utils.cpp \
     plano3d.cpp \
-    minimaestro24.cpp
+    minimaestro24.cpp \
+    hexconsole.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -45,7 +46,8 @@ HEADERS += \
     cinematica.h \
     utils.h \
     plano3d.h \
-    minimaestro24.h
+    minimaestro24.h \
+    hexconsole.h
 
 FORMS += \
         mainwindow.ui \

@@ -101,14 +101,6 @@ void Console::keyPressEvent(QKeyEvent *e)
         default:
             if (localEchoEnabled)
             {
-                /*
-                QPalette p = palette();
-                p.setColor(QPalette::Base, Qt::black);
-                //p.setColor(QPalette::Text, Qt::green);
-                p.setColor(QPalette::Text, Qt::yellow);
-                setPalette(p);
-                QPlainTextEdit::keyPressEvent(e);*/
-
                 QTextCursor cursor(this->textCursor());
                 QTextCharFormat format;
                 format.setForeground(QBrush(QColor(Qt::yellow)));

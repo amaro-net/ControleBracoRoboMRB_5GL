@@ -52,6 +52,7 @@ class MiniMaestro24 : public QObject
         void setouVelocidade(int canal, unsigned int valor);
         void setouAceleracao(int canal, unsigned int valor);
         void respostaGetErrors(unsigned char bytesErro[]);
+        void enviouParaPortaSerial(const char *data, qint64 len);
 
     public:
         MiniMaestro24(QSerialPort *serial);

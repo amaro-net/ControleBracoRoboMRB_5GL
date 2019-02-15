@@ -3,6 +3,7 @@
 
 #include "montagemdecomandosdialog.h"
 #include "console.h"
+#include "hexconsole.h"
 #include "constantes.h"
 #include "cinematica.h"
 #include "minimaestro24.h"
@@ -60,10 +61,11 @@ class MainWindow : public QMainWindow
         void abrirPortaSerial();
         void fecharPortaSerial();
         void writeData(const QByteArray &data);
+        void writeDataMM24(const QByteArray &data);
         void readData();
         void handleError(QSerialPort::SerialPortError error);
         void timeoutDLY();
-        void timeoutConfig();
+        void timeoutConfigReadyForPIC();
         void timeoutEnvioImediato();
 
         void positionChangedMiniMaestro24(unsigned int posicao[]);
@@ -73,6 +75,7 @@ class MainWindow : public QMainWindow
         void setouVelocidadeMiniMaestro24(int canal, unsigned int valor);
         void setouAceleracaoMiniMaestro24(int canal, unsigned int valor);
         void respostaGetErrorsMiniMaestro24(unsigned char bytesErro[]);
+        void enviouParaPortaSerialMiniMaestro24(const char *data, qint64 len);
 
 
         void on_rdbReadyForPIC_clicked();
@@ -269,6 +272,12 @@ class MainWindow : public QMainWindow
 
         void on_btLimparErrosMM24_clicked();
 
+        void on_chkPausarMonitoramentoMM24_clicked(bool checked);
+
+        void on_btLimparConsoleMM24_clicked();
+
+        void on_chkHabilitaMonitoramentoSerialMM24_clicked(bool checked);
+
     private:
         void preencheCombosPortaSerial();
         void showStatusMessage(const QString &message);
@@ -373,6 +382,7 @@ class MainWindow : public QMainWindow
         MontagemDeComandosDialog *montagemDeComandosDialog;
 
         Console *console;
+        HexConsole *hexConsole;
         QSerialPort *serial;
 
         QList<QSpinBox *> lstSpnAlvo;
@@ -426,7 +436,7 @@ class MainWindow : public QMainWindow
         QString comandoParaPararMovEnviado;
         QString ultimoVELcomVelocidadeAnterior = "";
 
-        QTimer *timer;
+        QTimer *timerConfigReadyForPIC;
         int tentativaConfig = 0;
 
         QTimer *timerDLY;

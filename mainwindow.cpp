@@ -25,6 +25,11 @@ MainWindow::MainWindow(QWidget *parent) :
     console->setVisible(true);
     console->setLocalEchoEnabled(ui->chkEcoLocal->isChecked());
 
+    hexConsole = new HexConsole(ui->tabTerminalMiniMaestro);
+    hexConsole->setEnabled(false);
+    hexConsole->setVisible(true);
+    hexConsole->setLocalEchoEnabled(true);
+
     serial = new QSerialPort(this);
 
     montagemDeComandosDialog = new MontagemDeComandosDialog(this);
@@ -54,8 +59,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
 
-    connect(console, &Console::getData, this, &MainWindow::writeData);
-
     conectarComponentes();
 
     alimentarListasDeComponentes();
@@ -73,14 +76,14 @@ MainWindow::MainWindow(QWidget *parent) :
     timerDLY = new QTimer(this);
     timerDLY->setSingleShot(true);
 
-    timer = new QTimer(this);
-    timer->setSingleShot(true);
+    timerConfigReadyForPIC = new QTimer(this);
+    timerConfigReadyForPIC->setSingleShot(true);
 
     timerEnvioImediato = new QTimer(this);
     timerEnvioImediato->setSingleShot(true);
 
     connect(timerDLY, &QTimer::timeout, this, &MainWindow::timeoutDLY);
-    connect(timer, &QTimer::timeout, this, &MainWindow::timeoutConfig);
+    connect(timerConfigReadyForPIC, &QTimer::timeout, this, &MainWindow::timeoutConfigReadyForPIC);
     connect(timerEnvioImediato, &QTimer::timeout, this, &MainWindow::timeoutEnvioImediato);
 
     for(int i = 0; i < QTD_SERVOS; i++)
@@ -226,7 +229,7 @@ void MainWindow::configuracoesIniciais()
     //connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
     tentativaConfig = 0;
     enviaComando("[ECH0]");
-    timer->start(2000);
+    timerConfigReadyForPIC->start(2000);
 }
 
 void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefault)
@@ -427,14 +430,14 @@ void MainWindow::configurarConversaoEntreMicrossegundosEAngulos(bool valoresDefa
     on_tabUnidadePos_currentChanged(ui->tabUnidadePos->currentIndex());
 }
 
-void MainWindow::timeoutConfig()
+void MainWindow::timeoutConfigReadyForPIC()
 {
     if(tentativaConfig < 2)
     {
         tentativaConfig++;
         enviaComando("[ECH0]");
         showStatusMessage("Tentativa "+QString("%1").arg(tentativaConfig)+" de configuração.");
-        timer->start();
+        timerConfigReadyForPIC->start();
     }
     else
     {
@@ -453,9 +456,15 @@ void MainWindow::habilitarComponentesConn(bool estadoHab)
     habilitarComponentes(estadoHab);
 
     if(ui->rdbReadyForPIC->isChecked())
+    {
         habilitarComponentesReadyForPIC(estadoHab);
+        ui->chkPausarMonitoramentoMM24->setEnabled(estadoHab);
+    }
     else if(ui->rdbMiniMaestro24->isChecked())
+    {
         habilitarComponentesReadyForPIC(false);
+        ui->chkPausarMonitoramentoMM24->setEnabled(estadoHab);
+    }
     HabilitarComponentesComServosLigados();
     ui->rdbReadyForPIC->setEnabled(!estadoHab);
     ui->rdbMiniMaestro24->setEnabled(!estadoHab);
@@ -578,11 +587,7 @@ void MainWindow::HabilitarComponentesComServosLigados()
 
 MainWindow::~MainWindow()
 {
-    if(serial->isOpen())
-        serial->close();
-
-    if(this->mm24 != nullptr)
-        delete(this->mm24);
+    fecharPortaSerial();
 
     delete montagemDeComandosDialog;
     delete ui;
@@ -632,12 +637,20 @@ void MainWindow::abrirPortaSerial()
         showStatusMessage(strStatusMessage);
 
         ui->btAbrirPortaSerial->setEnabled(false);
-        console->setEnabled(true);
+
         inicializando = true;
         if(ui->rdbReadyForPIC->isChecked())
+        {
+            connect(console, &Console::getData, this, &MainWindow::writeData);
+            console->setEnabled(true);
+
             configuracoesIniciais();
+        }
         else if(ui->rdbMiniMaestro24->isChecked())
-        {            
+        {
+            connect(hexConsole, &HexConsole::getData, this, &MainWindow::writeDataMM24);
+            hexConsole->setEnabled(true);
+
             this->mm24 = new MiniMaestro24(serial);
             for(int canal = 0; canal < 5; canal++)
             {
@@ -651,7 +664,7 @@ void MainWindow::abrirPortaSerial()
             connect(this->mm24, &MiniMaestro24::setouVelocidade, this, &MainWindow::setouVelocidadeMiniMaestro24);
             connect(this->mm24, &MiniMaestro24::setouAceleracao, this, &MainWindow::setouAceleracaoMiniMaestro24);
             connect(this->mm24, &MiniMaestro24::respostaGetErrors, this, &MainWindow::respostaGetErrorsMiniMaestro24);
-
+            connect(this->mm24, &MiniMaestro24::enviouParaPortaSerial, this, &MainWindow::enviouParaPortaSerialMiniMaestro24);
 
             configurarConversaoEntreMicrossegundosEAngulos(true);
 
@@ -670,6 +683,7 @@ void MainWindow::abrirPortaSerial()
             habilitaBotoesExecComandos(true);
             habilitaCamposAbaPosicaoAlvo(0, true);
             habilitaCamposAbaPosicaoAlvo(1, true);                
+            ui->chkPausarMonitoramentoMM24->setChecked(false);
         }
 
     }
@@ -685,7 +699,7 @@ void MainWindow::fecharPortaSerial()
 {
     if (serial->isOpen())
         serial->close();
-    console->setEnabled(false);
+
     ui->chkEnviaComandoImediato->setChecked(false);
 
     if(this->mm24 != nullptr)
@@ -695,12 +709,28 @@ void MainWindow::fecharPortaSerial()
         this->mm24 = nullptr;
     }
 
+    if(ui->rdbReadyForPIC->isChecked())
+    {
+        console->setEnabled(false);
+        console->disconnect();
+    }
+    else if(ui->rdbMiniMaestro24->isChecked())
+    {
+        hexConsole->setEnabled(false);
+        hexConsole->disconnect();
+    }
+
     habilitarComponentesConn(false);
 
     showStatusMessage("Desconectado");
 }
 
 void MainWindow::writeData(const QByteArray &data)
+{
+    serial->write(data);
+}
+
+void MainWindow::writeDataMM24(const QByteArray &data)
 {
     serial->write(data);
 }
@@ -714,8 +744,8 @@ void MainWindow::readData()
         recebeCaracteresDeResposta(data);
     }
     else
-    {
-        // TODO: Aba Terminal: Tratamento do console para comandos diretos da Mini Maestro 24        
+    {        
+        hexConsole->putData(data, false);
         recebeBytesMiniMaestro24(data);
     }
 
@@ -1300,7 +1330,7 @@ void MainWindow::decodificaResposta()
     }
     else if(resposta.contains("ECH"))
     {
-        timer->stop();
+        timerConfigReadyForPIC->stop();
 
         if(tamanhoResposta == 5)
         {
@@ -1499,7 +1529,7 @@ void MainWindow::recebeBytesMiniMaestro24(QByteArray data)
     comando_mm cmd;    
 
     if(mm24->filaComMonitoramentoEnviados.isEmpty())
-        return;    
+        return;
 
     cmd = mm24->filaComMonitoramentoEnviados.dequeue();    
 
@@ -1507,7 +1537,7 @@ void MainWindow::recebeBytesMiniMaestro24(QByteArray data)
 
     for(int i = 0; i < data.length(); i++)
     {
-        rChar = data.at(i);
+        rChar = data.at(i);        
         cmd.resposta[qtd_bytes++] = rChar;
 
         if(qtd_bytes == cmd.qtdBytesAReceber)
@@ -1729,6 +1759,13 @@ void MainWindow::respostaGetErrorsMiniMaestro24(unsigned char bytesErro[])
             mascaraErro = mascaraErro * 2;
         }
     }
+}
+
+void MainWindow::enviouParaPortaSerialMiniMaestro24(const char *data, qint64 len)
+{    
+    QByteArray byteArray(data, int(len));
+
+    hexConsole->putData(byteArray, true);
 }
 
 void MainWindow::setarValorPosLimiteResposta(QString resposta)
@@ -4288,12 +4325,15 @@ void MainWindow::on_btResetarPlacaServos_clicked()
 }
 
 
-/* NOTE: ***** Aba Terminal ***** */
+/* NOTE: ***** Aba Terminal (Ready For Pic) ***** */
 
 void MainWindow::on_chkEcoLocal_clicked(bool checked)
 {
     console->setLocalEchoEnabled(checked);
 }
+
+
+/* NOTE: ***** Aba Terminal (Mini Maestro 24) ***** */
 
 void MainWindow::on_btLimparErrosMM24_clicked()
 {
@@ -4303,6 +4343,25 @@ void MainWindow::on_btLimparErrosMM24_clicked()
     ui->lblCodigoErroMM24->setText("0x0000");
     ui->listErrosAtivos->clear();
 }
+
+void MainWindow::on_chkPausarMonitoramentoMM24_clicked(bool checked)
+{
+    if(checked)
+        mm24->timerMonitoramentoPosicao->stop();
+    else
+        mm24->timerMonitoramentoPosicao->start();
+}
+
+void MainWindow::on_btLimparConsoleMM24_clicked()
+{
+    hexConsole->clear();
+}
+
+void MainWindow::on_chkHabilitaMonitoramentoSerialMM24_clicked(bool checked)
+{
+    hexConsole->setMonitoramentoSerialHabilitado(checked);
+}
+
 
 /* NOTE: ***** Funções para Cinemática direta/inversa ***** */
 
@@ -4330,3 +4389,4 @@ void MainWindow::preencheCamposXYZAlvo(double *posGarra)
     ui->spnRyAlvo->setValue(posGarra[4]);
     ui->spnRzAlvo->setValue(posGarra[5]);
 }
+

@@ -48,6 +48,8 @@ short MiniMaestro24::SetTarget(char canal, uint16_t target)
     // Envio do comando
     serial->write(data, sizeof(data));
 
+    emit enviouParaPortaSerial(data, sizeof(data));
+
     return 1;
 }
 
@@ -92,6 +94,8 @@ short MiniMaestro24::SetMultipleTargets(char numTargets, char primeiroCanal, uin
     // Envio do comando
     serial->write(data, tamData);
 
+    emit enviouParaPortaSerial(data, tamData);
+
     delete[] data;
 
     return 1;
@@ -111,6 +115,8 @@ short MiniMaestro24::SetSpeed(char canal, uint16_t vel)
     // Envio do comando
     serial->write(data, sizeof(data));
 
+    emit enviouParaPortaSerial(data, sizeof(data));
+
     return 1;
 }
 
@@ -127,6 +133,8 @@ short MiniMaestro24::SetAcceleration(char canal, uint16_t accel)
 
     // Envio do comando
     serial->write(data, sizeof(data));
+
+    emit enviouParaPortaSerial(data, sizeof(data));
 
     return 1;
 }
@@ -148,6 +156,8 @@ unsigned int MiniMaestro24::GetPosition(char canal)
     // Envio do comando
     serial->write(data, 2);
 
+    emit enviouParaPortaSerial(data, 2);
+
     return 0;
 }
 
@@ -167,6 +177,8 @@ unsigned char MiniMaestro24::GetMovingState()
     char comando = static_cast<char>(0x93);
     serial->write(&comando, 1);
 
+    emit enviouParaPortaSerial(&comando, 1);
+
     return 0;
 }
 
@@ -178,7 +190,11 @@ unsigned int MiniMaestro24::GetErrors()
 
     this->filaComMonitoramentoEnviados.enqueue(cmd);
 
-    serial->putChar(static_cast<char>(0xA1)); // Comando get errors, Compact Protocol
+    char comando = static_cast<char>(0xA1); // Comando get errors, Compact Protocol
+
+    serial->putChar(comando);
+
+    emit enviouParaPortaSerial(&comando, 1);
 
     return 0;
 }
