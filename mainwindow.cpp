@@ -1589,6 +1589,7 @@ void MainWindow::positionChangedMiniMaestro24(unsigned int posicao[])
 
     if(todasPosicoesMaioresQueZero)
     {
+        // TODO: Mini Maestro 24: Verificar porque os campos XYZ atual não estão sendo preenchidos
         posGarra = preencheCamposXYZAtual(posicoesAtuaisGraus);
         delete posGarra;
     }
@@ -1628,6 +1629,7 @@ void MainWindow::fimMovimentoMiniMaestro24(unsigned int posicao[])
 
     if(todasPosicoesMaioresQueZero)
     {
+        // TODO: Mini Maestro 24: Verificar porque os campos XYZ atual não estão sendo preenchidos
         posGarra = preencheCamposXYZAtual(posicoesAtuaisGraus);
     }
 
@@ -1669,6 +1671,7 @@ void MainWindow::fimMovimentoMiniMaestro24(unsigned int posicao[])
 
     if(todasPosicoesMaioresQueZero)
     {
+        // TODO: Mini Maestro 24: Verificar porque os campos XYZ alvo não estão sendo preenchidos
         preencheCamposXYZAlvo(posGarra);
         delete(posGarra);
     }
@@ -2195,8 +2198,8 @@ void MainWindow::on_btAdicionarComandoAASeqComandos_clicked()
         ui->tabPrincipal->setCurrentIndex(2);
 
     for(int i = 0; i < ui->listaUltimoComandoAcionado->count(); i++)
-    {
-        ui->listSequenciaComandos->addItem(ui->listaUltimoComandoAcionado->item(i)->text());
+    {        
+        adicionarComandoAASequencia(ui->listaUltimoComandoAcionado->item(i)->text());
     }
 
     on_btPararSeqComandos_clicked(); // Repete para atualizar o status da sequência.
@@ -3214,10 +3217,17 @@ void MainWindow::on_btAdicionarComando_clicked()
 }
 
 void MainWindow::adicionarComandoAASequencia(QString comando)
-{
-    // TODO: Aba sequência: Permitir comandos serem adicionados no meio da sequência, ao invés de só no final
-    // Obs.: ver o insertItem() do QListWidget
-    ui->listSequenciaComandos->addItem(comando);        
+{    
+    int current_index = ui->listSequenciaComandos->currentRow();
+    int qtdComandos = ui->listSequenciaComandos->count();
+
+    if(current_index == qtdComandos)
+        ui->listSequenciaComandos->addItem(comando);
+    else
+        ui->listSequenciaComandos->insertItem(current_index + 1, comando);
+
+    ui->listSequenciaComandos->setCurrentRow(current_index + 1);
+
     on_btPararSeqComandos_clicked();
 }
 
@@ -3256,7 +3266,8 @@ void MainWindow::on_btAdicionarPosCorrente_clicked()
 
     comandoJST += "]";
 
-    ui->listSequenciaComandos->addItem(comandoJST);
+    adicionarComandoAASequencia(comandoJST);
+
     on_btPararSeqComandos_clicked(); // Repete para atualizar o status da sequência.
 }
 
@@ -4294,7 +4305,7 @@ void MainWindow::on_btResetarPlacaControle_clicked()
 {
     on_btPararSeqComandos_clicked();
     ui->chkEnviaComandoImediato->setChecked(false);
-
+    // TODO: Aba Configurações: Corrigir os botões Yes e No para Sim e Não
     int resposta = QMessageBox::question(this,
                                          tr("Resetar placa de controle"),
                                          tr("Deseja reiniciar a placa Ready For PIC?\n"
@@ -4312,7 +4323,7 @@ void MainWindow::on_btResetarPlacaServos_clicked()
 {
     on_btPararSeqComandos_clicked();
     ui->chkEnviaComandoImediato->setChecked(false);
-
+    // TODO: Aba Configurações: Corrigir os botões Yes e No para Sim e Não
     int resposta = QMessageBox::question(this,
                                          tr("Resetar placa dos servos"),
                                          tr("Deseja reiniciar a placa Mini Maestro 24?"),
