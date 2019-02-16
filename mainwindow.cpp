@@ -1561,7 +1561,7 @@ void MainWindow::positionChangedMiniMaestro24(unsigned int posicao[])
     int valor;
     double graus;
     double posicoesAtuaisGraus[6];
-    bool todasPosicoesMaioresQueZero = false;
+    bool todasPosicoesMaioresQueZero = true;
     double *posGarra = nullptr;
 
     for(int i = 0; i < QTD_SERVOS; i++)
@@ -1588,8 +1588,7 @@ void MainWindow::positionChangedMiniMaestro24(unsigned int posicao[])
     }
 
     if(todasPosicoesMaioresQueZero)
-    {
-        // TODO: Mini Maestro 24: Verificar porque os campos XYZ atual não estão sendo preenchidos
+    {        
         posGarra = preencheCamposXYZAtual(posicoesAtuaisGraus);
         delete posGarra;
     }
@@ -1601,7 +1600,7 @@ void MainWindow::fimMovimentoMiniMaestro24(unsigned int posicao[])
     int valor;
     double graus;
     double posicoesAtuaisGraus[6];
-    bool todasPosicoesMaioresQueZero = false;
+    bool todasPosicoesMaioresQueZero = true;
     double *posGarra = nullptr;
 
     for(int i = 0; i < QTD_SERVOS; i++)
@@ -1628,8 +1627,7 @@ void MainWindow::fimMovimentoMiniMaestro24(unsigned int posicao[])
     }
 
     if(todasPosicoesMaioresQueZero)
-    {
-        // TODO: Mini Maestro 24: Verificar porque os campos XYZ atual não estão sendo preenchidos
+    {        
         posGarra = preencheCamposXYZAtual(posicoesAtuaisGraus);
     }
 
@@ -1670,8 +1668,7 @@ void MainWindow::fimMovimentoMiniMaestro24(unsigned int posicao[])
     }
 
     if(todasPosicoesMaioresQueZero)
-    {
-        // TODO: Mini Maestro 24: Verificar porque os campos XYZ alvo não estão sendo preenchidos
+    {        
         preencheCamposXYZAlvo(posGarra);
         delete(posGarra);
     }
