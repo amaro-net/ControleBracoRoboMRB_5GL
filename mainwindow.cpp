@@ -3177,14 +3177,10 @@ void MainWindow::on_btNovaSequencia_clicked(bool inicializando)
     int resposta = QMessageBox::No;
 
     if(!inicializando)
-    {
-        resposta = QMessageBox::question(this,
-                                         tr("Nova sequência de comandos"),
-                                         tr("Deseja criar uma nova sequência?\n"
-                                            "A sequência atual será apagada."),
-                                         QMessageBox::Yes,
-                                         QMessageBox::No | QMessageBox::Default | QMessageBox::Escape,
-                                         QMessageBox::NoButton);
+    {        
+        resposta = caixaDialogoPerguntaSimNao(tr("Nova sequência de comandos"),
+                                              tr("Deseja criar uma nova sequência?\n"
+                                                 "A sequência atual será apagada."));
     }
     if (inicializando || resposta == QMessageBox::Yes)
     {
@@ -4302,16 +4298,9 @@ void MainWindow::on_btResetarPlacaControle_clicked()
 {
     on_btPararSeqComandos_clicked();
     ui->chkEnviaComandoImediato->setChecked(false);
-    // TODO: Aba Configurações: Corrigir os botões Yes e No para Sim e Não
-    int resposta = QMessageBox::question(this,
-                                         tr("Resetar placa de controle"),
-                                         tr("Deseja reiniciar a placa Ready For PIC?\n"
-                                            "A placa Mini Maestro 24 poderá ser reiniciada \n"
-                                            "também caso seu pino de reset esteja ligado."),
-                                         QMessageBox::Yes,
-                                         QMessageBox::No | QMessageBox::Default | QMessageBox::Escape,
-                                         QMessageBox::NoButton);
 
+    int resposta = caixaDialogoPerguntaSimNao(tr("Resetar placa de controle"),
+                                              tr("Deseja reiniciar a placa Ready For PIC?\n"));
     if (resposta == QMessageBox::Yes)
         enviaComando("[RST]");
 }
@@ -4320,14 +4309,9 @@ void MainWindow::on_btResetarPlacaServos_clicked()
 {
     on_btPararSeqComandos_clicked();
     ui->chkEnviaComandoImediato->setChecked(false);
-    // TODO: Aba Configurações: Corrigir os botões Yes e No para Sim e Não
-    int resposta = QMessageBox::question(this,
-                                         tr("Resetar placa dos servos"),
-                                         tr("Deseja reiniciar a placa Mini Maestro 24?"),
-                                         QMessageBox::Yes,
-                                         QMessageBox::No | QMessageBox::Default | QMessageBox::Escape,
-                                         QMessageBox::NoButton);
 
+    int resposta = caixaDialogoPerguntaSimNao(tr("Resetar placa dos servos"),
+                                              tr("Deseja reiniciar a placa Mini Maestro 24?"));
     if (resposta == QMessageBox::Yes)
         enviaComando("[RSTM]");
 }
