@@ -278,6 +278,8 @@ class MainWindow : public QMainWindow
 
         void on_chkHabilitaMonitoramentoSerialMM24_clicked(bool checked);
 
+        void on_btLimparConsole_clicked();
+
     private:
         void preencheCombosPortaSerial();
         void showStatusMessage(const QString &message);

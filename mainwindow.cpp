@@ -24,11 +24,18 @@ MainWindow::MainWindow(QWidget *parent) :
     console->setEnabled(false);
     console->setVisible(true);
     console->setLocalEchoEnabled(ui->chkEcoLocal->isChecked());
+    QRect geometry = console->geometry();
+    geometry.setY(16);
+    console->setGeometry(geometry);
+
 
     hexConsole = new HexConsole(ui->tabTerminalMiniMaestro);
     hexConsole->setEnabled(false);
     hexConsole->setVisible(true);
     hexConsole->setLocalEchoEnabled(true);
+    geometry = hexConsole->geometry();
+    geometry.setY(16);
+    hexConsole->setGeometry(geometry);
 
     serial = new QSerialPort(this);
 
@@ -4324,6 +4331,10 @@ void MainWindow::on_chkEcoLocal_clicked(bool checked)
     console->setLocalEchoEnabled(checked);
 }
 
+void MainWindow::on_btLimparConsole_clicked()
+{
+    console->clear();
+}
 
 /* NOTE: ***** Aba Terminal (Mini Maestro 24) ***** */
 
@@ -4381,4 +4392,3 @@ void MainWindow::preencheCamposXYZAlvo(double *posGarra)
     ui->spnRyAlvo->setValue(posGarra[4]);
     ui->spnRzAlvo->setValue(posGarra[5]);
 }
-
