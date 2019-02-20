@@ -105,10 +105,10 @@ void Console::keyPressEvent(QKeyEvent *e)
                 QTextCharFormat format;
                 format.setForeground(QBrush(QColor(Qt::yellow)));
                 cursor.setCharFormat(format);
-                cursor.insertText(e->text());
+                cursor.insertText(e->text().toUpper());
             }
 
-            emit getData(e->text().toLocal8Bit());
+            emit getData(e->text().toUpper().toLocal8Bit());
     }
 }
 
