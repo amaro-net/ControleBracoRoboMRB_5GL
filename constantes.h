@@ -10,19 +10,19 @@
 #define CASAS_DECIMAIS_VELOCIDADE_ANGULAR  3
 #define CASAS_DECIMAIS_ACELERACAO_ANGULAR  4
 
-#define CASAS_DECIMAIS_POSICAO_XYZ    2
-#define CASAS_DECIMAIS_ROTACOES_XYZ   2
-#define CASAS_DECIMAIS_ROTACOES_XYZ_RAD   5
+#define CASAS_DECIMAIS_POSICAO_XYZ      2
+#define CASAS_DECIMAIS_ROTACOES_XYZ     2
+#define CASAS_DECIMAIS_ROTACOES_XYZ_RAD 5
 
 #define CASAS_DECIMAIS_SENOS_COSSENOS 4
 
-#define STATUS_SEQCOM_PARADA_VAZIA      "Sequência parada"
-#define STATUS_SEQCOM_PARADA_NAO_VAZIA  "Sequência parada. ENTER ou duplo clique para executar um comando."
-#define STATUS_SEQCOM_EM_EXECUCAO       "Em execução"
-#define STATUS_SEQCOM_CONTINUANDO_EXEC  "Continuando execução"
-#define STATUS_SEQCOM_EM_LOOP           "Em loop"
-#define STATUS_SEQCOM_CONTINUANDO_LOOP  "Continuando loop"
-#define STATUS_SEQCOM_EM_DLY_SEM_PAR    "Em espera. Pressione ENTER, duplo clique na sequência, Continuar ou Continuar loop."
+#define STATUS_SEQCOM_PARADA_VAZIA     "Sequência parada"
+#define STATUS_SEQCOM_PARADA_NAO_VAZIA "Sequência parada. ENTER ou duplo clique para executar um comando."
+#define STATUS_SEQCOM_EM_EXECUCAO      "Em execução"
+#define STATUS_SEQCOM_CONTINUANDO_EXEC "Continuando execução"
+#define STATUS_SEQCOM_EM_LOOP          "Em loop"
+#define STATUS_SEQCOM_CONTINUANDO_LOOP "Continuando loop"
+#define STATUS_SEQCOM_EM_DLY_SEM_PAR   "Em espera. Pressione ENTER, duplo clique na sequência, Continuar ou Continuar loop."
 
 #define TEMPO_TIMER_ENVIO_IMEDIATO_MS   256
 
@@ -30,8 +30,11 @@
 #define LBL_POS_ATUAL_X_MAX 218
 
 #define STR_UND_MICROSSEGUNDOS " μs"
-#define STR_UND_GRAUS " º"
-#define STR_UND_CM " cm"
+#define STR_UND_GRAUS          " º"
+#define STR_UND_CM             " cm"
+
+#define LBL_PARADA_TOTAL_READY_FOR_PIC "Parada total.\nBotão Parar envia comando PRT para\na placa Ready for PIC, para parar\ninstantaneamente o movimento do\nbraço robô."
+#define LBL_PARADA_TOTAL_MM24          "Parada total.\nBotão Parar envia posição atual como posição\nalvo para parar instantaneamente o\nmovimento do braço robô (experimental)."
 
 static QString junta[QTD_SERVOS] = {"J0", "J1", "J2", "J3", "J4", "GR"};
 static QString idJST[QTD_SERVOS] = {"A", "B", "C", "D", "E", "G"};

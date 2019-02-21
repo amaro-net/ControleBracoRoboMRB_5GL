@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>5</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tabComandos">
      <attribute name="title">
@@ -3573,6 +3573,9 @@ alterada.</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="chkParadaTotal">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>190</x>

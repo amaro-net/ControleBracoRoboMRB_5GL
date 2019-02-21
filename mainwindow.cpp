@@ -28,7 +28,6 @@ MainWindow::MainWindow(QWidget *parent) :
     geometry.setY(16);
     console->setGeometry(geometry);
 
-
     hexConsole = new HexConsole(ui->tabTerminalMiniMaestro);
     hexConsole->setEnabled(false);
     hexConsole->setVisible(true);
@@ -54,11 +53,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabPrincipal->removeTab(ui->tabPrincipal->indexOf(ui->tabTerminalMiniMaestro));
 
     if(ui->rdbReadyForPIC->isChecked())
+    {
         mostrarAbaTerminal(ui->rdbReadyForPIC);
+        ui->chkParadaTotal->setText(LBL_PARADA_TOTAL_READY_FOR_PIC);
+    }
     else if(ui->rdbMiniMaestro24->isChecked())
     {
         mostrarAbaTerminal(ui->rdbMiniMaestro24);
-        ui->listErrosAtivos->clear();
+        ui->chkParadaTotal->setText(LBL_PARADA_TOTAL_MM24);
+        ui->listErrosAtivos->clear();        
     }
 
     connect(serial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
@@ -1063,17 +1066,6 @@ void MainWindow::setaPosicaoPontoVerde(int idxJunta, int posicao)
     }
 }
 
-void MainWindow::montaJSTParaPararMov1Junta()
-{    
-    comandoJSTParaPararMov = "[JST";
-    for(int i = 0; i < QTD_SERVOS; i++)
-    {
-        int posAtual = lstEdtAtual[i]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt();
-        comandoJSTParaPararMov += QString("%1%2").arg(idJST[i]).arg(posAtual, 4, 10, QChar('0'));
-    }
-    comandoJSTParaPararMov += "]";
-}
-
 void MainWindow::decodificaResposta()
 {
     QString resposta = filaBufferEntrada.dequeue();
@@ -1090,11 +1082,7 @@ void MainWindow::decodificaResposta()
         int valor;
         double graus;
         bool todasPosicoesMaioresQueZero = true;
-        double *posGarra = nullptr;
-
-        QString comandoRecebido = resposta.mid(1,3);
-        comandoJSTParaPararMov = QString(resposta);
-        comandoJSTParaPararMov.replace(comandoRecebido, "JST");
+        double *posGarra = nullptr;        
 
         for(int i = 0; i < QTD_SERVOS; i++)
         {
@@ -1205,8 +1193,6 @@ void MainWindow::decodificaResposta()
             valor = strValor.toInt();
 
             lstEdtAtual[i]->setText(strValor.setNum(valor) + STR_UND_MICROSSEGUNDOS);
-
-            montaJSTParaPararMov1Junta();
 
             if(valor > 0)
             {
@@ -1319,8 +1305,6 @@ void MainWindow::decodificaResposta()
 
         ui->spnGRAlvo->setValue(valor.toInt());
 
-        montaJSTParaPararMov1Junta();
-
         if(!ui->spnGRAlvo->isEnabled())
         {
             ui->spnGRAlvo->setEnabled(true);
@@ -1411,6 +1395,10 @@ void MainWindow::decodificaResposta()
 
         ehRespostaFinal = true;
     }
+    else if(resposta.contains("PRT OK"))
+    {
+        ehRespostaFinal = true;
+    }
 
     /* Envio de comandos das filas após a decodificação da resposta */
     if(filaComandosInicializacao.count() > 0)
@@ -1434,80 +1422,10 @@ void MainWindow::decodificaResposta()
         }
         inicializando = false;
 
-        if(paradaDeSequenciaSolicitada && ui->chkParadaTotal->isChecked())
-        {
-            if(filaComandosParaPararMov.count() > 0)
-            {
-                parser(filaComandosParaPararMov.dequeue());
-            }
-            else if(!foiEnviadoJSTParaPararMov)
-            {
-                parser(comandoJSTParaPararMov);
-                //paradaDeSequenciaSolicitada = false;
-                foiEnviadoJSTParaPararMov = true;
-                comandoParaPararMovEnviado = comandoJSTParaPararMov;
-            }
-            else if (resposta.contains(comandoParaPararMovEnviado))
-            {
-                int valorVelAnterior;
-                QString comandoVEL;
-                filaComandosMoverComVelAcl.clear();
-                for(int i = 0; i < QTD_SERVOS; i++)
-                {
-                    valorVelAnterior = velocidadesAnterioresAAParada[i];
-                    comandoVEL = QString("[VEL%1%2]").arg(junta[i]).arg(valorVelAnterior, 4, 10, QChar('0'));
-                    filaComandosMoverComVelAcl.enqueue(comandoVEL);
-                }
-                parser(filaComandosMoverComVelAcl.dequeue());
-            }
-            else if(resposta.contains("JST"))
-            {
-                parser(resposta);
-                comandoParaPararMovEnviado = resposta;
-            }
-            else if(resposta.contains("RPS"))
-            {
-                parser("[RPS]");
-                comandoParaPararMovEnviado = "RPS";
-            }
-            else if(resposta.contains("CTZ"))
-            {
-                QString juntaCTZ = resposta.mid(4,2);
-                QString comandoCTZ = QString("[CTZ%1]").arg(juntaCTZ);
-                parser(comandoCTZ);
-                comandoParaPararMovEnviado = resposta;
-            }
-            else if (resposta.contains("GA"))
-            {
-                parser("[GA]");
-                comandoParaPararMovEnviado = "GA";
-            }
-            else if(resposta.contains("GF"))
-            {
-                parser("[GF]");
-                comandoParaPararMovEnviado = "GF";
-            }
-            else if(filaComandosMoverComVelAcl.count() > 0 && ehRespostaMoverComVelAcl)
-            {
-                QString comando = filaComandosMoverComVelAcl.dequeue();
+        if(ehRespostaFinal)
+            ui->chkParadaTotal->setEnabled(true);
 
-                if(filaComandosMoverComVelAcl.count() <= 0)
-                    ultimoVELcomVelocidadeAnterior = comando;
-
-                parser(comando);
-            }
-            else if(ultimoVELcomVelocidadeAnterior.size() > 0 &&
-                    resposta.contains(ultimoVELcomVelocidadeAnterior))
-            {
-                ultimoVELcomVelocidadeAnterior = "";
-                paradaDeSequenciaSolicitada = false;
-                // TODO: Aba Sequência de Comandos: Reimplementar a parada total com o novo comando de parada total implementado na placa de controle
-                ui->chkParadaTotal->setEnabled(true);
-                ui->btPararSeqComandos->setEnabled(true);
-                foiEnviadoJSTParaPararMov = false;
-            }
-        }
-        else if(seqEmExecucao && ehRespostaFinal)
+        if(seqEmExecucao && ehRespostaFinal)
         {
             executaComandoDaSequencia();
         }
@@ -3565,16 +3483,8 @@ void MainWindow::on_btPararSeqComandos_clicked()
             if(ui->rdbReadyForPIC->isChecked())
             {
                 ui->chkParadaTotal->setEnabled(false);
-                ui->btPararSeqComandos->setEnabled(false);
-                filaComandosParaPararMov.clear();
-                for(int i = 0; i < QTD_SERVOS; i++)
-                {
-                    velocidadesAnterioresAAParada[i] = lstSpnVel[i]->value();
-                    filaComandosParaPararMov.enqueue(QString("[VEL%1%2]").arg(junta[i]).arg(1, 4, 10, QChar('0')));
-                }
-                enviaComando(filaComandosParaPararMov.dequeue());
-                paradaDeSequenciaSolicitada = true;
-                foiEnviadoJSTParaPararMov = false;
+
+                enviaComando("[PRT]");
             }
             else if(ui->rdbMiniMaestro24->isChecked())
             {                
@@ -4209,12 +4119,14 @@ void MainWindow::on_rdbReadyForPIC_clicked()
 {
     ui->rdbMiniMaestro24->setChecked(false);    
     mostrarAbaTerminal(ui->rdbReadyForPIC);
+    ui->chkParadaTotal->setText(LBL_PARADA_TOTAL_READY_FOR_PIC);
 }
 
 void MainWindow::on_rdbMiniMaestro24_clicked()
 {
     ui->rdbReadyForPIC->setChecked(false);    
     mostrarAbaTerminal(ui->rdbMiniMaestro24);
+    ui->chkParadaTotal->setText(LBL_PARADA_TOTAL_MM24);
 }
 
 void MainWindow::on_btObterPosLimites_clicked()

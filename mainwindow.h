@@ -298,7 +298,7 @@ class MainWindow : public QMainWindow
 
         void recebeCaracteresDeResposta(QByteArray data);
         void setaPosicaoPontoVerde(int idxJunta, int posicao);
-        void montaJSTParaPararMov1Junta();
+
         void decodificaResposta();
 
         void recebeBytesMiniMaestro24(QByteArray data);
@@ -424,17 +424,16 @@ class MainWindow : public QMainWindow
         QQueue<QString> filaComandosInicializacao;
         QQueue<QString> filaComandosMovimentacaoAbaComandos;
         QQueue<QString> filaComandosMoverComVelAcl;
-        QQueue<QString> filaConfigPosLimites;
-        QQueue<QString> filaComandosParaPararMov;
+        QQueue<QString> filaConfigPosLimites;        
 
         int qtdComandosInicializacao;
 
         bool seqEmExecucao = false;
         bool emLoop = false;
         bool itemClicado = false;
-        bool paradaDeSequenciaSolicitada = false;
+
         int velocidadesAnterioresAAParada[QTD_SERVOS];
-        bool foiEnviadoJSTParaPararMov = false;
+
         QString comandoParaPararMovEnviado;
         QString ultimoVELcomVelocidadeAnterior = "";
 
@@ -449,8 +448,6 @@ class MainWindow : public QMainWindow
 
         QTimer *timerEnvioImediato;
         QString comandoEnvioImediato;
-
-        QString comandoJSTParaPararMov;
 
         bool calculoAngulosAlvoAcionado = false;
 
