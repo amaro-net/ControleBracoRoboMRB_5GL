@@ -1076,7 +1076,11 @@ void MainWindow::decodificaResposta()
     bool ehRespostaMoverComVelAcl = false;
     double posicoesAtuaisGraus[6];
 
-    if(tamanhoResposta == 35 && (resposta.contains("MOV") || resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN2")) )
+    if(tamanhoResposta == 35 && (resposta.contains("MOV") ||
+                                 resposta.contains("JST") ||
+                                 resposta.contains("RPS") ||
+                                 resposta.contains("DSL") ||
+                                 resposta.contains("IN2")) )
     {
         QString strValor;
         int valor;
@@ -1113,7 +1117,7 @@ void MainWindow::decodificaResposta()
             posGarra = preencheCamposXYZAtual(posicoesAtuaisGraus);
         }
 
-        //if(resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("IN2"))
+        //if(resposta.contains("JST") || resposta.contains("RPS") || resposta.contains("DSL") || resposta.contains("IN2"))
         if(!resposta.contains("MOV"))
         {
             for(int i = 0; i < QTD_SERVOS; i++)
@@ -1165,7 +1169,7 @@ void MainWindow::decodificaResposta()
 
             ehRespostaFinal = true;
             ehRespostaMoverComVelAcl = resposta.contains("JST");
-            ehRespostaMovAbaComandos = resposta.contains("[JSTA0000B0000C0000D0000E0000G0000]") ||
+            ehRespostaMovAbaComandos = resposta.contains("DSL") ||
                                        resposta.contains("RPS");
         }
         else
@@ -1904,7 +1908,7 @@ void MainWindow::desligaServos()
 {
     filaComandosMovimentacaoAbaComandos.clear();
     filaComandosMovimentacaoAbaComandos.enqueue("[RPS]");
-    filaComandosMovimentacaoAbaComandos.enqueue("[JSTA0000B0000C0000D0000E0000G0000]");
+    filaComandosMovimentacaoAbaComandos.enqueue("[DSL]");
 
     parser(filaComandosMovimentacaoAbaComandos.dequeue());
 }
@@ -2086,7 +2090,7 @@ void MainWindow::on_btDesligaServos_clicked()
 
     ui->lblComandoAcionado->setText(ui->btDesligaServos->text());
     ui->listaUltimoComandoAcionado->clear();
-    ui->listaUltimoComandoAcionado->addItem("[JSTA0000B0000C0000D0000E0000G0000]");
+    ui->listaUltimoComandoAcionado->addItem("[DSL]");
 
     if(ui->rdbReadyForPIC->isChecked())
         desligaServos();
@@ -3619,6 +3623,11 @@ bool MainWindow::parser(QString comando)
         enviaComando(comando);
         return true;
     }
+    else if(comando.contains("[DSL]"))
+    {
+        enviaComando(comando);
+        return true;
+    }
     else if(comando.contains("CTZ"))
     {
         QString strJunta = comando.mid(4,2);
@@ -4002,6 +4011,17 @@ bool MainWindow::parserMM24(QString comando)
 
         mm24->SetMultipleTargets(5, 0, posRepouso);
 
+        return true;
+    }
+    else if(comando.contains("[DSL]"))
+    {
+        uint16_t posZero[5];
+        for (int i = 0; i < 5; i++)
+        {
+            posZero[i] = 0;
+        }
+
+        mm24->SetMultipleTargets(6, 0, posZero);
         return true;
     }
     else if(comando.contains("CTZ"))
