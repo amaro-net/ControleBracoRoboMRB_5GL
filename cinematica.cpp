@@ -739,6 +739,12 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     if(colideComBaseFixa != nullptr)
         *colideComBaseFixa = false;
 
+    if(colideComBaseGir != nullptr)
+        *colideComBaseGir = false;
+
+    if(colideComSegmentoL1 != nullptr)
+        *colideComSegmentoL1 = false;
+
     double gama = *gamaGraus * M_PI /180;
     double beta = *betaGraus * M_PI /180;
     double alfa = *alfaGraus * M_PI /180;
