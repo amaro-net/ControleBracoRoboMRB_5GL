@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tabComandos">
      <attribute name="title">
@@ -2615,6 +2615,9 @@ comandos</string>
           <property name="suffix">
            <string> cm</string>
           </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
           <property name="minimum">
            <double>-9999.000000000000000</double>
           </property>
@@ -2702,6 +2705,9 @@ comandos</string>
           <property name="suffix">
            <string> cm</string>
           </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
           <property name="minimum">
            <double>-9999.000000000000000</double>
           </property>
@@ -2782,6 +2788,9 @@ comandos</string>
           </property>
           <property name="suffix">
            <string> cm</string>
+          </property>
+          <property name="decimals">
+           <number>1</number>
           </property>
           <property name="minimum">
            <double>-9999.000000000000000</double>
@@ -2864,6 +2873,9 @@ comandos</string>
           <property name="suffix">
            <string> º</string>
           </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
           <property name="minimum">
            <double>-9999.000000000000000</double>
           </property>
@@ -2945,6 +2957,9 @@ comandos</string>
           <property name="suffix">
            <string> º</string>
           </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
           <property name="minimum">
            <double>-9999.000000000000000</double>
           </property>
@@ -3025,6 +3040,9 @@ comandos</string>
           </property>
           <property name="suffix">
            <string> º</string>
+          </property>
+          <property name="decimals">
+           <number>1</number>
           </property>
           <property name="minimum">
            <double>-9999.000000000000000</double>

@@ -110,8 +110,13 @@ class Cinematica
                                             double *pz,
                                             double *angulosMaxGraus, double *angulosMinGraus,
                                             bool *posicaoAtingivel);
+        double *vetorPosAngularSingular(double alfaGraus, int quadranteAlfa,
+                                        double teta1,
+                                        double *pz,
+                                        double *angulosMaxGraus, double *angulosMinGraus,
+                                        bool *posicaoAtingivel);
         double *calculaPosicaoSingular(double *pz,
-                                       double gama, double beta, double alfa,
+                                       double *gamaGraus, double *betaGraus, double *alfaGraus,
                                        double *angulosCorrentesJuntas,
                                        double *angulosMaxGraus,
                                        double *angulosMinGraus,

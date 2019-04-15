@@ -142,13 +142,13 @@ bool Cinematica::garraColideComBaseFixa(double x, double y, double z,
     double r23 = double(Zt[1]);
     double r33 = double(Zt[2]);
 
-    Plano3D plano5(0.0, 0.0, 13.2, 0.0, 0.0, 1.0, -5.0, 3.0, -2.5, 2.5, 13.2, 13.2);
-    Plano3D plano6(0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -34.34, 3.36, -9.95, 9.95, -INFINITY, 0.0);
+    Plano3D face5(0.0, 0.0, 13.2, 0.0, 0.0, 1.0, -5.0, 3.0, -2.5, 2.5, 13.2, 13.2);
+    Plano3D face6(0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -34.34, 3.36, -9.95, 9.95, -INFINITY, 0.0);
 
     QList<Plano3D> planos;
 
-    planos.append(plano5);
-    planos.append(plano6);
+    planos.append(face5);
+    planos.append(face6);
 
     for(Plano3D plano : planos)
     {
@@ -640,63 +640,145 @@ void Cinematica::calculaTeta2Teta3Teta4Singular(double* teta2, double* teta3, do
     }
 }
 
+double *Cinematica::vetorPosAngularSingular(double alfaGraus, int quadranteAlfa,
+                                            double teta1,
+                                            double *pz,
+                                            double *angulosMaxGraus, double *angulosMinGraus,
+                                            bool *posicaoAtingivel)
+{
+    double teta2, teta3, teta4, teta5;
+    double sinal180graus = 1;
+
+    double teta5Min = angulosMinGraus[4];
+    double teta5Max = angulosMaxGraus[4];
+
+    while(quadranteAlfa <= 0)
+    {
+        quadranteAlfa += 4;
+    }
+
+    while(quadranteAlfa > 4)
+    {
+        quadranteAlfa -= 4;
+    }
+
+    if(quadranteAlfa == 1 || quadranteAlfa == 2)
+        sinal180graus = -1;
+
+
+    teta5 = alfaGraus + sinal180graus * 180.0 - teta1;
+
+    if( ! EstaDentroDoIntervalo(teta5Min, true, teta5, teta5Max, true, CASAS_DECIMAIS_POSICAO_ANGULAR))
+    {
+        double difTeta5;
+
+        if(teta5 < teta5Min)
+        {
+            difTeta5 = teta5 - teta5Min;
+            teta5 = teta5Min;
+        }
+        else // if(teta5 > teta5Max)
+        {
+            difTeta5 = teta5 - teta5Max;
+            teta5 = teta5Max;
+        }
+
+        teta1 = teta1 + difTeta5;
+    }
+
+    calculaTeta2Teta3Teta4Singular(&teta2, &teta3, &teta4,
+                                   pz,
+                                   angulosMaxGraus,
+                                   angulosMinGraus,
+                                   posicaoAtingivel);
+
+    return new double[5]{teta1, teta2, teta3, teta4, teta5};
+}
+
 double* Cinematica::calculaPosicaoSingular(double* pz,
-                                           double gama, double beta, double alfa,
+                                           double *gamaGraus, double *betaGraus, double *alfaGraus,
                                            double *angulosCorrentesJuntas,
                                            double *angulosMaxGraus,
                                            double *angulosMinGraus,
                                            bool *posicaoAtingivel)
 {
-    double teta1, teta2, teta3, teta4, teta5;
+    double teta1;
+    double teta1Corrente = angulosCorrentesJuntas[0];    
 
-    double teta1Corrente = angulosCorrentesJuntas[0];
-    double teta5Corrente = angulosCorrentesJuntas[4];
-
-    if(EhIgual(gama, 0.0, CASAS_DECIMAIS_ROTACOES_XYZ_RAD) &&
-       EhIgual(beta, 0.0, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
-    {        
-        if(EhIgual(alfa, 0.0, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
+    if(EhIgual(*gamaGraus, 0.0, CASAS_DECIMAIS_ROTACOES_XYZ) &&
+       EhIgual(*betaGraus, 0.0, CASAS_DECIMAIS_ROTACOES_XYZ))
+    {
+        if(*alfaGraus > 180.0)
         {
-            /*
-             * teta1 = teta5 = 90.0
-             *         ou
-             * teta1 = teta5 = -90.0
-            */
-            if(teta1Corrente < 0.0)
-            {
-                teta1 = -90.0;
-                teta5 = -90.0;
-            }
+            do
+                *alfaGraus = *alfaGraus - 360.0;
+            while (*alfaGraus > 180.0);
+        }
+        else if(*alfaGraus < -180.0)
+        {
+            do
+                *alfaGraus = *alfaGraus + 360.0;
+            while (*alfaGraus < -180.0);
+        }
+
+        // Primeiro quadrante de alfa
+        if(EstaDentroDoIntervalo(0.0, true, *alfaGraus, 90.0, true, CASAS_DECIMAIS_ROTACOES_XYZ))
+        {            
+            if (   EstaDentroDoIntervalo(-90.0, true, teta1Corrente, 0.0, false, CASAS_DECIMAIS_POSICAO_ANGULAR)
+                || EstaDentroDoIntervalo(90.0, false, teta1Corrente, 100.0, true, CASAS_DECIMAIS_POSICAO_ANGULAR))
+                teta1 = teta1Corrente;
+            else if(EstaDentroDoIntervalo(0.0, true, *alfaGraus, 10.0, true, CASAS_DECIMAIS_ROTACOES_XYZ))
+                teta1 = 100.0;
             else
-            {
+                teta1 = -90.0;
+
+            return vetorPosAngularSingular(*alfaGraus, 1,
+                                           teta1,
+                                           pz,
+                                           angulosMaxGraus, angulosMinGraus,
+                                           posicaoAtingivel);
+        }
+        // Segundo quadrante de alfa
+        else if(EstaDentroDoIntervalo(90.0, false, *alfaGraus, 180.0, true, CASAS_DECIMAIS_ROTACOES_XYZ))
+        {            
+            if (EstaDentroDoIntervalo(0.0, true, teta1Corrente, 90.0, false, CASAS_DECIMAIS_POSICAO_ANGULAR))
+                teta1 = teta1Corrente;
+            else
+                teta1 = -90.0;
+
+            return vetorPosAngularSingular(*alfaGraus, 2,
+                                           teta1,
+                                           pz,
+                                           angulosMaxGraus, angulosMinGraus,
+                                           posicaoAtingivel);
+        }
+        // Terceiro quadrante de alfa
+        else if(EstaDentroDoIntervalo(-180.0, true, *alfaGraus, -90.0, true, CASAS_DECIMAIS_ROTACOES_XYZ))
+        {            
+            if (EstaDentroDoIntervalo(0.0, true, teta1Corrente, 100.0, true, CASAS_DECIMAIS_POSICAO_ANGULAR))
+                teta1 = teta1Corrente;
+            else
+                teta1 = 0.0;
+
+            return vetorPosAngularSingular(*alfaGraus, 3,
+                                           teta1,
+                                           pz,
+                                           angulosMaxGraus, angulosMinGraus,
+                                           posicaoAtingivel);
+        }
+        // Quarto quadrante de alfa
+        else if(EstaDentroDoIntervalo(-90.0, false, *alfaGraus, 0.0, false, CASAS_DECIMAIS_ROTACOES_XYZ))
+        {            
+            if (EstaDentroDoIntervalo(0.0, false, teta1Corrente, 100.0, true, CASAS_DECIMAIS_POSICAO_ANGULAR))
+                teta1 = teta1Corrente;
+            else
                 teta1 = 90.0;
-                teta5 = 90.0;
-            }
 
-            calculaTeta2Teta3Teta4Singular(&teta2, &teta3, &teta4,
+            return vetorPosAngularSingular(*alfaGraus, 4,
+                                           teta1,
                                            pz,
-                                           angulosMaxGraus,
-                                           angulosMinGraus,
+                                           angulosMaxGraus, angulosMinGraus,
                                            posicaoAtingivel);
-
-            return new double[5]{teta1, teta2, teta3, teta4, teta5};
-        }        
-        else if(EhIgual(std::abs(alfa), M_PI, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
-        {
-            /*
-             * teta1 = -teta5
-             * sendo que -90.0 <= teta1 <= 90.0
-             */
-            teta5 = teta5Corrente;
-            teta1 = -teta5;
-
-            calculaTeta2Teta3Teta4Singular(&teta2, &teta3, &teta4,
-                                           pz,
-                                           angulosMaxGraus,
-                                           angulosMinGraus,
-                                           posicaoAtingivel);
-
-            return new double[5]{teta1, teta2, teta3, teta4, teta5};
         }
     }
 
@@ -745,9 +827,9 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     if(colideComSegmentoL1 != nullptr)
         *colideComSegmentoL1 = false;
 
-    double gama = *gamaGraus * M_PI /180;
-    double beta = *betaGraus * M_PI /180;
-    double alfa = *alfaGraus * M_PI /180;
+    double gama = *gamaGraus * M_PI /180.0;
+    double beta = *betaGraus * M_PI /180.0;
+    double alfa = *alfaGraus * M_PI /180.0;
 
     double sgama = arredondaPara(sin(gama), CASAS_DECIMAIS_SENOS_COSSENOS);
     double sbeta = arredondaPara(sin(beta), CASAS_DECIMAIS_SENOS_COSSENOS);
@@ -779,7 +861,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
        EhIgual(py, 0.0, CASAS_DECIMAIS_POSICAO_XYZ))
     {
         double* angulosJuntas = calculaPosicaoSingular(&pz,
-                                                       gama, beta, alfa,
+                                                       gamaGraus, betaGraus, alfaGraus,
                                                        angulosCorrentesJuntas,
                                                        angulosMaxGraus,
                                                        angulosMinGraus,
@@ -960,7 +1042,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     double teta1_1 = atan2pypx + atan2sqrt;
     double teta1_2 = atan2pypx - atan2sqrt;
     double teta1_3 = atan2(r23, r13);
-    double teta1_4 = atan2(r23, r13);
+    double teta1_4 = atan2(-r23, -r13);
 
     if(EhMaiorOuIgual(teta1_1, teta1min, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD) &&
        EhMenorOuIgual(teta1_1, teta1max, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD))
@@ -1232,9 +1314,9 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
             pesosTeta[3] = pesoTeta4;
             pesosTeta[4] = pesoTeta5;
 
-            for(int i = 0; i < solucoes.count(); i++)
+            for(int i = 0; i < solucoesValidas.count(); i++)
             {
-                solucao = solucoes.at(i);
+                solucao = solucoesValidas.at(i);
 
                 angTeta[0] = solucao->teta1;
                 angTeta[1] = solucao->teta2;
@@ -1250,25 +1332,25 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
                 for(int j = 0; j < QTD_SERVOS - 1; j++)
                 {
                     somatorio += pesosTeta[j] * difTeta[j];
-                    somaPesos = pesosTeta[j];
+                    somaPesos += pesosTeta[j];
                 }
 
                 solucao->peso = somatorio/somaPesos;
             }
 
             int idxSolucaoPesoMaior = 0;
-            double maiorPeso = solucoes.at(0)->peso;
+            double maiorPeso = solucoesValidas.at(0)->peso;
 
-            for(int i = 1; i < solucoes.count(); i++)
+            for(int i = 1; i < solucoesValidas.count(); i++)
             {
-                if(solucoes.at(i)->peso > maiorPeso)
+                if(solucoesValidas.at(i)->peso > maiorPeso)
                 {
-                    maiorPeso = solucoes.at(i)->peso;
+                    maiorPeso = solucoesValidas.at(i)->peso;
                     idxSolucaoPesoMaior = i;
                 }
             }
 
-            solucao = solucoes.at(idxSolucaoPesoMaior);
+            solucao = solucoesValidas.at(idxSolucaoPesoMaior);
         }
     }    
 
@@ -1313,4 +1395,3 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
 
     return new double[5]{teta1, teta2, teta3, teta4, teta5};
 }
-

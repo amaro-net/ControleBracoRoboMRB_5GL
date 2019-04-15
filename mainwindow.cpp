@@ -4308,9 +4308,9 @@ double *MainWindow::preencheCamposXYZAtual(double *posicoesAtuaisGraus)
     ui->edtPosXAtual->setText(QString("%L1%2").arg(posGarra[0], 0, 'f', CASAS_DECIMAIS_POSICAO_XYZ).arg(STR_UND_CM));
     ui->edtPosYAtual->setText(QString("%L1%2").arg(posGarra[1], 0, 'f', CASAS_DECIMAIS_POSICAO_XYZ).arg(STR_UND_CM));
     ui->edtPosZAtual->setText(QString("%L1%2").arg(posGarra[2], 0, 'f', CASAS_DECIMAIS_POSICAO_XYZ).arg(STR_UND_CM));
-    ui->edtRxAtual->setText(QString("%L1%2").arg(posGarra[3], 0, 'f', CASAS_DECIMAIS_POSICAO_ANGULAR).arg(STR_UND_GRAUS));
-    ui->edtRyAtual->setText(QString("%L1%2").arg(posGarra[4], 0, 'f', CASAS_DECIMAIS_POSICAO_ANGULAR).arg(STR_UND_GRAUS));
-    ui->edtRzAtual->setText(QString("%L1%2").arg(posGarra[5], 0, 'f', CASAS_DECIMAIS_POSICAO_ANGULAR).arg(STR_UND_GRAUS));
+    ui->edtRxAtual->setText(QString("%L1%2").arg(posGarra[3], 0, 'f', CASAS_DECIMAIS_ROTACOES_XYZ).arg(STR_UND_GRAUS));
+    ui->edtRyAtual->setText(QString("%L1%2").arg(posGarra[4], 0, 'f', CASAS_DECIMAIS_ROTACOES_XYZ).arg(STR_UND_GRAUS));
+    ui->edtRzAtual->setText(QString("%L1%2").arg(posGarra[5], 0, 'f', CASAS_DECIMAIS_ROTACOES_XYZ).arg(STR_UND_GRAUS));
 
     return posGarra;
 }
