@@ -534,6 +534,8 @@ void MainWindow::habilitarComponentes(bool estadoHab)
 
     ui->tabelaPosLimites->setEnabled(estadoHab);
     ui->tabelaPosLimitesGraus->setEnabled(estadoHab);
+    ui->chkHabChecagemDeColisao->setEnabled(estadoHab);
+    ui->chkImpedirColisao->setEnabled(estadoHab);
 
     ui->listSequenciaComandos->setEnabled(estadoHab);
     ui->btNovaSequencia->setEnabled(estadoHab);
@@ -2239,6 +2241,136 @@ void MainWindow::avisoColisaoSegmentoL1(bool posicaoProjetada)
                          QMessageBox::Ok);
 }
 
+int MainWindow::perguntaColisaoBaseFixa(bool posicaoProjetada)
+{
+    QString strCompl("");
+
+    if(posicaoProjetada)
+    {
+        strCompl = ",\nmesmo com a posição projetada no plano que corta verticalmente o braço robô";
+    }
+    QString mensagem = "Posição XYZ alvo faz a garra colidir com a base fixa"+strCompl+".\n"+
+                       "Deseja que a garra seja posicionada mesmo assim?";
+
+    return caixaDialogoCriticoPergutaSimNao(tr("Colisão com base fixa"), mensagem);
+}
+
+int MainWindow::perguntaColisaoBaseGiratoria(bool posicaoProjetada)
+{
+    QString strCompl("");
+
+    if(posicaoProjetada)
+    {
+        strCompl = ",\nmesmo com a posição projetada no plano que corta verticalmente o braço robô";
+    }
+    QString mensagem = "Posição XYZ alvo faz a garra colidir com a base giratória"+strCompl+".\n"+
+                       "Deseja que a garra seja posicionada mesmo assim?";
+
+    return caixaDialogoCriticoPergutaSimNao(tr("Colisão com base giratória"), mensagem);
+}
+
+int MainWindow::perguntaColisaoSegmentoL1(bool posicaoProjetada)
+{
+    QString strCompl("");
+
+    if(posicaoProjetada)
+    {
+        strCompl = ",\nmesmo com a posição projetada no plano que corta verticalmente o braço robô";
+    }
+    QString mensagem = "Posição XYZ alvo faz a garra colidir com o segmento L1"+strCompl+".\n"+
+                       "Deseja que a garra seja posicionada mesmo assim?";
+
+    return caixaDialogoCriticoPergutaSimNao(tr("Colisão com segmento L1"), mensagem);
+}
+
+void MainWindow::mover()
+{
+    if(ui->rdbReadyForPIC->isChecked())
+        comandoJST();
+    else if(ui->rdbMiniMaestro24->isChecked())
+    {
+        uint16_t posicaoAlvo[QTD_SERVOS];
+
+        for(int i = 0; i < QTD_SERVOS; i++)
+        {
+            posicaoAlvo[i] = static_cast<uint16_t>(lstSpnAlvo[i]->value());
+        }
+        this->mm24->SetMultipleTargets(QTD_SERVOS, 0, posicaoAlvo);
+    }
+}
+
+void MainWindow::moverComVelAcl()
+{
+    if(ui->rdbReadyForPIC->isChecked())
+    {
+        QString comando, comandoJST;
+        int valor;
+
+        on_btPararSeqComandos_clicked();
+
+        filaComandosMoverComVelAcl.clear();
+
+        comandoJST = "[JST";
+        for(int i = 0; i < QTD_SERVOS; i++)
+        {
+            valor = lstSpnVel[i]->value();
+            comando = QString("[VEL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
+            filaComandosMoverComVelAcl.enqueue(comando);
+
+            valor = lstSpnAcl[i]->value();
+            comando = QString("[ACL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
+            filaComandosMoverComVelAcl.enqueue(comando);
+
+            if(lstChkHab[i]->isChecked())
+                valor = lstSpnAlvo[i]->value();
+            else
+                valor = 0;
+
+            comandoJST += idJST[i] + QString("%1").arg(valor, 4, 10, QChar('0'));
+        }
+
+        comandoJST += "]";
+
+        filaComandosMoverComVelAcl.enqueue(comandoJST);
+
+        enviaComando(filaComandosMoverComVelAcl.dequeue());
+    }
+    else if(ui->rdbMiniMaestro24->isChecked())
+    {
+        uint16_t targets[6];
+
+        for(int i = 0; i < QTD_SERVOS; i++)
+        {
+              uint16_t speed = static_cast<uint16_t>(lstSpnVel[i]->value());
+              this->mm24->SetSpeed(char(i), speed);
+
+              uint16_t accel = static_cast<uint16_t>(lstSpnAcl[i]->value());
+              this->mm24->SetAcceleration(char(i), accel);
+
+              if(lstChkHab[i]->isChecked())
+                targets[i] = static_cast<uint16_t>(lstSpnAlvo[i]->value());
+              else
+                targets[i] = 0;
+        }
+
+        this->mm24->SetMultipleTargets(QTD_SERVOS, 0, targets);
+    }
+}
+
+void MainWindow::restauraPosicoesAlvoComAsAtuais()
+{
+    bool ehNumeroMaiorQueZero;
+
+    for(int idxJunta = 0; idxJunta < 6; idxJunta++)
+    {
+        int posCorrente = lstEdtAtual[idxJunta]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt(&ehNumeroMaiorQueZero);
+        if(ehNumeroMaiorQueZero)
+        {
+            lstSpnAlvo[idxJunta]->setValue(posCorrente);
+        }
+    }
+}
+
 void MainWindow::on_btMover_clicked()
 {
     on_btPararSeqComandos_clicked();
@@ -2258,36 +2390,39 @@ void MainWindow::on_btMover_clicked()
 
     if(!(colideComBaseFixa || colideComBaseGir || colideComSegmentoL1))
     {
-        if(ui->rdbReadyForPIC->isChecked())
-            comandoJST();
-        else if(ui->rdbMiniMaestro24->isChecked())
-        {            
-            uint16_t posicaoAlvo[QTD_SERVOS];
-
-            for(int i = 0; i < QTD_SERVOS; i++)
-            {
-                posicaoAlvo[i] = static_cast<uint16_t>(lstSpnAlvo[i]->value());
-            }
-            this->mm24->SetMultipleTargets(QTD_SERVOS, 0, posicaoAlvo);
-        }
+        mover();
     }
     else
     {
-        if(colideComBaseFixa)
-            avisoColisaoBaseFixa();
-        else if(colideComBaseGir)
-            avisoColisaoBaseGiratoria();
-        else if(colideComSegmentoL1)
-            avisoColisaoSegmentoL1();
-
-        bool ehNumeroMaiorQueZero;
-
-        for(int idxJunta = 0; idxJunta < 6; idxJunta++)
+        if(cinematica.impedirColisao)
         {
-            int posCorrente = lstEdtAtual[idxJunta]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt(&ehNumeroMaiorQueZero);
-            if(ehNumeroMaiorQueZero)
+            if(colideComBaseFixa)
+                avisoColisaoBaseFixa();
+            else if(colideComBaseGir)
+                avisoColisaoBaseGiratoria();
+            else if(colideComSegmentoL1)
+                avisoColisaoSegmentoL1();
+
+            restauraPosicoesAlvoComAsAtuais();
+        }
+        else
+        {
+            int resposta = QMessageBox::No;
+
+            if(colideComBaseFixa)
+                resposta = perguntaColisaoBaseFixa();
+            else if(colideComBaseGir)
+                resposta = perguntaColisaoBaseGiratoria();
+            else if(colideComSegmentoL1)
+                resposta = perguntaColisaoSegmentoL1();
+
+            if(resposta == QMessageBox::Yes)
             {
-                lstSpnAlvo[idxJunta]->setValue(posCorrente);
+                mover();
+            }
+            else
+            {
+                restauraPosicoesAlvoComAsAtuais();
             }
         }
     }
@@ -2313,78 +2448,39 @@ void MainWindow::on_btMoverComVelEAcl_clicked()
 
     if(!(colideComBaseFixa || colideComBaseGir || colideComSegmentoL1))
     {
-        if(ui->rdbReadyForPIC->isChecked())
-        {
-            QString comando, comandoJST;
-            int valor;
-
-            on_btPararSeqComandos_clicked();
-
-            filaComandosMoverComVelAcl.clear();
-
-            comandoJST = "[JST";
-            for(int i = 0; i < QTD_SERVOS; i++)
-            {
-                valor = lstSpnVel[i]->value();
-                comando = QString("[VEL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
-                filaComandosMoverComVelAcl.enqueue(comando);
-
-                valor = lstSpnAcl[i]->value();
-                comando = QString("[ACL%1%2]").arg(junta[i]).arg(valor, 4, 10, QChar('0'));
-                filaComandosMoverComVelAcl.enqueue(comando);
-
-                if(lstChkHab[i]->isChecked())
-                    valor = lstSpnAlvo[i]->value();
-                else
-                    valor = 0;
-
-                comandoJST += idJST[i] + QString("%1").arg(valor, 4, 10, QChar('0'));
-            }
-
-            comandoJST += "]";
-
-            filaComandosMoverComVelAcl.enqueue(comandoJST);
-
-            enviaComando(filaComandosMoverComVelAcl.dequeue());
-        }
-        else if(ui->rdbMiniMaestro24->isChecked())
-        {
-            uint16_t targets[6];
-
-            for(int i = 0; i < QTD_SERVOS; i++)
-            {
-                  uint16_t speed = static_cast<uint16_t>(lstSpnVel[i]->value());
-                  this->mm24->SetSpeed(char(i), speed);
-
-                  uint16_t accel = static_cast<uint16_t>(lstSpnAcl[i]->value());
-                  this->mm24->SetAcceleration(char(i), accel);
-
-                  if(lstChkHab[i]->isChecked())
-                    targets[i] = static_cast<uint16_t>(lstSpnAlvo[i]->value());
-                  else
-                    targets[i] = 0;
-            }
-
-            this->mm24->SetMultipleTargets(QTD_SERVOS, 0, targets);
-        }
+        moverComVelAcl();
     }
     else
     {
-        if(colideComBaseFixa)
-            avisoColisaoBaseFixa();
-        else if(colideComBaseGir)
-            avisoColisaoBaseGiratoria();
-        else if(colideComSegmentoL1)
-            avisoColisaoSegmentoL1();
-
-        bool ehNumeroMaiorQueZero;
-
-        for(int idxJunta = 0; idxJunta < 6; idxJunta++)
+        if(cinematica.impedirColisao)
         {
-            int posCorrente = lstEdtAtual[idxJunta]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt(&ehNumeroMaiorQueZero);
-            if(ehNumeroMaiorQueZero)
+            if(colideComBaseFixa)
+                avisoColisaoBaseFixa();
+            else if(colideComBaseGir)
+                avisoColisaoBaseGiratoria();
+            else if(colideComSegmentoL1)
+                avisoColisaoSegmentoL1();
+
+            restauraPosicoesAlvoComAsAtuais();
+        }
+        else
+        {
+            int resposta = QMessageBox::No;
+
+            if(colideComBaseFixa)
+                resposta = perguntaColisaoBaseFixa();
+            else if(colideComBaseGir)
+                resposta = perguntaColisaoBaseGiratoria();
+            else if(colideComSegmentoL1)
+                resposta = perguntaColisaoSegmentoL1();
+
+            if(resposta == QMessageBox::Yes)
             {
-                lstSpnAlvo[idxJunta]->setValue(posCorrente);
+                moverComVelAcl();
+            }
+            else
+            {
+                restauraPosicoesAlvoComAsAtuais();
             }
         }
     }
@@ -2410,34 +2506,80 @@ void MainWindow::on_btCalcularXYZAlvo_clicked()
         preencheCamposXYZAlvo(posGarra);
     else
     {
-        if(colideComBaseFixa)
-            avisoColisaoBaseFixa();
-        else if(colideComBaseGir)
-            avisoColisaoBaseGiratoria();
-        else if(colideComSegmentoL1)
-            avisoColisaoSegmentoL1();
+        if(cinematica.impedirColisao)
+        {
+            if(colideComBaseFixa)
+                avisoColisaoBaseFixa();
+            else if(colideComBaseGir)
+                avisoColisaoBaseGiratoria();
+            else if(colideComSegmentoL1)
+                avisoColisaoSegmentoL1();
+        }
+        else
+        {
+            int resposta = QMessageBox::No;
+
+            if(colideComBaseFixa)
+                resposta = perguntaColisaoBaseFixa();
+            else if(colideComBaseGir)
+                resposta = perguntaColisaoBaseGiratoria();
+            else if(colideComSegmentoL1)
+                resposta = perguntaColisaoSegmentoL1();
+
+            if(resposta == QMessageBox::Yes)
+            {
+                preencheCamposXYZAlvo(posGarra);
+            }
+        }
     }
     delete(posGarra);
 }
 
 int MainWindow::caixaDialogoPerguntaSimNao(const QString &titulo, const QString &texto)
 {
-    QMessageBox msgPerguntaPosProjetada;
+    QMessageBox msgPergunta;
 
-    msgPerguntaPosProjetada.setParent(this);
-    msgPerguntaPosProjetada.setWindowTitle(titulo);
-    msgPerguntaPosProjetada.setText(texto);
-    QPushButton* btSim = msgPerguntaPosProjetada.addButton(tr("Sim"), QMessageBox::YesRole);
-    QPushButton* btNao = msgPerguntaPosProjetada.addButton(tr("Não"), QMessageBox::NoRole);
+    msgPergunta.setParent(this);
+    msgPergunta.setWindowTitle(titulo);
+    msgPergunta.setText(texto);
+    QPushButton* btSim = msgPergunta.addButton(tr("Sim"), QMessageBox::YesRole);
+    QPushButton* btNao = msgPergunta.addButton(tr("Não"), QMessageBox::NoRole);
 
-    msgPerguntaPosProjetada.setDefaultButton(btNao);
-    msgPerguntaPosProjetada.setEscapeButton(btNao);
-    msgPerguntaPosProjetada.setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
-    msgPerguntaPosProjetada.setIcon(QMessageBox::Question);
+    msgPergunta.setDefaultButton(btNao);
+    msgPergunta.setEscapeButton(btNao);
+    msgPergunta.setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    msgPergunta.setIcon(QMessageBox::Question);
 
-    msgPerguntaPosProjetada.exec();
+    msgPergunta.exec();
 
-    QAbstractButton* btClicado = msgPerguntaPosProjetada.clickedButton();
+    QAbstractButton* btClicado = msgPergunta.clickedButton();
+
+    if(btClicado == btSim)
+    {
+        return QMessageBox::Yes;
+    }
+
+    return QMessageBox::No;
+}
+
+int MainWindow::caixaDialogoCriticoPergutaSimNao(const QString &titulo, const QString &texto)
+{
+    QMessageBox msgPergunta;
+
+    msgPergunta.setParent(this);
+    msgPergunta.setWindowTitle(titulo);
+    msgPergunta.setText(texto);
+    QPushButton* btSim = msgPergunta.addButton(tr("Sim"), QMessageBox::YesRole);
+    QPushButton* btNao = msgPergunta.addButton(tr("Não"), QMessageBox::NoRole);
+
+    msgPergunta.setDefaultButton(btNao);
+    msgPergunta.setEscapeButton(btNao);
+    msgPergunta.setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    msgPergunta.setIcon(QMessageBox::Critical);
+
+    msgPergunta.exec();
+
+    QAbstractButton* btClicado = msgPergunta.clickedButton();
 
     if(btClicado == btSim)
     {
@@ -2479,7 +2621,6 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
                                                  angMax, angMin,
                                                  &posicaoProjetada, &posicaoAtingivel,
                                                  &colideComBaseFixa, &colideComBaseGir, &colideComSegmentoL1);
-
     if(posicaoProjetada && posicaoAtingivel)
     {
         respostaPosProjetada = caixaDialogoPerguntaSimNao(tr("Posição projetada"),
@@ -2492,27 +2633,64 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
     }
     else if(colideComBaseFixa)
     {
-        avisoColisaoBaseFixa(posicaoProjetada);
+        if(cinematica.impedirColisao)
+        {
+            avisoColisaoBaseFixa(posicaoProjetada);
+            respostaPosInatingivel = QMessageBox::No;
+            posicaoAtingivel = false;
+        }
+        else
+        {
+            respostaPosInatingivel = perguntaColisaoBaseFixa(posicaoProjetada);
+            if(respostaPosInatingivel == QMessageBox::Yes)
+                posicaoAtingivel = true;
+            else {
+                posicaoAtingivel = false;
+            }
+        }
 
-        respostaPosInatingivel = QMessageBox::No;
         respostaPosProjetada = respostaPosInatingivel;
-        posicaoAtingivel = false;
     }
     else if(colideComBaseGir)
     {
-        avisoColisaoBaseGiratoria(posicaoProjetada);
+        if(cinematica.impedirColisao)
+        {
+            avisoColisaoBaseGiratoria(posicaoProjetada);
+            respostaPosInatingivel = QMessageBox::No;
+            posicaoAtingivel = false;
+        }
+        else
+        {
+            respostaPosInatingivel = perguntaColisaoBaseGiratoria(posicaoProjetada);
 
-        respostaPosInatingivel = QMessageBox::No;
+            if(respostaPosInatingivel == QMessageBox::Yes)
+                posicaoAtingivel = true;
+            else {
+                posicaoAtingivel = false;
+            }
+        }
+
         respostaPosProjetada = respostaPosInatingivel;
-        posicaoAtingivel = false;
     }
     else if(colideComSegmentoL1)
-    {        
-        avisoColisaoSegmentoL1(posicaoProjetada);
+    {
+        if(cinematica.impedirColisao)
+        {
+            avisoColisaoSegmentoL1(posicaoProjetada);
+            respostaPosInatingivel = QMessageBox::No;
+            posicaoAtingivel = false;
+        }
+        else
+        {
+            respostaPosInatingivel = perguntaColisaoSegmentoL1(posicaoProjetada);
 
-        respostaPosInatingivel = QMessageBox::No;
+            if(respostaPosInatingivel == QMessageBox::Yes)
+                posicaoAtingivel = true;
+            else {
+                posicaoAtingivel = false;
+            }
+        }
         respostaPosProjetada = respostaPosInatingivel;
-        posicaoAtingivel = false;
     }
     else if(!posicaoAtingivel)
     {
@@ -2621,6 +2799,24 @@ void MainWindow::habilitaCamposAbaPosicaoAlvoJunta(int posicaoAba, int idxJunta,
     }
 }
 
+void MainWindow::enviaPosicaoImediatamente(int idxJunta, int posicaoMicrossegundos)
+{
+    if(ui->rdbReadyForPIC->isChecked())
+    {
+        comandoEnvioImediato = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(posicaoMicrossegundos, 4, 10, QChar('0'));
+
+        if(!timerEnvioImediato->isActive())
+        {
+            timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_MS);
+        }
+
+    }
+    else if(ui->rdbMiniMaestro24->isChecked())
+    {
+        mm24->SetTarget(char(idxJunta), uint16_t(posicaoMicrossegundos));
+    }
+}
+
 void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrossegundos)
 {    
     if(ui->chkEnviaComandoImediato->isChecked() && !calculoAngulosAlvoAcionado)
@@ -2653,37 +2849,42 @@ void MainWindow::enviaPosicaoAlvoAssimQueMudar(int idxJunta, int posicaoMicrosse
 
             if(!(colideComBaseFixa || colideComBaseGir || colideComSegmentoL1))
             {
-                if(ui->rdbReadyForPIC->isChecked())
-                {
-                    comandoEnvioImediato = QString("[JST%1%2]").arg(idJST[idxJunta]).arg(posicaoMicrossegundos, 4, 10, QChar('0'));
-
-                    if(!timerEnvioImediato->isActive())
-                    {
-                        timerEnvioImediato->start(TEMPO_TIMER_ENVIO_IMEDIATO_MS);
-                    }
-
-                }
-                else if(ui->rdbMiniMaestro24->isChecked())
-                {                    
-                    mm24->SetTarget(char(idxJunta), uint16_t(posicaoMicrossegundos));
-                }
+                enviaPosicaoImediatamente(idxJunta, posicaoMicrossegundos);
             }
             else
             {
-                bool ehNumeroMaiorQueZero;
-
-                if(colideComBaseFixa)
-                    avisoColisaoBaseFixa();
-                else if(colideComBaseGir)
-                    avisoColisaoBaseGiratoria();
-                else if(colideComSegmentoL1)
-                    avisoColisaoSegmentoL1();
-
-                ui->chkEnviaComandoImediato->setChecked(false);
-                int posCorrente = lstEdtAtual[idxJunta]->text().replace(STR_UND_MICROSSEGUNDOS, "").toInt(&ehNumeroMaiorQueZero);
-                if(ehNumeroMaiorQueZero)
+                if(cinematica.impedirColisao)
                 {
-                    lstSpnAlvo[idxJunta]->setValue(posCorrente);
+                    if(colideComBaseFixa)
+                        avisoColisaoBaseFixa();
+                    else if(colideComBaseGir)
+                        avisoColisaoBaseGiratoria();
+                    else if(colideComSegmentoL1)
+                        avisoColisaoSegmentoL1();
+
+                    ui->chkEnviaComandoImediato->setChecked(false);
+                    restauraPosicoesAlvoComAsAtuais();
+                }
+                else
+                {
+                    int resposta = QMessageBox::No;
+
+                    if(colideComBaseFixa)
+                        resposta = perguntaColisaoBaseFixa();
+                    else if(colideComBaseGir)
+                        resposta = perguntaColisaoBaseGiratoria();
+                    else if(colideComSegmentoL1)
+                        resposta = perguntaColisaoSegmentoL1();
+
+                    if(resposta == QMessageBox::Yes)
+                    {
+                        enviaPosicaoImediatamente(idxJunta, posicaoMicrossegundos);
+                    }
+                    else
+                    {
+                        ui->chkEnviaComandoImediato->setChecked(false);
+                        restauraPosicoesAlvoComAsAtuais();
+                    }
                 }
             }
         }
@@ -4255,6 +4456,62 @@ void MainWindow::on_btResetarPlacaServos_clicked()
         enviaComando("[RSTM]");
 }
 
+void MainWindow::habilitarSistemaDeColisao(bool estadoHab)
+{
+    ui->chkImpedirColisao->setEnabled(estadoHab);
+    ui->chkImpedirColisao->setChecked(estadoHab);
+    cinematica.checarColisao = estadoHab;
+    cinematica.impedirColisao = estadoHab;
+}
+
+void MainWindow::on_chkHabChecagemDeColisao_clicked(bool checked)
+{    
+    if(checked)
+    {
+        habilitarSistemaDeColisao(true);
+    }
+    else
+    {        
+        int resposta = caixaDialogoCriticoPergutaSimNao(tr("Desabilitar checagem de colisão"),
+                                                        tr("Desabilitar a checagem de colisão põe em grande risco a integridade das "
+                                                           "partes mecânicas do braço robô. Tem certeza que deseja continuar?"));
+        if(resposta == QMessageBox::Yes)
+        {
+            habilitarSistemaDeColisao(false);
+        }
+        else
+        {            
+            ui->chkHabChecagemDeColisao->setChecked(true);
+            habilitarSistemaDeColisao(true);
+        }
+    }
+}
+
+void MainWindow::on_chkImpedirColisao_clicked(bool checked)
+{    
+    if(checked)
+    {
+        cinematica.impedirColisao = true;
+    }
+    else
+    {        
+        int resposta = caixaDialogoCriticoPergutaSimNao(tr("Desabilitar impedimento de colisão"),
+                                                        tr("Desabilitar o impedimento de colisão põe em risco a integridade das "
+                                                           "partes mecânicas do braço robô. No entanto, uma mensagem de confirmação "
+                                                           "irá aparecer sempre que uma posição alvo for colidir com a base fixa, a base "
+                                                           "giratória ou o segmento L1. "
+                                                           "Tem certeza que deseja continuar?"));
+        if(resposta == QMessageBox::Yes)
+        {
+            cinematica.impedirColisao = false;
+        }
+        else
+        {
+            ui->chkImpedirColisao->setChecked(true);
+            cinematica.impedirColisao = true;
+        }
+    }
+}
 
 /* NOTE: ***** Aba Terminal (Ready For Pic) ***** */
 
@@ -4324,3 +4581,4 @@ void MainWindow::preencheCamposXYZAlvo(double *posGarra)
     ui->spnRyAlvo->setValue(posGarra[4]);
     ui->spnRzAlvo->setValue(posGarra[5]);
 }
+

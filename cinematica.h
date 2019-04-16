@@ -128,6 +128,10 @@ class Cinematica
                           bool *posicaoProjetada = nullptr, bool *posicaoAtingivel = nullptr,
                           bool *colideComBaseFixa = nullptr, bool *colideComBaseGir = nullptr, bool *colideComSegmentoL1 = nullptr);
 
+
+        // Campos
+        bool impedirColisao = true;
+        bool checarColisao = true;
 };
 
 #endif // CINEMATICA_H

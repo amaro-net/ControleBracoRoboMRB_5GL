@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="tabComandos">
      <attribute name="title">
@@ -4225,6 +4225,44 @@ Inversa</string>
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QCheckBox" name="chkHabChecagemDeColisao">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>380</y>
+        <width>411</width>
+        <height>19</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Checagem de colisão da garra com a base fixa, base giratória ou segmento L1</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="chkImpedirColisao">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>400</y>
+        <width>221</width>
+        <height>19</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Impedir colisão da garra</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tabTerminal">

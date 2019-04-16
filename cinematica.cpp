@@ -135,6 +135,9 @@ bool Cinematica::garraColideComBaseFixa(double x, double y, double z,
                                         double px, double py, double pz,
                                         QVector3D Zt)
 {
+    if(!checarColisao)
+        return false;
+
     if(pontoColideComBaseFixa(x, y, z) || pontoColideComBaseFixa(px, py, pz))
         return true;
 
@@ -185,6 +188,9 @@ bool Cinematica::garraColideComBaseGiratoria(double xgl, double zgl,
                                              double pxl, double pzl,
                                              double teta234)
 {
+    if(!checarColisao)
+        return false;
+
     double tetag = teta234 - M_PI_2;
 
     if( (EhMenorOuIgual(xgl, 2.15, CASAS_DECIMAIS_POSICAO_XYZ) &&
@@ -227,6 +233,9 @@ bool Cinematica::garraColideComSegmentoL1(double xgl, double zgl,
                                           double pxl, double pzl,
                                           double teta2)
 {
+    if(!checarColisao)
+        return false;
+
     if(!(EhIgual(teta2, M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD) ||
          EhIgual(teta2, -M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD)) )
     {

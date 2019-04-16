@@ -280,6 +280,10 @@ class MainWindow : public QMainWindow
 
         void on_btLimparConsole_clicked();
 
+        void on_chkHabChecagemDeColisao_clicked(bool checked);
+
+        void on_chkImpedirColisao_clicked(bool checked);
+
     private:
         void preencheCombosPortaSerial();
         void showStatusMessage(const QString &message);
@@ -331,6 +335,9 @@ class MainWindow : public QMainWindow
         void continuaExecucaoPartindoDoDLYSemParam();
 
         int caixaDialogoPerguntaSimNao(const QString &titulo, const QString &texto);
+        int caixaDialogoCriticoPergutaSimNao(const QString &titulo, const QString &texto);
+
+        void habilitarSistemaDeColisao(bool estadoHab);
 
         /* Comandos */
         void enviaComando(QString comando);
@@ -349,6 +356,11 @@ class MainWindow : public QMainWindow
         void comandoJST();
         void comandoLED();
         void comandoLEDSemParametros();
+
+        void mover();
+        void moverComVelAcl();
+        void restauraPosicoesAlvoComAsAtuais();
+        void enviaPosicaoImediatamente(int idxJunta, int posicaoMicrossegundos);
 
         bool parser(QString comando);        
 
@@ -373,6 +385,9 @@ class MainWindow : public QMainWindow
         void avisoColisaoBaseFixa(bool posicaoProjetada = false);
         void avisoColisaoBaseGiratoria(bool posicaoProjetada = false);
         void avisoColisaoSegmentoL1(bool posicaoProjetada = false);
+        int perguntaColisaoBaseFixa(bool posicaoProjetada = false);
+        int perguntaColisaoBaseGiratoria(bool posicaoProjetada = false);
+        int perguntaColisaoSegmentoL1(bool posicaoProjetada = false);
 
         /* Funções para cinemática direta/inversa */
         double *preencheCamposXYZAtual(double *posicoesAtuaisGraus);
