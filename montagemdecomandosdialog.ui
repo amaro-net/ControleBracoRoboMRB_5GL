@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>467</width>
-    <height>466</height>
+    <height>482</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
      <x>30</x>
      <y>70</y>
      <width>341</width>
-     <height>373</height>
+     <height>401</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -47,7 +47,7 @@
     <number>1</number>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>5</number>
    </property>
    <widget class="QWidget" name="pgComandosSemParametros">
     <property name="geometry">
@@ -55,7 +55,7 @@
       <x>0</x>
       <y>0</y>
       <width>341</width>
-      <height>184</height>
+      <height>212</height>
      </rect>
     </property>
     <attribute name="label">
@@ -65,9 +65,9 @@
      <property name="geometry">
       <rect>
        <x>90</x>
-       <y>13</y>
+       <y>10</y>
        <width>161</width>
-       <height>141</height>
+       <height>181</height>
       </rect>
      </property>
      <property name="orientation">
@@ -88,6 +88,11 @@
        <string>Repouso ([RPS])</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="btDesliga">
+      <property name="text">
+       <string>Desliga ([DSL])</string>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="pgCTZ">
@@ -96,7 +101,7 @@
       <x>0</x>
       <y>0</y>
       <width>341</width>
-      <height>184</height>
+      <height>212</height>
      </rect>
     </property>
     <attribute name="label">
@@ -165,7 +170,7 @@
       <x>0</x>
       <y>0</y>
       <width>341</width>
-      <height>184</height>
+      <height>212</height>
      </rect>
     </property>
     <attribute name="label">
@@ -190,7 +195,7 @@
        <x>61</x>
        <y>20</y>
        <width>261</width>
-       <height>164</height>
+       <height>182</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
@@ -559,7 +564,7 @@
       <x>0</x>
       <y>0</y>
       <width>341</width>
-      <height>184</height>
+      <height>212</height>
      </rect>
     </property>
     <attribute name="label">
@@ -680,7 +685,7 @@
       <x>0</x>
       <y>0</y>
       <width>341</width>
-      <height>184</height>
+      <height>212</height>
      </rect>
     </property>
     <attribute name="label">
@@ -801,7 +806,7 @@
       <x>0</x>
       <y>0</y>
       <width>341</width>
-      <height>184</height>
+      <height>212</height>
      </rect>
     </property>
     <attribute name="label">
@@ -812,8 +817,8 @@
       <rect>
        <x>126</x>
        <y>16</y>
-       <width>160</width>
-       <height>42</height>
+       <width>168</width>
+       <height>46</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="layoutLeds">
@@ -919,7 +924,7 @@
       <x>0</x>
       <y>0</y>
       <width>341</width>
-      <height>184</height>
+      <height>212</height>
      </rect>
     </property>
     <attribute name="label">

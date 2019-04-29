@@ -153,6 +153,8 @@ class MontagemDeComandosDialog : public QDialog
 
         void on_spnTempoMs_valueChanged(int arg1);
 
+        void on_btDesliga_clicked();
+
     private:
         Ui::MontagemDeComandosDialog *ui;
 

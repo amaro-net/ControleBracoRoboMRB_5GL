@@ -348,6 +348,11 @@ void MontagemDeComandosDialog::on_btRepouso_clicked()
     ui->edtComando->setText("[RPS]");
 }
 
+void MontagemDeComandosDialog::on_btDesliga_clicked()
+{
+    ui->edtComando->setText("[DSL]");
+}
+
 void MontagemDeComandosDialog::on_btCTZ_clicked()
 {    
     if(ui->rdbJunta0->isChecked())
@@ -875,5 +880,3 @@ void MontagemDeComandosDialog::on_spnTempoMs_valueChanged(int arg1)
     if(ui->edtComando->text().contains("DLY"))
         on_btDLY_clicked();
 }
-
-
