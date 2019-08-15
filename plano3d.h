@@ -2,6 +2,7 @@
 #define PLANO3D_H
 
 #include <QVector3D>
+#include "utils.h"
 
 class Plano3D
 {
@@ -25,9 +26,9 @@ class Plano3D
         Plano3D();
         Plano3D(double x0, double y0, double z0,
                 double nx, double ny, double nz,
-                double xMin = -INFINITY, double xMax = +INFINITY,
-                double yMin = -INFINITY, double yMax = +INFINITY,
-                double zMin = -INFINITY, double zMax = +INFINITY);
+                double xMin = -static_cast<double>(INFINITY), double xMax = +static_cast<double>(INFINITY),
+                double yMin = -static_cast<double>(INFINITY), double yMax = +static_cast<double>(INFINITY),
+                double zMin = -static_cast<double>(INFINITY), double zMax = +static_cast<double>(INFINITY));
         Plano3D(QVector3D P0, QVector3D N);
 
         bool contemPonto(double x, double y, double z);

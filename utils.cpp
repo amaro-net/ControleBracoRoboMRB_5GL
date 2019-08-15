@@ -1,5 +1,4 @@
 #include "utils.h"
-#include <cmath>
 
 float arredondaPara(float num, int casasDecimais)
 {

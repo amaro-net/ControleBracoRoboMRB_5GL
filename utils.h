@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <qglobal.h>
+#include <cmath>
 
 float arredondaPara(float num, int casasDecimais);
 double arredondaPara(double num, int casasDecimais);
