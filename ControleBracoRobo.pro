@@ -51,6 +51,7 @@ HEADERS += \
 
 FORMS += \
         mainwindow.ui \
+    mainwindow_linux.ui \
     montagemdecomandosdialog.ui
 
 QT += serialport

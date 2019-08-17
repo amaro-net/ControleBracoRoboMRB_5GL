@@ -26,8 +26,13 @@
 
 #define TEMPO_TIMER_ENVIO_IMEDIATO_MS   256
 
-#define LBL_POS_ATUAL_X_MIN 50
-#define LBL_POS_ATUAL_X_MAX 218
+#if defined(Q_OS_WIN)
+    #define LBL_POS_ATUAL_X_MIN 50
+    #define LBL_POS_ATUAL_X_MAX 218
+#elif defined(Q_OS_LINUX)
+    #define LBL_POS_ATUAL_X_MIN 68
+    #define LBL_POS_ATUAL_X_MAX 216
+#endif
 
 #define STR_UND_MICROSSEGUNDOS " μs"
 #define STR_UND_GRAUS          " º"
@@ -66,10 +71,6 @@ static const int aclTmpPulsoDefault[QTD_SERVOS] = {8, 4, 8, 8, 32, 0};
 
 static const int velocidadesMax[QTD_SERVOS] = {128, 128, 128, 92, 128, 100};
 static const int aceleracoesMax[QTD_SERVOS] = {128, 128, 128, 92, 128, 100};
-
-
-
-
 
 
 #endif // CONSTANTES_H

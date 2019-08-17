@@ -7,7 +7,13 @@
 #include <qmath.h>
 #include <QThread>
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+
+#if defined(Q_OS_WIN)
+    #include "ui_mainwindow.h"
+#elif defined(Q_OS_LINUX)
+    #include "ui_mainwindow_linux.h"
+#endif
+
 #include "constantes.h"
 #include "utils.h"
 
