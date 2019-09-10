@@ -892,7 +892,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     // Motoman L-3 página 121)
 
     // WARNING: Ponto da garra e origem do referencial da base: Notar que o ponto da garra (e o ponto do pulso) não está rente com a origem do referencial da base fixa.
-    // WARNING: Vetor M e plano do braço robô: O plano cuja normal é M passa pelo pulso da garra e pela origem do referencial da base (não pega o ponto da garra).
+    // WARNING: Vetor M e plano do braço robô: O plano cuja normal é M passa pela origem do referencial da base (não pega o ponto da garra nem o pulso J4).
     //          Ou seja, esse mesmo plano é oblíquo ao plano que pega a coordenada da garra e do pulso
     //          e também, a um plano paralelo que pega a origem da base fixa.
     // WARNING: Ver warnings do arquivo constantes.h referentes aos parâmetros d2, d3, d4 e d5
@@ -996,7 +996,8 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     gamaGrausProj = arredondaPara(gamaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
 
     if(posicaoProjetada != nullptr)
-    {        
+    {
+        // TODO: Cinemática inversa: Comparar apenas o vetor Zt com o Ztl
         *posicaoProjetada = !(EhIgual(xProj, *x, CASAS_DECIMAIS_POSICAO_XYZ) &&
                               EhIgual(yProj, *y, CASAS_DECIMAIS_POSICAO_XYZ) &&
                               EhIgual(zProj, *z, CASAS_DECIMAIS_POSICAO_XYZ) &&
