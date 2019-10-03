@@ -107,20 +107,20 @@ class Cinematica
                                  double pxl, double pzl,
                                  SolucaoCinematicaInversa *solucao = nullptr);
         void calculaTeta2Teta3Teta4Singular(double *teta2, double *teta3, double *teta4,
-                                            double *pz,
+                                            double *z,
                                             double *angulosMaxGraus, double *angulosMinGraus,
                                             bool *posicaoAtingivel);
         double *vetorPosAngularSingular(double alfaGraus, int quadranteAlfa,
                                         double teta1,
-                                        double *pz,
+                                        double *z,
                                         double *angulosMaxGraus, double *angulosMinGraus,
                                         bool *posicaoAtingivel);
-        double *calculaPosicaoSingular(double *pz,
+        double *calculaPosicaoSingular(double *z,
                                        double *gamaGraus, double *betaGraus, double *alfaGraus,
                                        double *angulosCorrentesJuntas,
                                        double *angulosMaxGraus,
                                        double *angulosMinGraus,
-                                       bool *posicaoAtingivel);        
+                                       bool *posicaoAtingivel);
         double *angJuntas(double *x, double *y, double *z,
                           double *gamaGraus, double *betaGraus, double *alfaGraus,
                           double *angulosCorrentesJuntas,

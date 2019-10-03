@@ -18,7 +18,6 @@ double *Cinematica::coordenadasAngFixosOuEulerZXY(QMatrix4x4 T)
     //double r23 = arredondaPara(double(T(1,2)), CASAS_DECIMAIS_SENOS_COSSENOS);
     double r33 = arredondaPara(double(T(2,2)), CASAS_DECIMAIS_SENOS_COSSENOS);
 
-
     double x = arredondaPara(double(T(0, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
     double y = arredondaPara(double(T(1, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
     double z = arredondaPara(double(T(2, 3)), CASAS_DECIMAIS_POSICAO_XYZ);
@@ -146,7 +145,7 @@ bool Cinematica::garraColideComBaseFixa(double x, double y, double z,
     double r33 = double(Zt[2]);
 
     Plano3D face5(0.0, 0.0, 13.2, 0.0, 0.0, 1.0, -5.0, 3.0, -2.5, 2.5, 13.2, 13.2);
-    Plano3D face6(0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -34.34, 3.36, -9.95, 9.95, -INFINITY, 0.0);
+    Plano3D face6(0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -34.34, 3.36, -9.95, 9.95, static_cast<double>(-INFINITY), 0.0);
 
     QList<Plano3D> planos;
 
@@ -554,6 +553,9 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
     double pxl2pzl2 = pow(pxl, 2) + pow(pzl, 2);
 
     // Cálculo do teta3
+    // TODO: Cinemática inversa: Para x = 16,1 cm, y = 0,0 cm, z = 35,0 cm
+    //                                Rx = -90,0 º, Ry = -90,0 º, Rz = 0,0 º
+    //                           verificar porque c3 dá maior que 1 e que 1.5
     double c3 = (pxl2pzl2 - pow(a2, 2) - pow(a3, 2))/(2 * a2 * a3);
 
     if(std::abs(c3) > 1.0 && std::abs(c3) < 1.5)
@@ -572,10 +574,10 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
 
     double cksi = (pxl2pzl2 + pow(a2, 2) - pow(a3, 2))/(2 * a2 * sqrt(pxl2pzl2));
 
-    double sksi = sqrt(1 - pow(cksi, 2));
-
     if(std::abs(cksi) > 1.0 && std::abs(cksi) < 1.5)
         cksi = trunc(cksi);
+
+    double sksi = sqrt(1 - pow(cksi, 2));
 
     double ksi = atan2(sksi, cksi);
 
@@ -594,17 +596,17 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
 }
 
 void Cinematica::calculaTeta2Teta3Teta4Singular(double* teta2, double* teta3, double* teta4,
-                                                double* pz,
+                                                double* z,
                                                 double *angulosMaxGraus, double *angulosMinGraus,
                                                 bool *posicaoAtingivel)
 {
-    if(EhIgual(*pz, d1+a2+a3, CASAS_DECIMAIS_POSICAO_XYZ))
+    if(EhIgual(*z, d1+a2+a3+LgL3, CASAS_DECIMAIS_POSICAO_XYZ))
     {
         *teta2 = 90.0;
         *teta3 = 0.0;
         *teta4 = 90.0;
     }
-    else if(*pz < d1+a2+a3)
+    else if(*z < d1+a2+a3+LgL3)
     {
         SolucaoCinematicaInversa solucao;
 
@@ -624,11 +626,13 @@ void Cinematica::calculaTeta2Teta3Teta4Singular(double* teta2, double* teta3, do
 
         solucao.possivel = true;
 
+        double pz = *z - LgL3;
+
         abordagemGeometrica(teta2, teta2min, teta2max,
                             teta3, teta3min, teta3max,
                             teta4, teta4min, teta4max,
                             teta234,
-                            0, *pz - d1, &solucao);
+                            0, pz - d1, &solucao);
 
         *teta2 = *teta2 * 180.0 / M_PI;
         *teta3 = *teta3 * 180.0 / M_PI;
@@ -637,12 +641,12 @@ void Cinematica::calculaTeta2Teta3Teta4Singular(double* teta2, double* teta3, do
         if(posicaoAtingivel != nullptr)
             *posicaoAtingivel = solucao.possivel;
     }
-    else // if(pz > d1+a2+a3)
+    else // if(z > d1+a2+a3+LgL3)
     {
         if(posicaoAtingivel != nullptr)
             *posicaoAtingivel = false;
 
-         *pz = d1+a2+a3;
+         *z = d1+a2+a3+LgL3;
          *teta2 = 90.0;
          *teta3 = 0.0;
          *teta4 = 90.0;
@@ -651,7 +655,7 @@ void Cinematica::calculaTeta2Teta3Teta4Singular(double* teta2, double* teta3, do
 
 double *Cinematica::vetorPosAngularSingular(double alfaGraus, int quadranteAlfa,
                                             double teta1,
-                                            double *pz,
+                                            double *z,
                                             double *angulosMaxGraus, double *angulosMinGraus,
                                             bool *posicaoAtingivel)
 {
@@ -696,7 +700,7 @@ double *Cinematica::vetorPosAngularSingular(double alfaGraus, int quadranteAlfa,
     }
 
     calculaTeta2Teta3Teta4Singular(&teta2, &teta3, &teta4,
-                                   pz,
+                                   z,
                                    angulosMaxGraus,
                                    angulosMinGraus,
                                    posicaoAtingivel);
@@ -704,7 +708,7 @@ double *Cinematica::vetorPosAngularSingular(double alfaGraus, int quadranteAlfa,
     return new double[5]{teta1, teta2, teta3, teta4, teta5};
 }
 
-double* Cinematica::calculaPosicaoSingular(double* pz,
+double* Cinematica::calculaPosicaoSingular(double* z,
                                            double *gamaGraus, double *betaGraus, double *alfaGraus,
                                            double *angulosCorrentesJuntas,
                                            double *angulosMaxGraus,
@@ -743,7 +747,7 @@ double* Cinematica::calculaPosicaoSingular(double* pz,
 
             return vetorPosAngularSingular(*alfaGraus, 1,
                                            teta1,
-                                           pz,
+                                           z,
                                            angulosMaxGraus, angulosMinGraus,
                                            posicaoAtingivel);
         }
@@ -757,7 +761,7 @@ double* Cinematica::calculaPosicaoSingular(double* pz,
 
             return vetorPosAngularSingular(*alfaGraus, 2,
                                            teta1,
-                                           pz,
+                                           z,
                                            angulosMaxGraus, angulosMinGraus,
                                            posicaoAtingivel);
         }
@@ -771,7 +775,7 @@ double* Cinematica::calculaPosicaoSingular(double* pz,
 
             return vetorPosAngularSingular(*alfaGraus, 3,
                                            teta1,
-                                           pz,
+                                           z,
                                            angulosMaxGraus, angulosMinGraus,
                                            posicaoAtingivel);
         }
@@ -785,7 +789,7 @@ double* Cinematica::calculaPosicaoSingular(double* pz,
 
             return vetorPosAngularSingular(*alfaGraus, 4,
                                            teta1,
-                                           pz,
+                                           z,
                                            angulosMaxGraus, angulosMinGraus,
                                            posicaoAtingivel);
         }
@@ -848,8 +852,8 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     double cbeta = arredondaPara(cos(beta), CASAS_DECIMAIS_SENOS_COSSENOS);
     double calfa = arredondaPara(cos(alfa), CASAS_DECIMAIS_SENOS_COSSENOS);
 
-    double r11;
-    double r21;
+    double r11 = 0.0;
+    double r21 = 0.0;
     double r31;
     double r12 = calfa * sbeta * sgama - salfa * cgama;
     double r22 = salfa * sbeta * sgama + calfa * cgama;
@@ -858,18 +862,10 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     double r23 = salfa * sbeta * cgama - calfa * sgama;
     double r33 = cbeta * cgama;
 
-    double px = *x - LgL3 * r13;
-    double py = *y - LgL3 * r23;
-    double pz = *z - LgL3 * r33;
-
-    px = arredondaPara(px, CASAS_DECIMAIS_POSICAO_XYZ);
-    py = arredondaPara(py, CASAS_DECIMAIS_POSICAO_XYZ);
-    pz = arredondaPara(pz, CASAS_DECIMAIS_POSICAO_XYZ);
-
-    if(EhIgual(px, 0.0, CASAS_DECIMAIS_POSICAO_XYZ) &&
-       EhIgual(py, 0.0, CASAS_DECIMAIS_POSICAO_XYZ))
+    if(EhIgual(*x, 0.0, CASAS_DECIMAIS_POSICAO_XYZ) &&
+       EhIgual(*y, 0.0, CASAS_DECIMAIS_POSICAO_XYZ))
     {
-        double* angulosJuntas = calculaPosicaoSingular(&pz,
+        double* angulosJuntas = calculaPosicaoSingular(z,
                                                        gamaGraus, betaGraus, alfaGraus,
                                                        angulosCorrentesJuntas,
                                                        angulosMaxGraus,
@@ -884,8 +880,8 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         }
     }
 
-    double px2py2 = pow(px, 2.0) + pow(py, 2.0);
-    double sqrtpx2py2 = sqrt(px2py2);
+    double x2y2 = pow(*x, 2.0) + pow(*y, 2.0);
+    double sqrtx2y2 = sqrt(x2y2);
 
     // Projetando o ponto desejado no plano do braço. Esta projeção será a que a
     // garra poderá verdadeiramente assumir (ver cap. 4 do craig - The Yasukawa
@@ -896,22 +892,23 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     //          Ou seja, esse mesmo plano é oblíquo ao plano que pega a coordenada da garra e do pulso
     //          e também, a um plano paralelo que pega a origem da base fixa.
     // WARNING: Ver warnings do arquivo constantes.h referentes aos parâmetros d2, d3, d4 e d5
+    /* TODO: Cinemática inversa: No caso do ponto XYZ estar além do espaço de trabalho, trazer
+             o mesmo para dentro do espaço de trabalho */
     QVector3D M;
-    if(sqrtpx2py2 != 0.0)
+
+    if(sqrtx2y2 > 0)
     {
-        M.setX(float(-py/sqrtpx2py2));
-        M.setY(float(px/sqrtpx2py2));
-        M.setZ(0.0f);
-    }
-    else
-    {
-        // Aqui o x ou o y chegam diferentes de zero, já que o caso em que
-        // px, py, x e y são zero já é tratado no método calculaPosicaoSingular
-        double sqrtx2y2 = sqrt(pow(*x, 2.0) + pow(*y, 2.0));
         M.setX(float(-(*y/sqrtx2y2)));
         M.setY(float(*x/sqrtx2y2));
         M.setZ(0.0f);
     }
+    else
+    {
+        M.setX(float(-salfa));
+        M.setY(float(calfa));
+        M.setZ(0.0);
+    }
+
     QVector3D Zt(static_cast<float>(r13), static_cast<float>(r23), static_cast<float>(r33));
     QVector3D Yt(static_cast<float>(r12), static_cast<float>(r22), static_cast<float>(r32));
 
@@ -930,88 +927,104 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     steta = arredondaPara(steta, CASAS_DECIMAIS_SENOS_COSSENOS);
     cteta = arredondaPara(cteta, CASAS_DECIMAIS_SENOS_COSSENOS);
 
-    QVector3D Ytl = cteta * Yt
-                 + steta * QVector3D::crossProduct(K, Yt)
-                 + ((1 - cteta) * QVector3D::dotProduct(K, Yt)) * K;
-
-    QVector3D Xtl = QVector3D::crossProduct(Ytl, Ztl);
-
-    for(int i = 0; i < 3; i++)
+    if (EhMaiorOuIgual(steta, 1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
     {
-        // TODO: Cinemática inversa: Verificar se estes arredondamentos fazem sentido
-        Xtl[i] = arredondaPara(Xtl[i], CASAS_DECIMAIS_SENOS_COSSENOS);
-        Ytl[i] = arredondaPara(Ytl[i], CASAS_DECIMAIS_SENOS_COSSENOS);
-        Ztl[i] = arredondaPara(Ztl[i], CASAS_DECIMAIS_SENOS_COSSENOS);
+        steta = 1.0f;
+        cteta = 0.0f;
+    }
+    else if(EhMaiorOuIgual(cteta, 1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        cteta = 1.0f;
+        steta = 0.0f;
+    }
+    else if(EhMenorOuIgual(steta, -1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        steta = -1.0f;
+        cteta = 0.0f;
+    }
+    else if(EhMenorOuIgual(cteta, -1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        cteta = -1.0f;
+        steta = 0.0f;
     }
 
-    r11 = double(Xtl[0]);
-    r21 = double(Xtl[1]);
-    r31 = double(Xtl[2]);
+    double teta = atan2(static_cast<double>(steta), static_cast<double>(cteta)) * 180.0 / M_PI;
 
-    r12 = double(Ytl[0]);
-    r22 = double(Ytl[1]);
-    r32 = double(Ytl[2]);
+    teta = arredondaPara(teta, CASAS_DECIMAIS_ROTACOES_XYZ);
+    teta = abs(teta);
 
-    r13 = double(Ztl[0]);
-    r23 = double(Ztl[1]);
-    r33 = double(Ztl[2]);
-
-    // Recalculando x, y e z da garra
-    double xProj = px + LgL3 * r13;
-    double yProj = py + LgL3 * r23;
-    double zProj = pz + LgL3 * r33;
-
-    //recalculando gama, beta e alfa
-    double betaProj = atan2(-r31, sqrt(pow(r11,2)+pow(r21,2)));
-    double alfaProj, gamaProj;
-
-    if(EhIgual(betaProj, M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
+    if(teta > 0.0)
     {
-        alfaProj = 0;
-        gamaProj = atan2(r12, r22);
-    }    
-    else if (EhIgual(betaProj, -M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
-    {
-        alfaProj = 0;
-        gamaProj = -atan2(r12, r22);
+        QVector3D Ytl = cteta * Yt
+                     + steta * QVector3D::crossProduct(K, Yt)
+                     + ((1 - cteta) * QVector3D::dotProduct(K, Yt)) * K;
+
+        QVector3D Xtl = QVector3D::crossProduct(Ytl, Ztl);
+
+        for(int i = 0; i < 3; i++)
+        {
+            Xtl[i] = arredondaPara(Xtl[i], CASAS_DECIMAIS_SENOS_COSSENOS);
+            Ytl[i] = arredondaPara(Ytl[i], CASAS_DECIMAIS_SENOS_COSSENOS);
+            Ztl[i] = arredondaPara(Ztl[i], CASAS_DECIMAIS_SENOS_COSSENOS);
+        }
+
+        r11 = double(Xtl[0]);
+        r21 = double(Xtl[1]);
+        r31 = double(Xtl[2]);
+
+        r12 = double(Ytl[0]);
+        r22 = double(Ytl[1]);
+        r32 = double(Ytl[2]);
+
+        r13 = double(Ztl[0]);
+        r23 = double(Ztl[1]);
+        r33 = double(Ztl[2]);        
+
+        //recalculando gama, beta e alfa
+        double betaProj = atan2(-r31, sqrt(pow(r11,2)+pow(r21,2)));
+        double alfaProj, gamaProj;
+
+        if (EhIgual(betaProj, M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
+        {
+            alfaProj = 0;
+            gamaProj = atan2(r12, r22);
+        }
+        else if (EhIgual(betaProj, -M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
+        {
+            alfaProj = 0;
+            gamaProj = -atan2(r12, r22);
+        }
+        else
+        {
+            double cbeta = cos(betaProj);
+            cbeta = arredondaPara(cbeta, CASAS_DECIMAIS_SENOS_COSSENOS);
+            alfaProj = atan2(r21/cbeta, r11/cbeta);
+            gamaProj = atan2(r32/cbeta, r33/cbeta);
+        }       
+
+        double alfaGrausProj = alfaProj * 180.0 / M_PI;
+        double betaGrausProj = betaProj * 180.0 / M_PI;
+        double gamaGrausProj = gamaProj * 180.0 / M_PI;
+
+        alfaGrausProj = arredondaPara(alfaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
+        betaGrausProj = arredondaPara(betaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
+        gamaGrausProj = arredondaPara(gamaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
+
+        if(posicaoProjetada != nullptr)
+            *posicaoProjetada = true;
+
+        *gamaGraus = gamaGrausProj;
+        *betaGraus = betaGrausProj;
+        *alfaGraus = alfaGrausProj;
+
+        // TODO: Cinemática inversa: avaliar se será necessário tratar posições singulares após a projeção
     }
-    else
-    {
-        double cbeta = cos(betaProj);
-        cbeta = arredondaPara(cbeta, CASAS_DECIMAIS_SENOS_COSSENOS);
-        alfaProj = atan2(r21/cbeta, r11/cbeta);
-        gamaProj = atan2(r32/cbeta, r33/cbeta);
-    }
 
-    xProj = arredondaPara(xProj, CASAS_DECIMAIS_POSICAO_XYZ);
-    yProj = arredondaPara(yProj, CASAS_DECIMAIS_POSICAO_XYZ);
-    zProj = arredondaPara(zProj, CASAS_DECIMAIS_POSICAO_XYZ);
+    double px = *x - LgL3 * r13;
+    double py = *y - LgL3 * r23;
+    double pz = *z - LgL3 * r33;
 
-    double alfaGrausProj = alfaProj * 180.0 / M_PI;
-    double betaGrausProj = betaProj * 180.0 / M_PI;
-    double gamaGrausProj = gamaProj * 180.0 / M_PI;
-
-    alfaGrausProj = arredondaPara(alfaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
-    betaGrausProj = arredondaPara(betaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
-    gamaGrausProj = arredondaPara(gamaGrausProj, CASAS_DECIMAIS_ROTACOES_XYZ);
-
-    if(posicaoProjetada != nullptr)
-    {
-        // TODO: Cinemática inversa: Comparar apenas o vetor Zt com o Ztl
-        *posicaoProjetada = !(EhIgual(xProj, *x, CASAS_DECIMAIS_POSICAO_XYZ) &&
-                              EhIgual(yProj, *y, CASAS_DECIMAIS_POSICAO_XYZ) &&
-                              EhIgual(zProj, *z, CASAS_DECIMAIS_POSICAO_XYZ) &&
-                              EhIgual(alfaGrausProj, *alfaGraus, CASAS_DECIMAIS_ROTACOES_XYZ) &&
-                              EhIgual(betaGrausProj, *betaGraus, CASAS_DECIMAIS_ROTACOES_XYZ) &&
-                              EhIgual(gamaGrausProj, *gamaGraus, CASAS_DECIMAIS_ROTACOES_XYZ));
-    }
-
-    *x = xProj;
-    *y = yProj;
-    *z = zProj;
-    *gamaGraus = gamaGrausProj;
-    *betaGraus = betaGrausProj;
-    *alfaGraus = alfaGrausProj;
+    double px2py2 = pow(px, 2) + pow(py, 2);
 
     bool bColideComBaseFixa = false;
 
