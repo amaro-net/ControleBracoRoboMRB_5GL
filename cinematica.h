@@ -121,6 +121,7 @@ class Cinematica
                                        double *angulosMaxGraus,
                                        double *angulosMinGraus,
                                        bool *posicaoAtingivel);
+        void trazPosAlvoParaDentroDoEspacoDeTrabalho(double *x, double *y, double *z);
         double *angJuntas(double *x, double *y, double *z,
                           double *gamaGraus, double *betaGraus, double *alfaGraus,
                           double *angulosCorrentesJuntas,

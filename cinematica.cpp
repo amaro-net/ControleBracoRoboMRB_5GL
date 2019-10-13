@@ -798,6 +798,41 @@ double* Cinematica::calculaPosicaoSingular(double* z,
     return nullptr;
 }
 
+void Cinematica::trazPosAlvoParaDentroDoEspacoDeTrabalho(double *x, double *y, double *z)
+{
+    double De = a2 + a3 + LgL3;
+    double x2y2 = pow(*x, 2) + pow(*y, 2);
+    double zd1 = *z - d1;
+
+    double D = sqrt(x2y2 + pow(zd1, 2));
+
+    if(D > De)
+    {
+        double Dxy = sqrt(x2y2);
+
+        double xe = 0;
+        double ye = 0;
+
+        double stetaElev = zd1 / D;
+        double ctetaElev = Dxy / D;
+
+        if(Dxy > 0)
+        {
+            double Dexy = De * ctetaElev;
+            double ctetaAzim = *x / Dxy;
+            double stetaAzim = *y / Dxy;
+            xe = Dexy * ctetaAzim;
+            ye = Dexy * stetaAzim;
+        }
+
+        double ze = De * stetaElev + d1;
+
+        *x = xe;
+        *y = ye;
+        *z = ze;
+    }
+}
+
 // TODO: Cinemática direta: Criar um método para calcular o tamanho da abertura da garra com base no ângulo do eixo do servo da garra.
 // TODO: Cinemática direta: Criar a cinemática direta para os dedos da garra, calculando o XYZ de cada dedo.
 // TODO: Cinemática direta/inversa: incluir tratamento para evitar cálculo de posições em que os dedos da garra colidem com a base fixa, com a base giratória ou com o segmento L1
@@ -883,6 +918,8 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     double x2y2 = pow(*x, 2.0) + pow(*y, 2.0);
     double sqrtx2y2 = sqrt(x2y2);
 
+    trazPosAlvoParaDentroDoEspacoDeTrabalho(x, y, z);
+
     // Projetando o ponto desejado no plano do braço. Esta projeção será a que a
     // garra poderá verdadeiramente assumir (ver cap. 4 do craig - The Yasukawa
     // Motoman L-3 página 121)
@@ -891,9 +928,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     // WARNING: Vetor M e plano do braço robô: O plano cuja normal é M passa pela origem do referencial da base (não pega o ponto da garra nem o pulso J4).
     //          Ou seja, esse mesmo plano é oblíquo ao plano que pega a coordenada da garra e do pulso
     //          e também, a um plano paralelo que pega a origem da base fixa.
-    // WARNING: Ver warnings do arquivo constantes.h referentes aos parâmetros d2, d3, d4 e d5
-    /* TODO: Cinemática inversa: No caso do ponto XYZ estar além do espaço de trabalho, trazer
-             o mesmo para dentro do espaço de trabalho */
+    // WARNING: Ver warnings do arquivo constantes.h referentes aos parâmetros d2, d3, d4 e d5        
     QVector3D M;
 
     if(sqrtx2y2 > 0)
@@ -1160,6 +1195,15 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         c234 = -r33;
 
         teta234 = atan2(s234, c234);
+        // TODO: Cinemática inversa: Resolver o problema de quadrante do teta234 que faz a solução ser impossível.
+        // Colocar todos os ângulos das juntas no máximo é um exemplo.
+        double teta234max = teta2max + teta3max + teta4max;
+        double teta234min = teta2min + teta3min + teta4min;
+
+        if(teta234 < teta234min)
+            teta234 += M_2_PI;
+        else if(teta234 > teta234max)
+            teta234 -= M_2_PI;
 
         double xgl, zgl, pxl, pzl;
 
