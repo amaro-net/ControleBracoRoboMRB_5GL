@@ -552,10 +552,7 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
 
     double pxl2pzl2 = pow(pxl, 2) + pow(pzl, 2);
 
-    // Cálculo do teta3
-    // TODO: Cinemática inversa: Para x = 16,1 cm, y = 0,0 cm, z = 35,0 cm
-    //                                Rx = -90,0 º, Ry = -90,0 º, Rz = 0,0 º
-    //                           verificar porque c3 dá maior que 1 e que 1.5
+    // Cálculo do teta3    
     double c3 = (pxl2pzl2 - pow(a2, 2) - pow(a3, 2))/(2 * a2 * a3);
 
     if(std::abs(c3) > 1.0 && std::abs(c3) < 1.5)
@@ -588,7 +585,20 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
     // Cálculo do teta4
     teta4 = teta234 - teta2 - teta3;
 
+    bool solucaoPossivelTemp = solucao->possivel;
     avaliaAnguloTeta(&teta4, teta4min, teta4max, solucao, solucaoTeta4, solucaoTeta4Possivel);
+
+    // Esta situação pode ocorrem quando teta234 dá negativo quando deveria dar maior
+    // que 180 graus
+    if(!(*solucaoTeta4Possivel) && teta234 < 0)
+    {
+        solucao->possivel = solucaoPossivelTemp;
+
+        teta234 = teta234 + 2 * M_PI;
+        teta4 = teta234 - teta2 - teta3;
+
+        avaliaAnguloTeta(&teta4, teta4min, teta4max, solucao, solucaoTeta4, solucaoTeta4Possivel);
+    }
 
     *teta2ptr = teta2;
     *teta3ptr = teta3;
@@ -1195,15 +1205,14 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         c234 = -r33;
 
         teta234 = atan2(s234, c234);
-        // TODO: Cinemática inversa: Resolver o problema de quadrante do teta234 que faz a solução ser impossível.
-        // Colocar todos os ângulos das juntas no máximo é um exemplo.
+
         double teta234max = teta2max + teta3max + teta4max;
         double teta234min = teta2min + teta3min + teta4min;
 
         if(teta234 < teta234min)
-            teta234 += M_2_PI;
+            teta234 += 2 * M_PI;
         else if(teta234 > teta234max)
-            teta234 -= M_2_PI;
+            teta234 -= 2 * M_PI;
 
         double xgl, zgl, pxl, pzl;
 
