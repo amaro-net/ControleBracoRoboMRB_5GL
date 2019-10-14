@@ -957,9 +957,16 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     QVector3D Zt(static_cast<float>(r13), static_cast<float>(r23), static_cast<float>(r33));
     QVector3D Yt(static_cast<float>(r12), static_cast<float>(r22), static_cast<float>(r32));
 
+    Zt.normalize();
+    Yt.normalize();
+
     QVector3D K = QVector3D::crossProduct(M, Zt);
 
+    K.normalize();
+
     QVector3D Ztl = QVector3D::crossProduct(K, M);
+
+    Ztl.normalize();
 
     /* WARNING: Vetor Ztl:  Se forem respeitados os parâmetros exatos de Denavit-Hatenberg obtidos para o braço robô (mais
      * especificamente d2, d3 e d4), Ztl sempre apontará para uma direção diferente do Zt, mesmo que a posição
@@ -1001,10 +1008,14 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     if(teta > 0.0)
     {
         QVector3D Ytl = cteta * Yt
-                     + steta * QVector3D::crossProduct(K, Yt)
-                     + ((1 - cteta) * QVector3D::dotProduct(K, Yt)) * K;
+                      + steta * QVector3D::crossProduct(K, Yt)
+                      + ((1 - cteta) * QVector3D::dotProduct(K, Yt)) * K;
+
+        Ytl.normalize();
 
         QVector3D Xtl = QVector3D::crossProduct(Ytl, Ztl);
+
+        Xtl.normalize();
 
         for(int i = 0; i < 3; i++)
         {
@@ -1062,7 +1073,18 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         *betaGraus = betaGrausProj;
         *alfaGraus = alfaGrausProj;
 
-        // TODO: Cinemática inversa: avaliar se será necessário tratar posições singulares após a projeção
+        if(EhIgual(*x, 0.0, CASAS_DECIMAIS_POSICAO_XYZ) &&
+           EhIgual(*y, 0.0, CASAS_DECIMAIS_POSICAO_XYZ))
+        {
+            double* angulosJuntas = calculaPosicaoSingular(z,
+                                                           gamaGraus, betaGraus, alfaGraus,
+                                                           angulosCorrentesJuntas,
+                                                           angulosMaxGraus,
+                                                           angulosMinGraus,
+                                                           posicaoAtingivel);
+            if(angulosJuntas != nullptr)
+                return angulosJuntas;
+        }
     }
 
     double px = *x - LgL3 * r13;
@@ -1205,14 +1227,6 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         c234 = -r33;
 
         teta234 = atan2(s234, c234);
-
-        double teta234max = teta2max + teta3max + teta4max;
-        double teta234min = teta2min + teta3min + teta4min;
-
-        if(teta234 < teta234min)
-            teta234 += 2 * M_PI;
-        else if(teta234 > teta234max)
-            teta234 -= 2 * M_PI;
 
         double xgl, zgl, pxl, pzl;
 
