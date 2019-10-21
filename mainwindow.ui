@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tabComandos">
      <attribute name="title">
@@ -153,7 +153,7 @@
          <x>175</x>
          <y>18</y>
          <width>82</width>
-         <height>48</height>
+         <height>49</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="layoutAtivarAtualizar">
@@ -3122,7 +3122,7 @@ alvo</string>
         <x>321</x>
         <y>237</y>
         <width>116</width>
-        <height>179</height>
+        <height>182</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="layoutBotoesMover">
@@ -3617,7 +3617,7 @@ do braço robô (experimental).</string>
      <widget class="QGroupBox" name="grpFeedBackJuntas">
       <property name="geometry">
        <rect>
-        <x>250</x>
+        <x>260</x>
         <y>61</y>
         <width>212</width>
         <height>113</height>
@@ -3689,9 +3689,9 @@ do braço robô (experimental).</string>
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>178</y>
-        <width>306</width>
-        <height>191</height>
+        <y>198</y>
+        <width>320</width>
+        <height>220</height>
        </rect>
       </property>
       <property name="title">
@@ -3702,8 +3702,8 @@ do braço robô (experimental).</string>
         <rect>
          <x>2</x>
          <y>15</y>
-         <width>300</width>
-         <height>148</height>
+         <width>310</width>
+         <height>168</height>
         </rect>
        </property>
        <property name="autoScroll">
@@ -3722,7 +3722,7 @@ do braço robô (experimental).</string>
         <bool>true</bool>
        </attribute>
        <attribute name="verticalHeaderDefaultSectionSize">
-        <number>18</number>
+        <number>21</number>
        </attribute>
        <row>
         <property name="text">
@@ -3892,8 +3892,8 @@ Inversa</string>
       <widget class="QPushButton" name="btConfigurarPosLimitesGraus">
        <property name="geometry">
         <rect>
-         <x>229</x>
-         <y>165</y>
+         <x>238</x>
+         <y>190</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -3906,7 +3906,7 @@ Inversa</string>
      <widget class="QGroupBox" name="grpPlacaConectada">
       <property name="geometry">
        <rect>
-        <x>250</x>
+        <x>260</x>
         <y>-1</y>
         <width>114</width>
         <height>60</height>
@@ -3950,8 +3950,8 @@ Inversa</string>
        <rect>
         <x>0</x>
         <y>-1</y>
-        <width>243</width>
-        <height>176</height>
+        <width>256</width>
+        <height>200</height>
        </rect>
       </property>
       <property name="title">
@@ -3965,8 +3965,8 @@ Inversa</string>
         <rect>
          <x>2</x>
          <y>15</y>
-         <width>239</width>
-         <height>133</height>
+         <width>241</width>
+         <height>152</height>
         </rect>
        </property>
        <property name="autoScroll">
@@ -3976,7 +3976,7 @@ Inversa</string>
         <number>53</number>
        </attribute>
        <attribute name="verticalHeaderDefaultSectionSize">
-        <number>18</number>
+        <number>21</number>
        </attribute>
        <row>
         <property name="text">
@@ -4155,8 +4155,8 @@ Inversa</string>
        </property>
        <property name="geometry">
         <rect>
-         <x>45</x>
-         <y>150</y>
+         <x>55</x>
+         <y>172</y>
          <width>118</width>
          <height>23</height>
         </rect>
@@ -4171,8 +4171,8 @@ Inversa</string>
        </property>
        <property name="geometry">
         <rect>
-         <x>166</x>
-         <y>150</y>
+         <x>176</x>
+         <y>172</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -4185,8 +4185,8 @@ Inversa</string>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>310</x>
-        <y>200</y>
+        <x>330</x>
+        <y>220</y>
         <width>153</width>
         <height>91</height>
        </rect>
@@ -4233,7 +4233,7 @@ Inversa</string>
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>380</y>
+        <y>420</y>
         <width>411</width>
         <height>19</height>
        </rect>
@@ -4252,7 +4252,7 @@ Inversa</string>
       <property name="geometry">
        <rect>
         <x>50</x>
-        <y>400</y>
+        <y>440</y>
         <width>221</width>
         <height>19</height>
        </rect>
@@ -5007,7 +5007,7 @@ Inversa</string>
      <rect>
       <x>5</x>
       <y>6</y>
-      <width>347</width>
+      <width>353</width>
       <height>43</height>
      </rect>
     </property>
@@ -5215,9 +5215,9 @@ Inversa</string>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>355</x>
+      <x>365</x>
       <y>6</y>
-      <width>101</width>
+      <width>102</width>
       <height>54</height>
      </rect>
     </property>
