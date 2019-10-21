@@ -494,7 +494,7 @@ comandos</string>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabLarguraDePulso">
        <attribute name="title">
@@ -3333,13 +3333,18 @@ alterada.</string>
        <rect>
         <x>10</x>
         <y>43</y>
-        <width>256</width>
+        <width>351</width>
         <height>192</height>
        </rect>
       </property>
       <property name="selectionMode">
        <enum>QAbstractItemView::SingleSelection</enum>
       </property>
+      <item>
+       <property name="text">
+        <string>[JSTA0000B0000C0000D0000E0000G0000]</string>
+       </property>
+      </item>
      </widget>
      <widget class="QPushButton" name="btNovaSequencia">
       <property name="enabled">
@@ -3347,7 +3352,7 @@ alterada.</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>280</x>
+        <x>380</x>
         <y>47</y>
         <width>126</width>
         <height>23</height>
@@ -3363,7 +3368,7 @@ alterada.</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>300</x>
+        <x>400</x>
         <y>114</y>
         <width>141</width>
         <height>23</height>
@@ -3379,7 +3384,7 @@ alterada.</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>300</x>
+        <x>400</x>
         <y>144</y>
         <width>170</width>
         <height>23</height>
@@ -3395,9 +3400,9 @@ alterada.</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>410</x>
         <y>169</y>
-        <width>101</width>
+        <width>148</width>
         <height>17</height>
        </rect>
       </property>
@@ -3411,9 +3416,9 @@ alterada.</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>410</x>
         <y>189</y>
-        <width>111</width>
+        <width>149</width>
         <height>17</height>
        </rect>
       </property>
@@ -3424,7 +3429,7 @@ alterada.</string>
      <widget class="QPushButton" name="btComandoUp">
       <property name="geometry">
        <rect>
-        <x>267</x>
+        <x>367</x>
         <y>107</y>
         <width>22</width>
         <height>28</height>
@@ -3437,7 +3442,7 @@ alterada.</string>
      <widget class="QPushButton" name="btComandoDown">
       <property name="geometry">
        <rect>
-        <x>267</x>
+        <x>367</x>
         <y>131</y>
         <width>22</width>
         <height>28</height>
@@ -3453,7 +3458,7 @@ alterada.</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>270</x>
+        <x>370</x>
         <y>214</y>
         <width>75</width>
         <height>23</height>
@@ -3469,7 +3474,7 @@ alterada.</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>351</x>
+        <x>451</x>
         <y>214</y>
         <width>75</width>
         <height>23</height>
@@ -3485,7 +3490,7 @@ alterada.</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>280</x>
+        <x>380</x>
         <y>77</y>
         <width>75</width>
         <height>23</height>
@@ -3501,7 +3506,7 @@ alterada.</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>360</x>
+        <x>460</x>
         <y>77</y>
         <width>75</width>
         <height>23</height>
