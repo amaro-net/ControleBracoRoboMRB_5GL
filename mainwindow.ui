@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Tela de Controle do Braço Robô</string>
+   <string>Controle do Braço Robô MRB-5GL</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QTabWidget" name="tabPrincipal">
