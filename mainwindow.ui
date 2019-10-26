@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Controle do Braço Robô MRB-5GL</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="controlebracoroboresorcefile.qrc">
+    <normaloff>:/images/icone_mainwindow.png</normaloff>:/images/icone_mainwindow.png</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QTabWidget" name="tabPrincipal">
     <property name="geometry">

@@ -6,5 +6,6 @@
         <file>images/foto_simulacao_braco_robo.png</file>
         <file>images/gplv3-or-later.png</file>
         <file>COPYING</file>
+        <file>images/icone_mainwindow.png</file>
     </qresource>
 </RCC>
