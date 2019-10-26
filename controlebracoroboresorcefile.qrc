@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>images/esfera_cristal_verde.png</file>
+        <file>images/splash_robo.png</file>
     </qresource>
 </RCC>

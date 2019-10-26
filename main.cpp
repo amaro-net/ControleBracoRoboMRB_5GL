@@ -36,15 +36,20 @@
     Você deve ter recebido uma cópia da Licença Pública Geral GNU junto
     com este programa, Se não, veja <http://www.gnu.org/licenses/>.
 */
-#include "mainwindow.h"
 #include <QApplication>
+#include <QSplashScreen>
+#include <QTimer>
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
-    // TODO: GNU-GPLv3: Incluir um aviso de inicialização antes de abrir a janela principal
     QApplication a(argc, argv);
     MainWindow w;
-    w.show();
+    QPixmap pixmap(":/images/splash_robo.png");
+    QSplashScreen splash(pixmap, Qt::WindowStaysOnTopHint);
+    splash.show();
+    QTimer::singleShot(5000, &splash, &QWidget::close);
+    QTimer::singleShot(5000, &w, SLOT(show()));
 
     return a.exec();
 }
