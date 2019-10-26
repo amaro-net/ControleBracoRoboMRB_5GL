@@ -46,6 +46,7 @@
 #include "constantes.h"
 #include "cinematica.h"
 #include "minimaestro24.h"
+#include "janelasobre.h"
 
 #include <QMainWindow>
 
@@ -71,6 +72,7 @@ namespace Ui {
 }
 
 class MontagemDeComandosDialog;
+class JanelaSobre;
 
 class MainWindow : public QMainWindow
 {
@@ -323,7 +325,9 @@ class MainWindow : public QMainWindow
 
         void on_chkImpedirColisao_clicked(bool checked);
 
-    private:
+        void on_btSobre_clicked();
+
+private:
         void preencheCombosPortaSerial();
         void showStatusMessage(const QString &message);
         void conectarComponentes();
@@ -436,6 +440,7 @@ class MainWindow : public QMainWindow
 
         Ui::MainWindow *ui;
         MontagemDeComandosDialog *montagemDeComandosDialog;
+        JanelaSobre *janelaSobre;
 
         Console *console;
         HexConsole *hexConsole;

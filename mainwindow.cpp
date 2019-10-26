@@ -37,9 +37,9 @@
     com este programa, Se não, veja <http://www.gnu.org/licenses/>.
 */
 
-// TODO: GNU-GPLv3: Incluir um botão "sobre" que exiba uma tela "sobre" similar ao "About" do Qt Creator (versão windows).
 // TODO: GNU-GPLv3: Incluir um botão "sobre" que exiba uma tela "sobre" similar ao "About" do Qt Creator (versão linux).
 // TODO: GNU-FDL: Incluir Licença de Documentação Livre GNU na documentação dos cálculos da cinemática
+// TODO: GNU-GPLv3: Incluir ajuda do protocolo de comunicação e dos comandos do braço robô MRB-5GL
 
 #include <QMessageBox>
 #include <QtSerialPort/QSerialPortInfo>
@@ -89,6 +89,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     montagemDeComandosDialog = new MontagemDeComandosDialog(this);
     montagemDeComandosDialog->setMainWindow(this);
+
+    janelaSobre = new JanelaSobre(this);
 
     preencheCombosPortaSerial();
 
@@ -4631,3 +4633,10 @@ void MainWindow::preencheCamposXYZAlvo(double *posGarra)
     ui->spnRzAlvo->setValue(posGarra[5]);
 }
 
+
+/*NOTE: ***** Ajuda ***** */
+
+void MainWindow::on_btSobre_clicked()
+{
+    janelaSobre->show();
+}

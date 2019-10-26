@@ -24,6 +24,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+    janelalicencagpl.cpp \
+    janelasobre.cpp \
         main.cpp \
         mainwindow.cpp \
     console.cpp \
@@ -37,6 +39,8 @@ SOURCES += \
     hexconsole.cpp
 
 HEADERS += \
+    janelalicencagpl.h \
+    janelasobre.h \
         mainwindow.h \
     console.h \
     montagemdecomandosdialog.h \
@@ -50,6 +54,8 @@ HEADERS += \
     hexconsole.h
 
 FORMS += \
+    janelalicencagpl.ui \
+    janelasobre.ui \
         mainwindow.ui \
     mainwindow_linux.ui \
     montagemdecomandosdialog.ui

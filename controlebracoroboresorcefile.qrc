@@ -2,5 +2,9 @@
     <qresource prefix="/">
         <file>images/esfera_cristal_verde.png</file>
         <file>images/splash_robo.png</file>
+        <file>images/foto_braco_robo.jpg</file>
+        <file>images/foto_simulacao_braco_robo.png</file>
+        <file>images/gplv3-or-later.png</file>
+        <file>COPYING</file>
     </qresource>
 </RCC>
