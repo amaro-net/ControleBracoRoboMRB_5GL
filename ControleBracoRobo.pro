@@ -56,6 +56,7 @@ HEADERS += \
 FORMS += \
     janelalicencagpl.ui \
     janelasobre.ui \
+    janelasobre_linux.ui \
         mainwindow.ui \
     mainwindow_linux.ui \
     montagemdecomandosdialog.ui

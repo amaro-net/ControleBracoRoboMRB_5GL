@@ -37,9 +37,8 @@
     com este programa, Se não, veja <http://www.gnu.org/licenses/>.
 */
 
-// TODO: GNU-GPLv3: Incluir um botão "sobre" que exiba uma tela "sobre" similar ao "About" do Qt Creator (versão linux).
 // TODO: GNU-FDL: Incluir Licença de Documentação Livre GNU na documentação dos cálculos da cinemática
-// TODO: GNU-GPLv3: Incluir ajuda do protocolo de comunicação e dos comandos do braço robô MRB-5GL
+// TODO: ajuda do braço robô: Incluir ajuda do protocolo de comunicação e dos comandos do braço robô MRB-5GL
 
 #include <QMessageBox>
 #include <QtSerialPort/QSerialPortInfo>

@@ -62,7 +62,11 @@ Console::Console(QWidget *parent)
     document()->setDefaultFont(font);
 
     this->setFixedHeight(350);
+#if defined(Q_OS_WIN)
     this->setFixedWidth(393);
+#elif defined(Q_OS_LINUX)
+    this->setFixedWidth(471);
+#endif
 }
 
 void Console::putData(const QByteArray &data, bool ehEnvioDeCaracteres)

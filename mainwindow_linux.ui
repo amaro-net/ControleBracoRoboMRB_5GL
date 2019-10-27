@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>683</width>
+    <width>718</width>
     <height>611</height>
    </rect>
   </property>
@@ -19,12 +19,12 @@
      <rect>
       <x>3</x>
       <y>61</y>
-      <width>671</width>
+      <width>711</width>
       <height>521</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="tabComandos">
      <attribute name="title">
@@ -489,7 +489,7 @@ comandos</string>
        <rect>
         <x>230</x>
         <y>0</y>
-        <width>393</width>
+        <width>451</width>
         <height>243</height>
        </rect>
       </property>
@@ -505,7 +505,7 @@ comandos</string>
          <rect>
           <x>0</x>
           <y>1</y>
-          <width>392</width>
+          <width>441</width>
           <height>193</height>
          </rect>
         </property>
@@ -599,13 +599,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -636,13 +636,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -664,7 +664,7 @@ comandos</string>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>96</width>
              <height>24</height>
             </size>
            </property>
@@ -720,13 +720,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -757,13 +757,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -785,7 +785,7 @@ comandos</string>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>96</width>
              <height>24</height>
             </size>
            </property>
@@ -841,13 +841,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -878,13 +878,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -906,7 +906,7 @@ comandos</string>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>96</width>
              <height>24</height>
             </size>
            </property>
@@ -962,13 +962,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -999,13 +999,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -1027,7 +1027,7 @@ comandos</string>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>96</width>
              <height>24</height>
             </size>
            </property>
@@ -1083,13 +1083,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -1120,13 +1120,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -1148,7 +1148,7 @@ comandos</string>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>96</width>
              <height>24</height>
             </size>
            </property>
@@ -1204,13 +1204,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>91</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -1241,13 +1241,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>80</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -1269,7 +1269,7 @@ comandos</string>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>96</width>
              <height>24</height>
             </size>
            </property>
@@ -1343,7 +1343,7 @@ comandos</string>
          <rect>
           <x>0</x>
           <y>1</y>
-          <width>388</width>
+          <width>441</width>
           <height>193</height>
          </rect>
         </property>
@@ -1434,13 +1434,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>65</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -1477,13 +1477,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>81</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -1536,13 +1536,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>90</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>100</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
@@ -1570,13 +1570,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>65</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -1613,13 +1613,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>81</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -1672,13 +1672,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>90</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>100</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
@@ -1706,13 +1706,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>65</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -1752,13 +1752,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>81</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -1811,13 +1811,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>90</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>100</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
@@ -1845,13 +1845,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>65</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -1888,13 +1888,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>81</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -1947,13 +1947,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>90</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>100</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
@@ -1981,13 +1981,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>65</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -2024,13 +2024,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>81</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -2083,13 +2083,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>90</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>100</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
@@ -2117,13 +2117,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>65</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>84</width>
+             <width>104</width>
              <height>24</height>
             </size>
            </property>
@@ -2160,13 +2160,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>55</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>81</width>
+             <width>90</width>
              <height>24</height>
             </size>
            </property>
@@ -2219,13 +2219,13 @@ comandos</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>90</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>100</width>
+             <width>117</width>
              <height>24</height>
             </size>
            </property>
@@ -3340,11 +3340,6 @@ alterada.</string>
       <property name="selectionMode">
        <enum>QAbstractItemView::SingleSelection</enum>
       </property>
-      <item>
-       <property name="text">
-        <string>[JSTA0000B0000C0000D0000E0000G0000]</string>
-       </property>
-      </item>
      </widget>
      <widget class="QPushButton" name="btNovaSequencia">
       <property name="enabled">
@@ -4323,7 +4318,7 @@ Inversa</string>
      <widget class="QPushButton" name="btLimparConsole">
       <property name="geometry">
        <rect>
-        <x>279</x>
+        <x>357</x>
         <y>368</y>
         <width>114</width>
         <height>24</height>
@@ -4351,7 +4346,7 @@ Inversa</string>
        <rect>
         <x>0</x>
         <y>16</y>
-        <width>393</width>
+        <width>471</width>
         <height>350</height>
        </rect>
       </property>
@@ -4359,7 +4354,7 @@ Inversa</string>
      <widget class="QFrame" name="frame">
       <property name="geometry">
        <rect>
-        <x>397</x>
+        <x>480</x>
         <y>324</y>
         <width>77</width>
         <height>41</height>
@@ -4639,10 +4634,10 @@ Inversa</string>
      <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
-        <x>350</x>
-        <y>10</y>
-        <width>86</width>
-        <height>16</height>
+        <x>351</x>
+        <y>11</y>
+        <width>82</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
@@ -4654,7 +4649,7 @@ Inversa</string>
        <rect>
         <x>350</x>
         <y>30</y>
-        <width>201</width>
+        <width>269</width>
         <height>171</height>
        </rect>
       </property>
@@ -4662,10 +4657,10 @@ Inversa</string>
      <widget class="QLabel" name="label_3">
       <property name="geometry">
        <rect>
-        <x>444</x>
-        <y>12</y>
-        <width>56</width>
-        <height>13</height>
+        <x>439</x>
+        <y>11</y>
+        <width>52</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
@@ -4675,10 +4670,10 @@ Inversa</string>
      <widget class="QLabel" name="lblCodigoErroMM24">
       <property name="geometry">
        <rect>
-        <x>500</x>
-        <y>12</y>
-        <width>57</width>
-        <height>13</height>
+        <x>497</x>
+        <y>11</y>
+        <width>60</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
@@ -4688,7 +4683,7 @@ Inversa</string>
      <widget class="QPushButton" name="btLimparErrosMM24">
       <property name="geometry">
        <rect>
-        <x>455</x>
+        <x>523</x>
         <y>205</y>
         <width>96</width>
         <height>21</height>
@@ -5287,6 +5282,28 @@ Inversa</string>
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QPushButton" name="btSobre">
+    <property name="geometry">
+     <rect>
+      <x>655</x>
+      <y>3</y>
+      <width>62</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Sobre...</string>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>

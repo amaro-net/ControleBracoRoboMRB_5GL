@@ -1,5 +1,10 @@
 #include "janelasobre.h"
-#include "ui_janelasobre.h"
+
+#if defined(Q_OS_WIN)
+    #include "ui_janelasobre.h"
+#elif defined(Q_OS_LINUX)
+    #include "ui_janelasobre_linux.h"
+#endif
 
 JanelaSobre::JanelaSobre(QWidget *parent) :
     QMainWindow(parent),
