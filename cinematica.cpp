@@ -626,7 +626,7 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
     bool solucaoPossivelTemp = solucao->possivel;
     avaliaAnguloTeta(&teta4, teta4min, teta4max, solucao, solucaoTeta4, solucaoTeta4Possivel);
 
-    // Esta situação pode ocorrem quando teta234 dá negativo quando deveria dar maior
+    // Esta situação pode ocorrer quando teta234 dá negativo quando deveria dar maior
     // que 180 graus
     if(!(*solucaoTeta4Possivel) && teta234 < 0)
     {

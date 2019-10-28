@@ -37,8 +37,7 @@
     com este programa, Se não, veja <http://www.gnu.org/licenses/>.
 */
 
-// TODO: GNU-FDL: Incluir Licença de Documentação Livre GNU na documentação dos cálculos da cinemática
-// TODO: ajuda do braço robô: Incluir ajuda do protocolo de comunicação e dos comandos do braço robô MRB-5GL
+// TODO: Ajuda do braço robô: Incluir ajuda do protocolo de comunicação e dos comandos do braço robô MRB-5GL
 
 #include <QMessageBox>
 #include <QtSerialPort/QSerialPortInfo>
