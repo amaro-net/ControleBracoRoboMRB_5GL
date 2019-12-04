@@ -410,45 +410,41 @@ QMatrix4x4 Cinematica::matrizPosGarra(double teta1graus, double teta2graus, doub
                                       bool* colideComBaseGir,
                                       bool* colideComSegmentoL1)
 {
-    QMatrix4x4 matrizGarraParaPulso(1, 0, 0, 0,
-                                    0, 1, 0, 0,
-                                    0, 0, 1, float(LgL3),
-                                    0, 0, 0, 1);
-
     QMatrix4x4 matrizPulsoParaBaseFixa = cinematicaDireta(teta1graus, teta2graus, teta3graus, teta4graus, teta5graus);
 
-    QMatrix4x4 matrizGarraParaBaseFixa = matrizPulsoParaBaseFixa * matrizGarraParaPulso;
+    QMatrix4x4 matrizGarraParaBaseFixa = matrizPulsoParaBaseFixa; // posição da garra é preenchida adiante
+
+    float r13 = matrizPulsoParaBaseFixa(0,2);
+    float r23 = matrizPulsoParaBaseFixa(1,2);
+    float r33 = matrizPulsoParaBaseFixa(2,2);
+
+    float px = matrizPulsoParaBaseFixa(0,3);
+    float py = matrizPulsoParaBaseFixa(1,3);
+    float pz = matrizPulsoParaBaseFixa(2,3);
+
+    float x = px + float(LgL3) * r13;
+    float y = py + float(LgL3) * r23;
+    float z = pz + float(LgL3) * r33;
+
+    matrizGarraParaBaseFixa.column(3).setX(x);
+    matrizGarraParaBaseFixa.column(3).setY(y);
+    matrizGarraParaBaseFixa.column(3).setZ(z);
 
     if(colideComBaseFixa != nullptr)
     {
-        double x = double(matrizGarraParaBaseFixa(0,3));
-        double y = double(matrizGarraParaBaseFixa(1,3));
-        double z = double(matrizGarraParaBaseFixa(2,3));
-        double px = double(matrizPulsoParaBaseFixa(0,3));
-        double py = double(matrizPulsoParaBaseFixa(1,3));
-        double pz = double(matrizPulsoParaBaseFixa(2,3));
-        float r13 = matrizPulsoParaBaseFixa(0,2);
-        float r23 = matrizPulsoParaBaseFixa(1,2);
-        float r33 = matrizPulsoParaBaseFixa(2,2);
-
         QVector3D Zt(r13, r23, r33);
 
-        *colideComBaseFixa = garraColideComBaseFixa(x, y, z, px, py, pz, Zt);
+        *colideComBaseFixa = garraColideComBaseFixa(double(x), double(y), double(z),
+                                                    double(px), double(py), double(pz),
+                                                    Zt);
     }
 
     if(colideComBaseGir != nullptr || colideComSegmentoL1 != nullptr)
     {
         double xgl, zgl, pxl, pzl;
 
-        double x = double(matrizGarraParaBaseFixa(0,3));
-        double y = double(matrizGarraParaBaseFixa(1,3));
-        double z = double(matrizGarraParaBaseFixa(2,3));
-        double px = double(matrizPulsoParaBaseFixa(0,3));
-        double py = double(matrizPulsoParaBaseFixa(1,3));
-        double pz = double(matrizPulsoParaBaseFixa(2,3));
-
-        coordenadasNoPlanoDoBracoRobo(x, y, z,
-                                      px, py, pz,
+        coordenadasNoPlanoDoBracoRobo(double(x), double(y), double(z),
+                                      double(px), double(py), double(pz),
                                       teta1graus * M_PI / 180.0,
                                       &xgl, &zgl,
                                       &pxl, &pzl);
@@ -470,25 +466,6 @@ QMatrix4x4 Cinematica::matrizPosGarra(double teta1graus, double teta2graus, doub
         }
     }
 
-    /*
-    cinDir = ! r11 r12 r13   px !
-             ! r21 r22 r23   py !
-             ! r31 r32 r33   pz !
-             !   0   0   0   1  !
-
-    cinDir * mGP = ! r11 r12 r13   r13 * LgL3 + px !
-                   ! r21 r22 r23   r23 * LgL3 + py !
-                   ! r31 r32 r33   r33 * LgL3 + pz !
-                   !   0   0   0          1        !
-
-                   x = px + LgL3 * r13
-                   y = py + LgL3 * r23
-                   z = pz + LgL3 * r33
-
-                   px = x - LgL3 * r13
-                   py = y - LgL3 * r23
-                   pz = z - LgL3 * r33
-    */
     return matrizGarraParaBaseFixa;
 }
 

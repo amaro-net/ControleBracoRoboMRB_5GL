@@ -65,3 +65,6 @@ QT += serialport
 
 RESOURCES += \
     controlebracoroboresorcefile.qrc
+
+DISTFILES += \
+    COPYING
