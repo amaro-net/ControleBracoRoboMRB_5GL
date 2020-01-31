@@ -426,9 +426,13 @@ QMatrix4x4 Cinematica::matrizPosGarra(double teta1graus, double teta2graus, doub
     float y = py + float(LgL3) * r23;
     float z = pz + float(LgL3) * r33;
 
-    matrizGarraParaBaseFixa.column(3).setX(x);
-    matrizGarraParaBaseFixa.column(3).setY(y);
-    matrizGarraParaBaseFixa.column(3).setZ(z);
+    QVector4D BPT = matrizGarraParaBaseFixa.column(3);
+
+    BPT.setX(x);
+    BPT.setY(y);
+    BPT.setZ(z);
+
+    matrizGarraParaBaseFixa.setColumn(3, BPT);
 
     if(colideComBaseFixa != nullptr)
     {
