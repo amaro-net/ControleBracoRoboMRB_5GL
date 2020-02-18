@@ -74,6 +74,13 @@ bool EhIgual(double p1, double p2, int casasDecimais)
 {
     double incremento = 0.0;
 
+    double epsilon;
+
+    if((qAbs(p1) < 1.0) && (qAbs(p2) < 1.0))
+        epsilon = pow(10.0, -(casasDecimais+1));
+    else
+        epsilon = pow(10.0, -(casasDecimais+2));
+
     if((qAbs(p1) < 1.0) || (qAbs(p2) < 1.0))
     {
         if(p1 >= 0.0 && p2 >= 0.0)
@@ -87,12 +94,26 @@ bool EhIgual(double p1, double p2, int casasDecimais)
         p2 += incremento;
     }
 
-    return (qAbs(p1 - p2) * pow(10.0, casasDecimais) <= qMin(qAbs(p1), qAbs(p2)));
+    double diff = qAbs(p1 - p2);
+
+    if(diff <= epsilon)
+        return true;
+
+    double max = qMax(qAbs(p1), qAbs(p2));
+
+    return (diff <= epsilon * max);
 }
 
 bool EhIgual(float p1, float p2, int casasDecimais)
 {
     float incremento = 0.0f;
+
+    float epsilon = powf(10.0f, -(casasDecimais+2));
+
+    if((qAbs(p1) < 1.0f) && (qAbs(p2) < 1.0f))
+        epsilon = powf(10.0, -(casasDecimais+1));
+    else
+        epsilon = powf(10.0, -(casasDecimais+2));
 
     if((qAbs(p1) < 1.0f) || (qAbs(p2) < 1.0f))
     {
@@ -107,7 +128,14 @@ bool EhIgual(float p1, float p2, int casasDecimais)
         p2 += incremento;
     }
 
-    return (qAbs(p1 - p2) * powf(10.0f, casasDecimais) <= qMin(qAbs(p1), qAbs(p2)));
+    float diff = qAbs(p1 - p2);
+
+    if(diff <= epsilon)
+        return true;
+
+    float max = qMax(qAbs(p1), qAbs(p2));
+
+    return (diff <= epsilon * max);
 }
 
 bool EhMenorOuIgual(double p1, double p2, int casasDecimais)
