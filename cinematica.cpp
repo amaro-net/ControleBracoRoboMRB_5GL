@@ -136,38 +136,6 @@ void Cinematica::coordenadasNoPlanoDoBracoRobo(double x, double y, double z,
     *pzl = pz - d1;
 }
 
-
-bool Cinematica::pontoPertenceASegmentoDeReta(double xc, double yc, double zc,
-                                              double x1, double y1, double z1,
-                                              double x2, double y2, double z2)
-{
-    double xMaior = fmax(x1, x2);
-    double xMenor = fmin(x1, x2);
-    double yMaior = fmax(y1, y2);
-    double yMenor = fmin(y1, y2);
-    double zMaior = fmax(z1, z2);
-    double zMenor = fmin(z1, z2);
-
-    if(EstaDentroDoIntervalo(xMenor, true, xc, xMaior, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-       EstaDentroDoIntervalo(yMenor, true, yc, yMaior, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-       EstaDentroDoIntervalo(zMenor, true, zc, zMaior, true, CASAS_DECIMAIS_POSICAO_XYZ))
-        return true;
-
-    return false;
-}
-
-bool Cinematica::pontoColideComBaseFixa(double x, double y, double z)
-{
-
-    return ( (EstaDentroDoIntervalo(-5, true, x, 3, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-              EstaDentroDoIntervalo(-2.5, true, y, 2.5, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-              EstaDentroDoIntervalo(0.0, false, z, 13.2, true, CASAS_DECIMAIS_POSICAO_XYZ)   ) ||
-             (EstaDentroDoIntervalo(-34.34, true, x, 3.36, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-              EstaDentroDoIntervalo(-9.95, true, y, 9.95, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-              EhMenorOuIgual(z, 0, CASAS_DECIMAIS_POSICAO_XYZ)) );
-
-}
-
 bool Cinematica::garraColideComBaseFixa(double x, double y, double z,
                                         double px, double py, double pz,
                                         QVector3D Zt)
@@ -175,46 +143,52 @@ bool Cinematica::garraColideComBaseFixa(double x, double y, double z,
     if(!checarColisao)
         return false;
 
-    if(pontoColideComBaseFixa(x, y, z) || pontoColideComBaseFixa(px, py, pz))
-        return true;
+    QVector3D v = static_cast<float>(LgL3) * Zt;
+    QVector3D P(static_cast<float>(px), static_cast<float>(py), static_cast<float>(pz));
+    QVector3D G(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
 
-    double r13 = double(Zt[0]);
-    double r23 = double(Zt[1]);
-    double r33 = double(Zt[2]);
-
+    Plano3D face1(0.0, 2.5, 0.0, 0.0, 1.0, 0.0, -5.0, 3.0, 2.5, 2.5, 0, 13.2);
+    Plano3D face2(0.0, -2.5, 0.0, 0.0, -1.0, 0.0, -5.0, 3.0, -2.5, -2.5, 0, 13.2);
+    Plano3D face3(3.0, 0.0, 0.0, 1.0, 0.0, 0.0, 3.0, 3.0, -2.5, 2.5, 0.0, 13.2);
+    Plano3D face4(-3.0, 0.0, 0.0, -1.0, 0.0, 0.0, -3.0, -3.0, -2.5, 2.5, 0.0, 13.2);
     Plano3D face5(0.0, 0.0, 13.2, 0.0, 0.0, 1.0, -5.0, 3.0, -2.5, 2.5, 13.2, 13.2);
     Plano3D face6(0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -34.34, 3.36, -9.95, 9.95, static_cast<double>(-INFINITY), 0.0);
 
-    QList<Plano3D> planos;
+    QList<Plano3D> faces;
 
-    planos.append(face5);
-    planos.append(face6);
+    faces.append(face1);
+    faces.append(face2);
+    faces.append(face3);
+    faces.append(face4);
+    faces.append(face5);
+    faces.append(face6);
 
-    for(Plano3D plano : planos)
+    for(Plano3D face : faces)
     {
-        double nx = plano.Nx();
-        double ny = plano.Ny();
-        double nz = plano.Nz();
+        QVector3D N(face.N);
+        QVector3D P0(face.P0);
 
-        double x0 = plano.X0();
-        double y0 = plano.Y0();
-        double z0 = plano.Z0();
+        float NescalarV = QVector3D::dotProduct(N, v);
 
-        double denominador = nx * r13 + ny * r23 + nz * r33;
+        if(NescalarV != 0.0f)
+        {
+            QVector3D v0 = P0 - P;
+            float NescalarV0 = QVector3D::dotProduct(N, v0);
 
-        if(denominador != 0.0)
-        {            
-            double t = (nx * (x0 - px) + ny * (y0 - py) + nz * (z0 - pz))/(LgL3 * denominador);
+            float t = NescalarV0/NescalarV;
 
-            double xc = px + LgL3 * r13 * t;
-            double yc = py + LgL3 * r23 * t;
-            double zc = pz + LgL3 * r33 * t;
-
-            if(pontoPertenceASegmentoDeReta(xc, yc, zc, px, py, pz, x, y, z) &&
-               plano.contemPonto(xc, yc, zc))
+            if(EstaDentroDoIntervalo(0.0f, true, t, 1.0f, true, CASAS_DECIMAIS_POSICAO_XYZ))
             {
-                return true;
+                QVector3D Pc = P + v * t;
+
+                if(face.contemPonto(Pc))
+                    return true;
             }
+        }
+        else
+        {
+            if(face.contemPonto(G) || face.contemPonto(P))
+                return true;
         }
     }
 

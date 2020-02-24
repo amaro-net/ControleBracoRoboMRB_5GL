@@ -51,12 +51,13 @@ Plano3D::Plano3D(double x0, double y0, double z0,
                  double yMin, double yMax,
                  double zMin, double zMax)
 {
-    this->x0 = x0;
-    this->y0 = y0;
-    this->z0 = z0;
-    this->nx = nx;
-    this->ny = ny;
-    this->nz = nz;
+    this->P0.setX(static_cast<float>(x0));
+    this->P0.setY(static_cast<float>(y0));
+    this->P0.setZ(static_cast<float>(z0));
+
+    this->N.setX(static_cast<float>(nx));
+    this->N.setY(static_cast<float>(ny));
+    this->N.setZ(static_cast<float>(nz));
 
     this->xMin = xMin;
     this->xMax = xMax;
@@ -68,111 +69,133 @@ Plano3D::Plano3D(double x0, double y0, double z0,
     calculaD();
 }
 
-Plano3D::Plano3D(QVector3D P0, QVector3D N)
+Plano3D::Plano3D(QVector3D P0, QVector3D N,
+                 double xMin, double xMax,
+                 double yMin, double yMax,
+                 double zMin, double zMax)
 {
-    Plano3D(double(P0.x()),
-            double(P0.y()),
-            double(P0.z()),
-            double(N.x()),
-            double(N.y()),
-            double(N.z()));
+    this->P0.setX(P0.x());
+    this->P0.setY(P0.y());
+    this->P0.setZ(P0.z());
+
+    this->N.setX(N.x());
+    this->N.setY(N.y());
+    this->N.setZ(N.z());
+
+    this->xMin = xMin;
+    this->xMax = xMax;
+    this->yMin = yMin;
+    this->yMax = yMax;
+    this->zMin = zMin;
+    this->zMax = zMax;
+
+    calculaD();
 }
 
 bool Plano3D::contemPonto(double x, double y, double z)
 {
+    double nx = static_cast<double>(N.x());
+    double ny = static_cast<double>(N.y());
+    double nz = static_cast<double>(N.z());
+
     bool resultado = EhIgual(nx * x + ny * y + nz * z + d, 0.0, CASAS_DECIMAIS_POSICAO_XYZ);
 
-    if(resultado && std::abs(xMin) != INFINITY)
+    if(resultado && std::abs(xMin) < static_cast<double>(INFINITY))
         resultado = resultado && EhMenorOuIgual(xMin, x, CASAS_DECIMAIS_POSICAO_XYZ);
 
-    if(resultado && std::abs(xMax) != INFINITY)
+    if(resultado && std::abs(xMax) < static_cast<double>(INFINITY))
         resultado = resultado && EhMenorOuIgual(x, xMax, CASAS_DECIMAIS_POSICAO_XYZ);
 
 
-    if(resultado && std::abs(yMin) != INFINITY)
+    if(resultado && std::abs(yMin) < static_cast<double>(INFINITY))
         resultado = resultado && EhMenorOuIgual(yMin, y, CASAS_DECIMAIS_POSICAO_XYZ);
 
-    if(resultado && std::abs(yMax) != INFINITY)
+    if(resultado && std::abs(yMax) < static_cast<double>(INFINITY))
         resultado = resultado && EhMenorOuIgual(y, yMax, CASAS_DECIMAIS_POSICAO_XYZ);
 
 
-    if(resultado && std::abs(zMin) != INFINITY)
+    if(resultado && std::abs(zMin) < static_cast<double>(INFINITY))
         resultado = resultado && EhMenorOuIgual(zMin, z, CASAS_DECIMAIS_POSICAO_XYZ);
 
-    if(resultado && std::abs(zMax) != INFINITY)
+    if(resultado && std::abs(zMax) < static_cast<double>(INFINITY))
         resultado = resultado && EhMenorOuIgual(z, zMax, CASAS_DECIMAIS_POSICAO_XYZ);
 
     return resultado;
 }
 
+bool Plano3D::contemPonto(QVector3D Pc)
+{
+    return contemPonto(static_cast<double>(Pc.x()), static_cast<double>(Pc.y()), static_cast<double>(Pc.z()));
+}
+
 void Plano3D::calculaD()
 {
-    d = -nx * x0 - ny * y0 - nz * z0;
+    d = double(-N.x() * P0.x() - N.y() * P0.y() - N.z() * P0.z());
 }
 
 double Plano3D::X0() const
 {
-    return x0;
+    return double(P0.x());
 }
 
 void Plano3D::setX0(double value)
 {
-    x0 = value;
+    P0.setX(static_cast<float>(value));
     calculaD();
 }
 
 double Plano3D::Y0() const
 {
-    return y0;
+    return double(P0.y());
 }
 
 void Plano3D::setY0(double value)
 {
-    y0 = value;
+    P0.setY(static_cast<float>(value));
     calculaD();
 }
 
 double Plano3D::Z0() const
 {
-    return z0;
+    return double(P0.z());
 }
 
 void Plano3D::setZ0(double value)
 {
-    z0 = value;
+    P0.setZ(static_cast<float>(value));
     calculaD();
 }
 
 double Plano3D::Nx() const
 {
-    return nx;
+    return double(N.x());
 }
 
 void Plano3D::setNx(double value)
 {
-    nx = value;
+    N.setX(static_cast<float>(value));
     calculaD();
 }
 
 double Plano3D::Ny() const
 {
-    return ny;
+    return double(N.y());
 }
 
 void Plano3D::setNy(double value)
 {
-    ny = value;
+    N.setY(static_cast<float>(value));
     calculaD();
 }
 
 double Plano3D::Nz() const
 {
-    return nz;
+    return double(N.z());
 }
 
 void Plano3D::setNz(double value)
 {
-    nz = value;
+    N.setZ(static_cast<float>(value));
     calculaD();
 }
 

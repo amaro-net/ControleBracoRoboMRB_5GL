@@ -110,10 +110,6 @@ class Cinematica
                                            double *pxl, double *pzl);
 
         /* Métodos para detecção de colisão */
-        bool pontoPertenceASegmentoDeReta(double xc, double yc, double zc,
-                                          double x1, double y1, double z1,
-                                          double x2, double y2, double z2);
-        bool pontoColideComBaseFixa(double x, double y, double z);
         bool garraColideComBaseFixa(double x, double y, double z,
                                     double px, double py, double pz,
                                     QVector3D Zt);

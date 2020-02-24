@@ -44,14 +44,6 @@
 
 class Plano3D
 {
-    private:
-        double x0;
-        double y0;
-        double z0;
-        double nx;
-        double ny;
-        double nz;
-
     public:
         double xMin;
         double xMax;
@@ -61,15 +53,24 @@ class Plano3D
         double zMax;
         double d;
 
+        QVector3D N;
+        QVector3D P0;
+
+
+
         Plano3D();
         Plano3D(double x0, double y0, double z0,
                 double nx, double ny, double nz,
                 double xMin = -static_cast<double>(INFINITY), double xMax = +static_cast<double>(INFINITY),
                 double yMin = -static_cast<double>(INFINITY), double yMax = +static_cast<double>(INFINITY),
                 double zMin = -static_cast<double>(INFINITY), double zMax = +static_cast<double>(INFINITY));
-        Plano3D(QVector3D P0, QVector3D N);
+        Plano3D(QVector3D P0, QVector3D N,
+                double xMin = -static_cast<double>(INFINITY), double xMax = +static_cast<double>(INFINITY),
+                double yMin = -static_cast<double>(INFINITY), double yMax = +static_cast<double>(INFINITY),
+                double zMin = -static_cast<double>(INFINITY), double zMax = +static_cast<double>(INFINITY));
 
         bool contemPonto(double x, double y, double z);
+        bool contemPonto(QVector3D Pc);
 
         void calculaD();
 
