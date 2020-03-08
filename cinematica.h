@@ -168,6 +168,9 @@ class Cinematica
         // Campos
         bool impedirColisao = true;
         bool checarColisao = true;
+        double M_PI_ARRED;
+        double M_PI_2_ARRED;
+        double M_PI_4_ARRED;
 };
 
 #endif // CINEMATICA_H

@@ -41,7 +41,9 @@
 
 Cinematica::Cinematica()
 {
-
+    M_PI_ARRED = arredondaPara(M_PI, CASAS_DECIMAIS_ROTACOES_XYZ_RAD);
+    M_PI_2_ARRED = arredondaPara(M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD);
+    M_PI_4_ARRED = arredondaPara(M_PI_4, CASAS_DECIMAIS_ROTACOES_XYZ_RAD);
 }
 
 double *Cinematica::coordenadasAngFixosOuEulerZXY(QMatrix4x4 T)
@@ -213,8 +215,8 @@ bool Cinematica::garraColideComBaseGiratoria(double xgl, double zgl,
     }
     else
     {
-        if(!(EhIgual(tetag, M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD) ||
-             EhIgual(tetag, -M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD)) )
+        if(!(EhIgual(tetag, M_PI_2_ARRED, CASAS_DECIMAIS_ROTACOES_XYZ_RAD) ||
+             EhIgual(tetag, -M_PI_2_ARRED, CASAS_DECIMAIS_ROTACOES_XYZ_RAD)) )
         {
             double a = tan(tetag);
             double b = pzl - a * pxl;
@@ -247,8 +249,8 @@ bool Cinematica::garraColideComSegmentoL1(double xgl, double zgl,
     if(!checarColisao)
         return false;
 
-    if(!(EhIgual(teta2, M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD) ||
-         EhIgual(teta2, -M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD)) )
+    if(!(EhIgual(teta2, M_PI_2_ARRED, CASAS_DECIMAIS_ROTACOES_XYZ_RAD) ||
+         EhIgual(teta2, -M_PI_2_ARRED, CASAS_DECIMAIS_ROTACOES_XYZ_RAD)) )
     {
         double al1 = tan(teta2);
 
@@ -257,6 +259,10 @@ bool Cinematica::garraColideComSegmentoL1(double xgl, double zgl,
         if(!EhIgual(denominador, 0.0, CASAS_DECIMAIS_POSICAO_XYZ))
         {
             double t = (al1 * pxl - pzl)/denominador;
+
+            if(!EstaDentroDoIntervalo(0.0, true, t, 1.0, true, CASAS_DECIMAIS_POSICAO_XYZ))
+                return false;
+
             double xl = pxl + (xgl - pxl) * t;
             double zl = pzl + (zgl - pzl) * t;
             double zlJ2 = L1 * sin(teta2);
@@ -264,21 +270,20 @@ bool Cinematica::garraColideComSegmentoL1(double xgl, double zgl,
 
             if(EhIgual(zl, al1 * xl, CASAS_DECIMAIS_POSICAO_XYZ) &&
                EstaDentroDoIntervalo(fmin(0.0, xlJ2), true, xl, fmax(0.0, xlJ2), true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-               EstaDentroDoIntervalo(fmin(0.0, zlJ2), true, zl, fmax(0.0, zlJ2), true, CASAS_DECIMAIS_POSICAO_XYZ) &&               
-               EstaDentroDoIntervalo(fmin(xgl, pxl), true, xl, fmax(xgl, pxl), true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-               EstaDentroDoIntervalo(fmin(zgl, pzl), true, zl, fmax(zgl, pzl), true, CASAS_DECIMAIS_POSICAO_XYZ))
+               EstaDentroDoIntervalo(fmin(0.0, zlJ2), true, zl, fmax(0.0, zlJ2), true, CASAS_DECIMAIS_POSICAO_XYZ)    )
                 return true;
         }
     }
     else
     {
-        //double denominador = L1 - xgl + pxl - zgl + pzl;
         double denominador = (xgl - pxl);
 
         if(!EhIgual(denominador, 0.0, CASAS_DECIMAIS_POSICAO_XYZ))
         {
-            //double t = (pxl + pzl)/denominador;
             double t = -pxl / denominador;
+
+            if(!EstaDentroDoIntervalo(0.0, true, t, 1.0, true, CASAS_DECIMAIS_POSICAO_XYZ))
+                return false;
 
             double xl = pxl + (xgl - pxl) * t;
             double zl = pzl + (zgl - pzl) * t;
@@ -287,9 +292,7 @@ bool Cinematica::garraColideComSegmentoL1(double xgl, double zgl,
             double zlJ2 = L1;
 
             if(EhIgual(xl, xlJ2, CASAS_DECIMAIS_POSICAO_XYZ) &&
-               EstaDentroDoIntervalo(0.0, true, zl, zlJ2, true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-               EstaDentroDoIntervalo(fmin(xgl, pxl), true, xl, fmax(xgl, pxl), true, CASAS_DECIMAIS_POSICAO_XYZ) &&
-               EstaDentroDoIntervalo(fmin(zgl, pzl), true, zl, fmax(zgl, pzl), true, CASAS_DECIMAIS_POSICAO_XYZ))
+               EstaDentroDoIntervalo(0.0, true, zl, zlJ2, true, CASAS_DECIMAIS_POSICAO_XYZ) )
                 return true;
         }
     }
@@ -1033,12 +1036,12 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         double betaProj = atan2(-r31, sqrt(pow(r11,2)+pow(r21,2)));
         double alfaProj, gamaProj;
 
-        if (EhIgual(betaProj, M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
+        if (EhIgual(betaProj, M_PI_2_ARRED, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
         {
             alfaProj = 0;
             gamaProj = atan2(r12, r22);
         }
-        else if (EhIgual(betaProj, -M_PI_2, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
+        else if (EhIgual(betaProj, -M_PI_2_ARRED, CASAS_DECIMAIS_ROTACOES_XYZ_RAD))
         {
             alfaProj = 0;
             gamaProj = -atan2(r12, r22);
