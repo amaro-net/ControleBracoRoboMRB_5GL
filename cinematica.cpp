@@ -520,11 +520,11 @@ void Cinematica::avaliaAnguloTeta(double* teta, double tetaMin, double tetaMax,
 void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double teta2max,
                                      double* teta3ptr, double teta3min, double teta3max,
                                      double* teta4ptr, double teta4min, double teta4max,
-                                     double teta234,
+                                     double* teta234ptr,
                                      double pxl, double pzl,
                                      SolucaoCinematicaInversa* solucao)
 {
-    double teta2, teta3, teta4;
+    double teta2, teta3, teta4, teta234 = *teta234ptr;
 
     double *solucaoTeta2 = nullptr,
            *solucaoTeta3 = nullptr,
@@ -548,11 +548,23 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
 
     double pxl2pzl2 = pow(pxl, 2) + pow(pzl, 2);
 
-    // Cálculo do teta3    
+    // Cálculo do teta3
     double c3 = (pxl2pzl2 - pow(a2, 2) - pow(a3, 2))/(2 * a2 * a3);
 
-    if(std::abs(c3) > 1.0 && std::abs(c3) < 1.5)
-        c3 = trunc(c3);
+    // Se c3 for consideravelmente maior que 1.0 em módulo, a solução será dada como impossível
+    bool c3EstourouLimite = false;
+    if(!EhMenorOuIgual(std::abs(c3), 1.0, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        c3EstourouLimite = true;
+    }
+
+    // Se c3 for maior, em módulo, que 1.0, mesmo que por uma diferença menor
+    // que 0.00000001 (por exemplo, o que não faria a solução ser necessariamente
+    // impossível), força c3 a ter valor 1.0 em módulo
+    if(c3 > 1.0)
+        c3 = 1.0;
+    else if(c3 < -1.0)
+        c3 = -1.0;
 
     /* WARNING: Enquanto o ângulo máximo da junta 2 for zero, teta3 sempre será negativo
                 Rever este trecho caso o ângulo máximo da junta 2 passe a ser positivo */
@@ -562,13 +574,31 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
 
     avaliaAnguloTeta(&teta3, teta3min, teta3max, solucao, solucaoTeta3, solucaoTeta3Possivel);
 
+    if(c3EstourouLimite)
+    {
+        *solucaoTeta3Possivel = false;
+        solucao->possivel = false;
+    }
+
     // Cálculo do teta2
     double beta2 = atan2(pzl, pxl);
 
     double cksi = (pxl2pzl2 + pow(a2, 2) - pow(a3, 2))/(2 * a2 * sqrt(pxl2pzl2));
 
-    if(std::abs(cksi) > 1.0 && std::abs(cksi) < 1.5)
-        cksi = trunc(cksi);
+    // Se cksi for consideravelmente maior que 1.0 em módulo, a solução será dada como impossível
+    bool cksiEstourouLimite = false;
+    if(!EhMenorOuIgual(std::abs(cksi), 1.0, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        cksiEstourouLimite = true;
+    }
+
+    // Se cksi for maior, em módulo, que 1.0, mesmo que por uma diferença menor
+    // que 0.00000001 (por exemplo, o que não faria a solução ser necessariamente
+    // impossível), força cksi a ter valor 1.0 em módulo
+    if(cksi > 1.0)
+        cksi = 1.0;
+    else if(cksi < -1.0)
+        cksi = -1.0;
 
     double sksi = sqrt(1 - pow(cksi, 2));
 
@@ -578,6 +608,12 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
 
     avaliaAnguloTeta(&teta2, teta2min, teta2max, solucao, solucaoTeta2, solucaoTeta2Possivel);
 
+    if(cksiEstourouLimite)
+    {
+        *solucaoTeta2Possivel = false;
+        solucao->possivel = false;
+    }
+
     // Cálculo do teta4
     teta4 = teta234 - teta2 - teta3;
 
@@ -586,7 +622,7 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
 
     // Esta situação pode ocorrer quando teta234 dá negativo quando deveria dar maior
     // que 180 graus
-    if(!(*solucaoTeta4Possivel) && teta234 < 0)
+    if(!(*solucaoTeta4Possivel) && *teta234ptr < 0)
     {
         solucao->possivel = solucaoPossivelTemp;
 
@@ -599,6 +635,7 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
     *teta2ptr = teta2;
     *teta3ptr = teta3;
     *teta4ptr = teta4;
+    *teta234ptr = teta234;
 }
 
 void Cinematica::calculaTeta2Teta3Teta4Singular(double* teta2, double* teta3, double* teta4,
@@ -637,7 +674,7 @@ void Cinematica::calculaTeta2Teta3Teta4Singular(double* teta2, double* teta3, do
         abordagemGeometrica(teta2, teta2min, teta2max,
                             teta3, teta3min, teta3max,
                             teta4, teta4min, teta4max,
-                            teta234,
+                            &teta234,
                             0, pz - d1, &solucao);
 
         *teta2 = *teta2 * 180.0 / M_PI;
@@ -893,9 +930,9 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     double cbeta = arredondaPara(cos(beta), CASAS_DECIMAIS_SENOS_COSSENOS);
     double calfa = arredondaPara(cos(alfa), CASAS_DECIMAIS_SENOS_COSSENOS);
 
-    double r11 = 0.0;
-    double r21 = 0.0;
-    double r31;
+    double r11 = calfa * cbeta;
+    double r21 = salfa * cbeta;
+    double r31 = -sbeta;
     double r12 = calfa * sbeta * sgama - salfa * cgama;
     double r22 = salfa * sbeta * sgama + calfa * cgama;
     double r32 = cbeta * sgama;
@@ -1153,7 +1190,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     if(EhMaiorOuIgual(teta1_4, teta1min, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD) &&
        EhMenorOuIgual(teta1_4, teta1max, CASAS_DECIMAIS_POSICAO_ANGULAR_RAD))
     {
-        if(!solucaoTeta1.contains(teta1_3))
+        if(!solucaoTeta1.contains(teta1_4))
             solucaoTeta1.append(teta1_4);
     }
 
@@ -1230,17 +1267,16 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
                                       px, py, pz,
                                       teta1,
                                       &xgl, &zgl,
-                                      &pxl, &pzl);
-
-        solucao->colideComBaseGir = garraColideComBaseGiratoria(xgl, zgl, pxl, pzl, teta234);
+                                      &pxl, &pzl);        
 
         abordagemGeometrica(&teta2, teta2min, teta2max,
                             &teta3, teta3min, teta3max,
                             &teta4, teta4min, teta4max,
-                            teta234,
+                            &teta234,
                             pxl, pzl,
                             solucao);
 
+        solucao->colideComBaseGir = garraColideComBaseGiratoria(xgl, zgl, pxl, pzl, teta234);
         solucao->colideComSegmentoL1 = garraColideComSegmentoL1(xgl, zgl, pxl, pzl, teta2);
     }
 
@@ -1255,50 +1291,6 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         {
             *posicaoAtingivel = solucao->possivel;
         }
-
-        if(solucao->subSolucao != nullptr)
-        {
-            // Unificação da solução com a subsolução
-            SubSolucaoCinematicaInversa *subSolucao = solucao->subSolucao;
-
-            if(!(solucao->possivel
-                 || (subSolucao->teta2possivel
-                     && subSolucao->teta3possivel
-                     && subSolucao->teta4possivel))
-               )
-            {
-                // Substitui os ângulos da solução pelos que constam na subsolução
-                // quando a solução em si não é possível. Esta é uma forma de
-                // fazer a solução ficar mais próxima do possível
-                solucao->teta2 = subSolucao->teta2;
-                solucao->teta3 = subSolucao->teta3;
-                solucao->teta4 = subSolucao->teta4;
-            }
-            else
-            {
-                // Pega a subsolução de maior peso.
-                double difTeta2 = std::abs(angulosCorrentesJuntas[1] - subSolucao->teta2);
-                double difTeta3 = std::abs(angulosCorrentesJuntas[2] - subSolucao->teta3);
-                double difTeta4 = std::abs(angulosCorrentesJuntas[3] - subSolucao->teta4);
-
-                subSolucao->peso = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
-
-                difTeta2 = std::abs(angulosCorrentesJuntas[1] - solucao->teta2);
-                difTeta3 = std::abs(angulosCorrentesJuntas[2] - solucao->teta3);
-                difTeta4 = std::abs(angulosCorrentesJuntas[3] - solucao->teta4);
-
-                double pesoSolucao = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
-
-                if(subSolucao->peso >= pesoSolucao)
-                {
-                    solucao->teta2 = subSolucao->teta2;
-                    solucao->teta3 = subSolucao->teta3;
-                    solucao->teta4 = subSolucao->teta4;
-                }
-            }
-
-            delete subSolucao;
-        }
     }
     else
     {
@@ -1308,33 +1300,6 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         for(int i = 0; i < solucoes.count(); i++)
         {
             solucao = solucoes.at(i);
-
-            if(solucao->subSolucao != nullptr)
-            {
-                // Unifica a subsolução com base nos pesos
-                SubSolucaoCinematicaInversa *subSolucao = solucao->subSolucao;
-
-                double difTeta2 = std::abs(angulosCorrentesJuntas[1] - subSolucao->teta2);
-                double difTeta3 = std::abs(angulosCorrentesJuntas[2] - subSolucao->teta3);
-                double difTeta4 = std::abs(angulosCorrentesJuntas[3] - subSolucao->teta4);
-
-                subSolucao->peso = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
-
-                difTeta2 = std::abs(angulosCorrentesJuntas[1] - solucao->teta2);
-                difTeta3 = std::abs(angulosCorrentesJuntas[2] - solucao->teta3);
-                difTeta4 = std::abs(angulosCorrentesJuntas[3] - solucao->teta4);
-
-                double pesoSolucao = (pesoTeta2 * difTeta2 + pesoTeta3 * difTeta3 + pesoTeta4 * difTeta4)/(pesoTeta2 + pesoTeta3 + pesoTeta4);
-
-                if(subSolucao->peso >= pesoSolucao)
-                {
-                    solucao->teta2 = subSolucao->teta2;
-                    solucao->teta3 = subSolucao->teta3;
-                    solucao->teta4 = subSolucao->teta4;
-                }
-
-                delete subSolucao;
-            }
 
             // Inclui a solução na lista de soluções válidas
             if(solucao->possivel)
@@ -1389,7 +1354,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
         }
         else
         {
-            // Obtém a solução válida de maior peso, ou a primeira, em caso de pesos iguais
+            // Obtém a solução válida de menor peso, ou a primeira, em caso de pesos iguais
             double difTeta[QTD_SERVOS - 1];
             double angTeta[QTD_SERVOS - 1];
             double pesosTeta[QTD_SERVOS - 1];
@@ -1404,11 +1369,11 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
             {
                 solucao = solucoesValidas.at(i);
 
-                angTeta[0] = solucao->teta1;
-                angTeta[1] = solucao->teta2;
-                angTeta[2] = solucao->teta3;
-                angTeta[3] = solucao->teta4;
-                angTeta[4] = solucao->teta5;
+                angTeta[0] = solucao->teta1 * 180.0 / M_PI;
+                angTeta[1] = solucao->teta2 * 180.0 / M_PI;
+                angTeta[2] = solucao->teta3 * 180.0 / M_PI;
+                angTeta[3] = solucao->teta4 * 180.0 / M_PI;
+                angTeta[4] = solucao->teta5 * 180.0 / M_PI;
 
                 for(int j = 0; j < QTD_SERVOS - 1; j++)
                     difTeta[j] = std::abs(angulosCorrentesJuntas[j] - angTeta[j]);
@@ -1424,19 +1389,19 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
                 solucao->peso = somatorio/somaPesos;
             }
 
-            int idxSolucaoPesoMaior = 0;
-            double maiorPeso = solucoesValidas.at(0)->peso;
+            int idxSolucaoPesoMenor = 0;
+            double menorPeso = solucoesValidas.at(0)->peso;
 
             for(int i = 1; i < solucoesValidas.count(); i++)
             {
-                if(solucoesValidas.at(i)->peso > maiorPeso)
+                if(solucoesValidas.at(i)->peso < menorPeso)
                 {
-                    maiorPeso = solucoesValidas.at(i)->peso;
-                    idxSolucaoPesoMaior = i;
+                    menorPeso = solucoesValidas.at(i)->peso;
+                    idxSolucaoPesoMenor = i;
                 }
             }
 
-            solucao = solucoesValidas.at(idxSolucaoPesoMaior);
+            solucao = solucoesValidas.at(idxSolucaoPesoMenor);
         }
     }    
 

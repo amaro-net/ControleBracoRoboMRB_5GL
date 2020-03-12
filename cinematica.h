@@ -138,7 +138,7 @@ class Cinematica
         void abordagemGeometrica(double *teta2ptr, double teta2min, double teta2max,
                                  double *teta3ptr, double teta3min, double teta3max,
                                  double *teta4ptr, double teta4min, double teta4max,
-                                 double teta234,
+                                 double *teta234ptr,
                                  double pxl, double pzl,
                                  SolucaoCinematicaInversa *solucao = nullptr);
         void calculaTeta2Teta3Teta4Singular(double *teta2, double *teta3, double *teta4,

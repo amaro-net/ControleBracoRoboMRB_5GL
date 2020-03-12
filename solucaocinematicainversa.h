@@ -39,7 +39,7 @@
 #ifndef SOLUCAOCINEMATICAINVERSA_H
 #define SOLUCAOCINEMATICAINVERSA_H
 
-#include "subsolucaocinematicainversa.h"
+#include <math.h>
 
 class SolucaoCinematicaInversa
 {
@@ -66,8 +66,6 @@ class SolucaoCinematicaInversa
         bool teta3possivel = false;
         bool teta4possivel = false;
         bool teta5possivel = false;
-
-        SubSolucaoCinematicaInversa *subSolucao = nullptr;
 
         bool possivel;
 

@@ -40,13 +40,12 @@
 
 SolucaoCinematicaInversa::SolucaoCinematicaInversa()
 {
-    peso = 0;
+    peso = static_cast<double>(INFINITY);
 }
 
 SolucaoCinematicaInversa::~SolucaoCinematicaInversa()
 {    
-    if(subSolucao != nullptr)
-        delete subSolucao;
+
 }
 
 bool SolucaoCinematicaInversa::possuiAlgumAnguloImpossivel(int *idxAngulo)

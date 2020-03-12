@@ -31,7 +31,6 @@ SOURCES += \
     console.cpp \
     montagemdecomandosdialog.cpp \
     solucaocinematicainversa.cpp \
-    subsolucaocinematicainversa.cpp \
     cinematica.cpp \
     utils.cpp \
     plano3d.cpp \
@@ -46,7 +45,6 @@ HEADERS += \
     montagemdecomandosdialog.h \
     constantes.h \
     solucaocinematicainversa.h \
-    subsolucaocinematicainversa.h \
     cinematica.h \
     utils.h \
     plano3d.h \
