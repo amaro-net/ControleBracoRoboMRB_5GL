@@ -918,6 +918,24 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     if(colideComSegmentoL1 != nullptr)
         *colideComSegmentoL1 = false;
 
+    if(EhIgual(*x, 0.0, CASAS_DECIMAIS_POSICAO_XYZ) &&
+       EhIgual(*y, 0.0, CASAS_DECIMAIS_POSICAO_XYZ))
+    {
+        double* angulosJuntas = calculaPosicaoSingular(z,
+                                                       gamaGraus, betaGraus, alfaGraus,
+                                                       angulosCorrentesJuntas,
+                                                       angulosMaxGraus,
+                                                       angulosMinGraus,
+                                                       posicaoAtingivel);
+
+        if(angulosJuntas != nullptr)
+        {
+            if(posicaoProjetada != nullptr)
+                *posicaoProjetada = false;
+            return angulosJuntas;
+        }
+    }
+
     double gama = *gamaGraus * M_PI /180.0;
     double beta = *betaGraus * M_PI /180.0;
     double alfa = *alfaGraus * M_PI /180.0;
@@ -940,37 +958,21 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     double r23 = salfa * sbeta * cgama - calfa * sgama;
     double r33 = cbeta * cgama;
 
-    if(EhIgual(*x, 0.0, CASAS_DECIMAIS_POSICAO_XYZ) &&
-       EhIgual(*y, 0.0, CASAS_DECIMAIS_POSICAO_XYZ))
-    {
-        double* angulosJuntas = calculaPosicaoSingular(z,
-                                                       gamaGraus, betaGraus, alfaGraus,
-                                                       angulosCorrentesJuntas,
-                                                       angulosMaxGraus,
-                                                       angulosMinGraus,
-                                                       posicaoAtingivel);
-
-        if(angulosJuntas != nullptr)
-        {
-            if(posicaoProjetada != nullptr)
-                *posicaoProjetada = false;
-            return angulosJuntas;
-        }
-    }
-
     double x2y2 = pow(*x, 2.0) + pow(*y, 2.0);
     double sqrtx2y2 = sqrt(x2y2);
 
     trazPosAlvoParaDentroDoEspacoDeTrabalho(x, y, z);
 
-    // Projetando o ponto desejado no plano do braço. Esta projeção será a que a
-    // garra poderá verdadeiramente assumir (ver cap. 4 do craig - The Yasukawa
-    // Motoman L-3 página 121)
+    // Projetando a orientação desejada no plano do braço. Esta projeção dirá a posição que a
+    // garra poderá verdadeiramente assumir (ver cap. 4 do livro do Craig - The Yasukawa
+    // Motoman L-3 página 121) ou o documento dos cálculos (calculos.pdf)
 
     // WARNING: Ponto da garra e origem do referencial da base: Notar que o ponto da garra (e o ponto do pulso) não está rente com a origem do referencial da base fixa.
     // WARNING: Vetor M e plano do braço robô: O plano cuja normal é M passa pela origem do referencial da base (não pega o ponto da garra nem o pulso J4).
-    //          Ou seja, esse mesmo plano é oblíquo ao plano que pega a coordenada da garra e do pulso
-    //          e também, a um plano paralelo que pega a origem da base fixa.
+    //          Isso se deve ao uso dos parâmetros DH d2, d3 e d4 estarem zerados. Com isso, o ponto da garra na cinemática direta (e na cinemática inversa,
+    //          consequentemente) está deslocado em relação ponto que de fato seria o da garra (ver calculos.pdf). Se fossem usados parâmetros exatos, o vetor
+    //          M iria definir um plano oblíquo, que passaria pelo ponto da garra e pela origem da base fixa, que faria o vetor Ztl apontar sempre para uma
+    //          direção diferente da posição alvo, mesmo que a posição alvo, na prática, não precisasse ser projetada.
     // WARNING: Ver warnings do arquivo constantes.h referentes aos parâmetros d2, d3, d4 e d5        
     QVector3D M;
 
