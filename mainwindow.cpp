@@ -2789,12 +2789,18 @@ void MainWindow::on_btCalcularAngulosAlvo_clicked()
             }
             else if (ui->rdbMiniMaestro24->isChecked())
             {
-                // Aba Posições das juntas: comando JST para a placa Mini maestro 24, botão Calcular ângulos alvo
+                uint16_t posicaoAlvo[QTD_SERVOS];
+
+                for(int i = 0; i < QTD_SERVOS; i++)
+                {
+                    posicaoAlvo[i] = static_cast<uint16_t>(lstSpnAlvo[i]->value());
+                }
+                this->mm24->SetMultipleTargets(QTD_SERVOS, 0, posicaoAlvo);
             }
         }
     }
 
-    calculoAngulosAlvoAcionado = false;    
+    calculoAngulosAlvoAcionado = false;
 }
 
 void MainWindow::habilitaCamposAbaPosicaoAlvo(int posicaoAba, bool estadoHab)

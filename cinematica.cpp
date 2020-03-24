@@ -553,7 +553,7 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
 
     // Se c3 for consideravelmente maior que 1.0 em módulo, a solução será dada como impossível
     bool c3EstourouLimite = false;
-    if(!EhMenorOuIgual(std::abs(c3), 1.0, CASAS_DECIMAIS_SENOS_COSSENOS))
+    if(!EhMenorOuIgual(std::abs(c3), 1.05, CASAS_DECIMAIS_SENOS_COSSENOS))
     {
         c3EstourouLimite = true;
     }
@@ -585,9 +585,9 @@ void Cinematica::abordagemGeometrica(double* teta2ptr, double teta2min, double t
 
     double cksi = (pxl2pzl2 + pow(a2, 2) - pow(a3, 2))/(2 * a2 * sqrt(pxl2pzl2));
 
-    // Se cksi for consideravelmente maior que 1.0 em módulo, a solução será dada como impossível
+    // Se cksi for consideravelmente maior que 1.05 em módulo, a solução será dada como impossível
     bool cksiEstourouLimite = false;
-    if(!EhMenorOuIgual(std::abs(cksi), 1.0, CASAS_DECIMAIS_SENOS_COSSENOS))
+    if(!EhMenorOuIgual(std::abs(cksi), 1.05, CASAS_DECIMAIS_SENOS_COSSENOS))
     {
         cksiEstourouLimite = true;
     }
@@ -876,6 +876,54 @@ void Cinematica::trazPosAlvoParaDentroDoEspacoDeTrabalho(double *x, double *y, d
     }
 }
 
+void Cinematica::ajustaSenoOuCossenoIgualA1(float* steta, float* cteta)
+{
+    if (EhMaiorOuIgual(*steta, 1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        *steta = 1.0f;
+        *cteta = 0.0f;
+    }
+    else if(EhMaiorOuIgual(*cteta, 1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        *cteta = 1.0f;
+        *steta = 0.0f;
+    }
+    else if(EhMenorOuIgual(*steta, -1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        *steta = -1.0f;
+        *cteta = 0.0f;
+    }
+    else if(EhMenorOuIgual(*cteta, -1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        *cteta = -1.0f;
+        *steta = 0.0f;
+    }
+}
+
+void Cinematica::ajustaSenoOuCossenoIgualA1(double* steta, double* cteta)
+{
+    if (EhMaiorOuIgual(*steta, 1.0, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        *steta = 1.0;
+        *cteta = 0.0;
+    }
+    else if(EhMaiorOuIgual(*cteta, 1.0, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        *cteta = 1.0;
+        *steta = 0.0;
+    }
+    else if(EhMenorOuIgual(*steta, -1.0, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        *steta = -1.0;
+        *cteta = 0.0;
+    }
+    else if(EhMenorOuIgual(*cteta, -1.0, CASAS_DECIMAIS_SENOS_COSSENOS))
+    {
+        *cteta = -1.0;
+        *steta = 0.0;
+    }
+}
+
 // TODO: Cinemática direta: Criar um método para calcular o tamanho da abertura da garra com base no ângulo do eixo do servo da garra.
 // TODO: Cinemática direta: Criar a cinemática direta para os dedos da garra, calculando o XYZ de cada dedo.
 // TODO: Cinemática direta/inversa: incluir tratamento para evitar cálculo de posições em que os dedos da garra colidem com a base fixa, com a base giratória ou com o segmento L1
@@ -948,6 +996,10 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     double cbeta = arredondaPara(cos(beta), CASAS_DECIMAIS_SENOS_COSSENOS);
     double calfa = arredondaPara(cos(alfa), CASAS_DECIMAIS_SENOS_COSSENOS);
 
+    ajustaSenoOuCossenoIgualA1(&sgama, &cgama);
+    ajustaSenoOuCossenoIgualA1(&sbeta, &cbeta);
+    ajustaSenoOuCossenoIgualA1(&salfa, &calfa);
+
     double r11 = calfa * cbeta;
     double r21 = salfa * cbeta;
     double r31 = -sbeta;
@@ -1014,26 +1066,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
     steta = arredondaPara(steta, CASAS_DECIMAIS_SENOS_COSSENOS);
     cteta = arredondaPara(cteta, CASAS_DECIMAIS_SENOS_COSSENOS);
 
-    if (EhMaiorOuIgual(steta, 1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
-    {
-        steta = 1.0f;
-        cteta = 0.0f;
-    }
-    else if(EhMaiorOuIgual(cteta, 1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
-    {
-        cteta = 1.0f;
-        steta = 0.0f;
-    }
-    else if(EhMenorOuIgual(steta, -1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
-    {
-        steta = -1.0f;
-        cteta = 0.0f;
-    }
-    else if(EhMenorOuIgual(cteta, -1.0f, CASAS_DECIMAIS_SENOS_COSSENOS))
-    {
-        cteta = -1.0f;
-        steta = 0.0f;
-    }
+    ajustaSenoOuCossenoIgualA1(&steta, &cteta);
 
     double teta = atan2(static_cast<double>(steta), static_cast<double>(cteta)) * 180.0 / M_PI;
 
@@ -1217,6 +1250,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
 
         solucao->s1 = arredondaPara(sin(teta1), CASAS_DECIMAIS_SENOS_COSSENOS);
         solucao->c1 = arredondaPara(cos(teta1), CASAS_DECIMAIS_SENOS_COSSENOS);
+        ajustaSenoOuCossenoIgualA1(&solucao->s1, &solucao->c1);
         solucao->possivel = false;
         solucao->teta1possivel = false;
 
@@ -1233,6 +1267,7 @@ double *Cinematica::angJuntas(double *x, double *y, double *z,
             solucao->teta1 = teta1;
             solucao->s1 = arredondaPara(sin(teta1), CASAS_DECIMAIS_SENOS_COSSENOS);
             solucao->c1 = arredondaPara(cos(teta1), CASAS_DECIMAIS_SENOS_COSSENOS);
+            ajustaSenoOuCossenoIgualA1(&solucao->s1, &solucao->c1);
             solucao->possivel = true;
             solucao->teta1possivel = true;
 

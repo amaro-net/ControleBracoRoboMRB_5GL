@@ -157,6 +157,9 @@ class Cinematica
                                        double *angulosMinGraus,
                                        bool *posicaoAtingivel);
         void trazPosAlvoParaDentroDoEspacoDeTrabalho(double *x, double *y, double *z);
+        void ajustaSenoOuCossenoIgualA1(float *steta, float *cteta);
+        void ajustaSenoOuCossenoIgualA1(double* steta, double* cteta);
+
         double *angJuntas(double *x, double *y, double *z,
                           double *gamaGraus, double *betaGraus, double *alfaGraus,
                           double *angulosCorrentesJuntas,
