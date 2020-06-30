@@ -427,8 +427,8 @@ void MontagemDeComandosDialog::on_btCTZ_clicked()
 void MontagemDeComandosDialog::onRdbJuntaCTZClicked(int idxJunta)
 {
     ui->rdbJunta0->setChecked(idxJunta == 0);
-    ui->rdbJunta2->setChecked(idxJunta == 1);
-    ui->rdbJunta1->setChecked(idxJunta == 2);
+    ui->rdbJunta1->setChecked(idxJunta == 1);
+    ui->rdbJunta2->setChecked(idxJunta == 2);
     ui->rdbJunta3->setChecked(idxJunta == 3);
     ui->rdbJunta4->setChecked(idxJunta == 4);
     ui->rdbGarra->setChecked(idxJunta == 5);
