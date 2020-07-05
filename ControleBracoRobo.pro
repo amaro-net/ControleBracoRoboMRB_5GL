@@ -66,3 +66,5 @@ RESOURCES += \
 
 DISTFILES += \
     COPYING
+
+RC_ICONS += icone_mainwindow_J1J_2.ico

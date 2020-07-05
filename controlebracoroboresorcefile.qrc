@@ -7,5 +7,6 @@
         <file>images/gplv3-or-later.png</file>
         <file>COPYING</file>
         <file>images/icone_mainwindow.png</file>
+        <file>icone_mainwindow_J1J_2.ico</file>
     </qresource>
 </RCC>
