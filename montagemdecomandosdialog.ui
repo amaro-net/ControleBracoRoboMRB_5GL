@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>467</width>
-    <height>482</height>
+    <width>483</width>
+    <height>526</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,8 +33,8 @@
     <rect>
      <x>30</x>
      <y>70</y>
-     <width>341</width>
-     <height>401</height>
+     <width>351</width>
+     <height>441</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -47,15 +47,15 @@
     <number>1</number>
    </property>
    <property name="currentIndex">
-    <number>5</number>
+    <number>4</number>
    </property>
    <widget class="QWidget" name="pgComandosSemParametros">
     <property name="geometry">
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>341</width>
-      <height>212</height>
+      <width>351</width>
+      <height>224</height>
      </rect>
     </property>
     <attribute name="label">
@@ -100,8 +100,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>341</width>
-      <height>212</height>
+      <width>351</width>
+      <height>224</height>
      </rect>
     </property>
     <attribute name="label">
@@ -125,7 +125,7 @@
       <rect>
        <x>119</x>
        <y>6</y>
-       <width>140</width>
+       <width>201</width>
        <height>141</height>
       </rect>
      </property>
@@ -169,8 +169,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>341</width>
-      <height>212</height>
+      <width>351</width>
+      <height>224</height>
      </rect>
     </property>
     <attribute name="label">
@@ -194,8 +194,8 @@
       <rect>
        <x>61</x>
        <y>20</y>
-       <width>261</width>
-       <height>182</height>
+       <width>285</width>
+       <height>200</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
@@ -563,8 +563,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>341</width>
-      <height>212</height>
+      <width>351</width>
+      <height>224</height>
      </rect>
     </property>
     <attribute name="label">
@@ -575,7 +575,7 @@
       <rect>
        <x>10</x>
        <y>18</y>
-       <width>75</width>
+       <width>51</width>
        <height>121</height>
       </rect>
      </property>
@@ -586,8 +586,8 @@
     <widget class="QSpinBox" name="spnVel">
      <property name="geometry">
       <rect>
-       <x>151</x>
-       <y>72</y>
+       <x>163</x>
+       <y>74</y>
        <width>91</width>
        <height>20</height>
       </rect>
@@ -599,8 +599,8 @@
     <widget class="QDoubleSpinBox" name="spnVelGrausPorSeg">
      <property name="geometry">
       <rect>
-       <x>246</x>
-       <y>72</y>
+       <x>258</x>
+       <y>74</y>
        <width>91</width>
        <height>20</height>
       </rect>
@@ -612,8 +612,8 @@
     <widget class="QLabel" name="label_3">
      <property name="geometry">
       <rect>
-       <x>248</x>
-       <y>48</y>
+       <x>260</x>
+       <y>50</y>
        <width>81</width>
        <height>18</height>
       </rect>
@@ -625,8 +625,8 @@
     <widget class="QLabel" name="label_4">
      <property name="geometry">
       <rect>
-       <x>152</x>
-       <y>48</y>
+       <x>164</x>
+       <y>50</y>
        <width>91</width>
        <height>18</height>
       </rect>
@@ -638,9 +638,9 @@
     <widget class="QSplitter" name="splitter_4">
      <property name="geometry">
       <rect>
-       <x>88</x>
-       <y>12</y>
-       <width>59</width>
+       <x>70</x>
+       <y>10</y>
+       <width>81</width>
        <height>141</height>
       </rect>
      </property>
@@ -684,8 +684,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>341</width>
-      <height>212</height>
+      <width>351</width>
+      <height>224</height>
      </rect>
     </property>
     <attribute name="label">
@@ -696,7 +696,7 @@
       <rect>
        <x>10</x>
        <y>18</y>
-       <width>75</width>
+       <width>51</width>
        <height>121</height>
       </rect>
      </property>
@@ -707,9 +707,9 @@
     <widget class="QSplitter" name="splitter_5">
      <property name="geometry">
       <rect>
-       <x>88</x>
-       <y>12</y>
-       <width>59</width>
+       <x>70</x>
+       <y>10</y>
+       <width>81</width>
        <height>141</height>
       </rect>
      </property>
@@ -750,9 +750,9 @@
     <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
-       <x>152</x>
-       <y>48</y>
-       <width>91</width>
+       <x>150</x>
+       <y>50</y>
+       <width>131</width>
        <height>18</height>
       </rect>
      </property>
@@ -763,8 +763,8 @@
     <widget class="QDoubleSpinBox" name="spnAclGrausPorSegQuad">
      <property name="geometry">
       <rect>
-       <x>246</x>
-       <y>72</y>
+       <x>150</x>
+       <y>110</y>
        <width>91</width>
        <height>20</height>
       </rect>
@@ -776,8 +776,8 @@
     <widget class="QSpinBox" name="spnAcl">
      <property name="geometry">
       <rect>
-       <x>151</x>
-       <y>72</y>
+       <x>150</x>
+       <y>70</y>
        <width>91</width>
        <height>20</height>
       </rect>
@@ -789,8 +789,8 @@
     <widget class="QLabel" name="label_6">
      <property name="geometry">
       <rect>
-       <x>248</x>
-       <y>48</y>
+       <x>150</x>
+       <y>90</y>
        <width>81</width>
        <height>18</height>
       </rect>
@@ -805,8 +805,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>341</width>
-      <height>212</height>
+      <width>351</width>
+      <height>224</height>
      </rect>
     </property>
     <attribute name="label">
@@ -817,8 +817,8 @@
       <rect>
        <x>126</x>
        <y>16</y>
-       <width>168</width>
-       <height>46</height>
+       <width>192</width>
+       <height>54</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="layoutLeds">
@@ -923,8 +923,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>341</width>
-      <height>212</height>
+      <width>351</width>
+      <height>224</height>
      </rect>
     </property>
     <attribute name="label">
@@ -978,7 +978,7 @@
        <x>40</x>
        <y>70</y>
        <width>291</width>
-       <height>61</height>
+       <height>111</height>
       </rect>
      </property>
      <property name="text">
@@ -993,7 +993,7 @@
   <widget class="QSplitter" name="splitter_3">
    <property name="geometry">
     <rect>
-     <x>378</x>
+     <x>390</x>
      <y>20</y>
      <width>81</width>
      <height>81</height>
