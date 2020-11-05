@@ -18,5 +18,8 @@ não é garantido ainda.
 Canal Amaro Robótica na COS.TV:
 https://cos.tv/channel/18349567838955520
 
+Canal Amaro Robótica no Youtube:             
+https://www.youtube.com/channel/UCy_uo2bDvMitD5um8x-WbZg
+
 Playlist dos vídeos referentes ao Software de Controle no Youtube:
 [![Software de Controle do MRB-5GL](https://img.youtube.com/vi/sga-DvOKtd4/0.jpg)](https://www.youtube.com/playlist?list=PLfnxnoUSxXdfb3OBQU8CEKTkQP01tUBvC)
