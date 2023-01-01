@@ -18,14 +18,14 @@ não é garantido ainda.
 Canal Amaro Robótica na COS.TV:                           
 https://cos.tv/channel/18349567838955520
 
-Canal Amaro Robótica no Youtube:             
-https://www.youtube.com/channel/UCy_uo2bDvMitD5um8x-WbZg
+Canal Amaro Robótica na Odysee:             
+https://odysee.com/@AmaroRobotica:a
 
 Playlist das alterações 2018/2019/2020 relacionadas ao MRB-5GL:                     
-[![Alterações do MRB-5GL 2018 a 2020](https://img.youtube.com/vi/V_La-snk-DI/0.jpg)](https://www.youtube.com/playlist?list=PLfnxnoUSxXdc-5UYfY9eQdZfMRf14gbJP)
+em breve, na Odysee
 
-Playlist dos vídeos referentes ao Software de Controle do MRB-5GL em Qt Creator no Youtube:       
-[![Software de Controle do MRB-5GL](https://img.youtube.com/vi/sga-DvOKtd4/0.jpg)](https://www.youtube.com/playlist?list=PLfnxnoUSxXdfb3OBQU8CEKTkQP01tUBvC)
+Playlist dos vídeos referentes ao Software de Controle do MRB-5GL em Qt Creator na Odysee:       
+em breve, na Odysee
 
 Playlist da cinemática implementada no software de controle do MRB-5GL em Qt Creator:   
-[![Cinemática do MRB-5GL](https://img.youtube.com/vi/mKupPKHnpJA/0.jpg)](https://www.youtube.com/playlist?list=PLfnxnoUSxXdebfmLJ61D2lqUyQXGn0DVx)
+em breve, na Odysee
