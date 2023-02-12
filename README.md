@@ -22,10 +22,10 @@ Canal Amaro Robótica na Odysee:
 https://odysee.com/@AmaroRobotica:a
 
 Playlist das alterações 2018/2019/2020 relacionadas ao MRB-5GL:                     
-em breve, na Odysee
+[<img src="https://thumbs.odycdn.com/03a281d512fab679c2fbd79a56205f10.webp" width="362" height="203">](https://odysee.com/@AmaroRobotica:a/Modifica%C3%A7%C3%B5es-do-bra%C3%A7o-rob%C3%B4-MRB-5GL-2018-2019-2020:2)
 
 Playlist dos vídeos referentes ao Software de Controle do MRB-5GL em Qt Creator na Odysee:       
-em breve, na Odysee
+[<img src="https://thumbs.odycdn.com/0ea16717597369b98eeb4e6d951a816c.webp" width="362" height="203">](https://odysee.com/@AmaroRobotica:a/Software-de-controle-do-bra%C3%A7o-rob%C3%B4-MRB-5GL-em-Qt-Creator:7)
 
 Playlist da cinemática implementada no software de controle do MRB-5GL em Qt Creator:   
-em breve, na Odysee
+[<img src="https://thumbs.odycdn.com/4d6d40832d719df314c7a16bd4a2248b.webp" width="362" height="203">](https://odysee.com/@AmaroRobotica:a/Cinem%C3%A1tica-nova-do-MRB-5GL-%28corrigida-e-aprimorada%29:4)
